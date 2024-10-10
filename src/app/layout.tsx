@@ -21,19 +21,23 @@ export const metadata: Metadata = {
 // src/app/layout.tsx
 // src/app/layout.tsx
 import './globals.css';
-import NavBar from './components/NavBar'; // Asegúrate de importar tu NavBar
+
+import NavBar from './components/NavBar';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
       <head>
-        <title>Mi Aplicación</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="flex">
-        <NavBar /> {/* Asegúrate de que la barra de navegación esté aquí */}
-        <div className="flex-1">{children}</div> {/* Contenido principal */}
+        <NavBar />
+        <main className="flex-grow min-h-screen">{children}</main>
       </body>
     </html>
   );
 }
+
+
+
 
