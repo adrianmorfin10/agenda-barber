@@ -110,7 +110,7 @@ const HomePage = () => {
         <div className="mt-10 text-center">
           <p className="text-gray-400 text-xs">Powered by</p>
           <img src="/img/logodiv.svg" alt="Logo Div" className="w-[42px] h-[42px] mx-auto" />
-          <p className="text-gray-400 text-xs">Divlab</p>
+          <p className="text-gray-400 text-xs">Divlabs</p>
         </div>
       </div>
 
