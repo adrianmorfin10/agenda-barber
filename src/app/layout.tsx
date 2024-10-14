@@ -32,7 +32,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="flex">
         <NavBar />
-        <main className="flex-grow min-h-screen">{children}</main>
+        {/* Margen superior aplicado solo en dispositivos pequeños */}
+        <main className="flex-grow min-h-screen mt-16 md:mt-0">{children}</main>
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 
+
 const NavBar = () => {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -65,7 +66,7 @@ const NavBar = () => {
         <div className="fixed inset-0 bg-[#0C0C0C] flex flex-col p-4 z-40">
           <div className="flex flex-col space-y-4 mt-16">
             {navItems.map(item => (
-              <Link key={item.path} href={item.path} className={`flex items-center space-x-2 p-2 transition hover:bg-[#1D1D1D] rounded-md text-white ${pathname === item.path ? 'font-bold' : 'text-[#7C7C7C]'}`}>
+              <Link key={item.path} href={item.path} className={`flex items-center space-x-2 p-2 transition hover:bg-[#1D1D1D] rounded-md text-white ${pathname === item.path ? 'font-bold' : 'text-[#7C7C7C]'}`} onClick={() => setMenuOpen(false)}>
                 <Image 
                   src={pathname === item.path ? item.icon : item.inactiveIcon} 
                   alt={item.label} 
@@ -78,6 +79,11 @@ const NavBar = () => {
           </div>
         </div>
       )}
+
+      {/* Contenido Principal */}
+      <div className={`mt-16 md:mt-0 ${menuOpen ? 'hidden' : 'block'} z-30`}>
+       
+      </div>
     </div>
   );
 };
