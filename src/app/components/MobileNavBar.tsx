@@ -10,7 +10,7 @@ const MobileNavBar = () => {
   const navItems = [
     { path: '/home', label: 'Citas', icon: '/img/calendar.svg' },
     { path: '/ventas', label: 'Ventas', icon: '/img/bill.svg' },
-    { path: '/clientes', label: 'Clientes', icon: '/img/user.svg' },
+    { path: '/clientes', label: 'Clies', icon: '/img/user.svg' },
     { path: '/productos', label: 'Productos', icon: '/img/product.svg' },
     { path: '/reportes', label: 'Reportes', icon: '/img/report.svg' },
     { path: '/empleados', label: 'Empleados', icon: '/img/emp.svg' },
