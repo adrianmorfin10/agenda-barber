@@ -17,7 +17,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     instagram: '',
     descuento: 0,
     membresia: false,
-    foto: null as File | null, // Cambiamos el tipo a File | null
+    foto: null as File | null,
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,14 +26,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null; // Obtener el archivo seleccionado
+    const file = e.target.files?.[0] || null;
     setNuevoCliente({ ...nuevoCliente, foto: file });
   };
 
   const handleAddCliente = () => {
-    // Aquí puedes añadir la lógica para añadir el cliente.
     console.log('Añadiendo cliente:', nuevoCliente);
-    // Restablece el formulario después de añadir
     setNuevoCliente({
       nombre: '',
       apellido: '',
@@ -42,7 +40,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
       instagram: '',
       descuento: 0,
       membresia: false,
-      foto: null, // Restablece la foto también
+      foto: null,
     });
     setIsModalOpen(false);
   };
@@ -74,12 +72,21 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
             </div>
 
             {/* Campo para cargar foto */}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
-            />
+            <div className="flex items-center mb-4">
+              <Image
+                src="/img/photo.svg" // Cambiar el ícono a photo.svg
+                alt="Cargar Foto"
+                width={24}
+                height={24}
+                className="mr-2 cursor-pointer"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
+              />
+            </div>
 
             <input
               type="text"
