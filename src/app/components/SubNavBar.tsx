@@ -10,7 +10,7 @@ const SubNavBar = () => {
   const isEmpleados = pathname === '/empleados';
 
   return (
-    <div className="flex justify-start items-center p-4 bg-white border-b text-black">
+    <div className="flex justify-start items-center p-4 pb-0 bg-white border-b text-black">
       <div
         className={`cursor-pointer poppins font-medium text-lg mr-5 ${isEmpleados ? 'border-b-2 border-black' : ''}`}
         onClick={() => window.location.href = '/empleados'} // Navegación simple
