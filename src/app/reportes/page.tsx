@@ -2,7 +2,6 @@
 'use client';
 
 import React from 'react';
-import DateSelector from './DateSelector';
 import Reportess from './Reportes'; // Asegúrate de que la ruta sea correcta
 
 const Page: React.FC = () => {

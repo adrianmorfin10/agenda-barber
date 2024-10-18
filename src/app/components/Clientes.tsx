@@ -3,45 +3,38 @@
 import React, { useState } from 'react';
 import ClientesList from './Clienteslist';
 import ClienteDetails from './ClienteDetails';
+import ClientService from '../services/ClientService';
+import Cliente from '../interfaces/cliente';
 
-interface Cliente {
-  id: number;
-  nombre: string;
-  apellido: string;
-  telefono: string;
-  instagram: string;
-  citas: number;
-  inasistencias: number;
-  cancelaciones: number;
-  ultimaVisita: string;
-  descuento: string;
-  ingresosTotales: string;
-  membresia: string;
-  tipo: string;
-  serviciosDisponibles: number;
-  proximoPago: string;
+
+
+const getClients = async (): Promise<Cliente[]> => {
+  const clientService = new ClientService();
+  const clientsData = await clientService.getClients();
+  const clients:Cliente[] = clientsData.map((client: any) => ({
+    id: client.id,
+    nombre: client.usuario.nombre,
+    apellido: client.usuario.apellido_paterno + " " + client.usuario.apellido_materno,
+    telefono: client.usuario.telefono,
+    instagram: client.instagram,
+    citas: client.citas || 0,
+    inasistencias: client.inasistencias || 0,
+    cancelaciones: client.cancelaciones || 0,
+    ultimaVisita: client.ultima_visita || "Sin fecha",
+    descuento: client.descuento || "Sin descuento",
+    ingresosTotales: client.ingresos_totales || "Sin ingresos",
+    membresia: client.is_member ? "Activa" : "Inactiva",
+    tipo: client.usuario.tipo || "Sin tipo",
+    serviciosDisponibles: client.servicios_disponibles || 0,
+    proximoPago: client.proximo_pago || "Sin proximo pago"
+  }));
+  return clients;
 }
 
 const Clientes = () => {
-  const initialClientes: Cliente[] = Array.from({ length: 10 }, (_, index) => ({
-    id: index,
-    nombre: `Nombre${index + 1}`,
-    apellido: `Apellido${index + 1}`,
-    telefono: `555-012${index}`,
-    instagram: `@usuario${index}`,
-    citas: Math.floor(Math.random() * 10),
-    inasistencias: Math.floor(Math.random() * 5),
-    cancelaciones: Math.floor(Math.random() * 3),
-    ultimaVisita: 'Oct, 8, 2024',
-    descuento: 'Sin descuento',
-    ingresosTotales: `$${Math.floor(Math.random() * 100)}.00`,
-    membresia: 'Activa',
-    tipo: 'Black',
-    serviciosDisponibles: Math.floor(Math.random() * 10),
-    proximoPago: '23/10/2024',
-  }));
+  
 
-  const [clientes] = useState<Cliente[]>(initialClientes);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null); // Comienza sin cliente seleccionado
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -49,6 +42,10 @@ const Clientes = () => {
     setSelectedCliente(cliente);
   };
 
+  React.useEffect(() => {
+    getClients().then(setClientes);
+  }, []);
+  
   return (
     <div className="flex bg-[#FFFFFF] min-h-screen">
       {/* Mostrar lista de clientes en mobile, siempre visible en desktop */}

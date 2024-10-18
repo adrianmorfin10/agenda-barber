@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import ClientService from '../services/ClientService';
 
 interface AddUserModalProps {
   isModalOpen: boolean;
@@ -32,17 +33,22 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
 
   const handleAddCliente = () => {
     console.log('Añadiendo cliente:', nuevoCliente);
-    setNuevoCliente({
-      nombre: '',
-      apellido: '',
-      telefono: '',
-      email: '',
-      instagram: '',
-      descuento: 0,
-      membresia: false,
-      foto: null,
+    const clientService = new ClientService();
+    clientService.createClient(nuevoCliente).then((response) => {
+      setNuevoCliente({
+        nombre: '',
+        apellido: '',
+        telefono: '',
+        email: '',
+        instagram: '',
+        descuento: 0,
+        membresia: false,
+        foto: null,
+      });
+      setIsModalOpen(false);
+    }).catch((error) => {
+      console.error('Error al añadir cliente:', error);
     });
-    setIsModalOpen(false);
   };
 
   const handleDescuentoChange = (increment: boolean) => {

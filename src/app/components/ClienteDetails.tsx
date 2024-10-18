@@ -30,7 +30,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack }) => {
   if (!cliente) return null;
 
   return (
-    <div className="flex flex-col justify-center p-5 w-full md:w-2/3 bg-[#F8F8F8] shadow-lg">
+    <div className="flex flex-col justify-center p-5 w-full h-full bg-[#F8F8F8]">
       
       {/* Encabezado para móviles */}
       <div className="md:hidden flex items-center justify-between mb-4">
