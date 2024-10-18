@@ -18,7 +18,7 @@ class ClientService extends HttpService {
     }
 
     async createClient(client: any) {
-        const response = await axios.post(`${this.baseUrl}/clients`, client);
+        const response = await axios.post(`${this.baseUrl}/clients/create`, client);
         return response.data;
     }
 
