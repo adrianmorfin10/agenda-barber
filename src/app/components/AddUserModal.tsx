@@ -77,43 +77,76 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               <h2 className="text-lg font-semibold ml-2 text-[#0C101E]">Añadir Nuevo Usuario</h2>
             </div>
 
-            {/* Campo para cargar foto */}
-            <div className="flex items-center mb-4">
-              <Image
-                src="/img/photo.svg" // Cambiar el ícono a photo.svg
-                alt="Cargar Foto"
-                width={24}
-                height={24}
-                className="mr-2 cursor-pointer"
-              />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
-              />
+            {/* Campos de Nombre y Apellido */}
+            <div className="flex mb-4">
+              <div className="flex flex-col mr-2" style={{ height: '136px' }}>
+                <label className="block mb-1 text-[#858585] text-[12px] font-light">Nombre:</label>
+                <input
+                  type="text"
+                  name="nombre"
+                  placeholder="Nombre"
+                  value={nuevoCliente.nombre}
+                  onChange={handleInputChange}
+                  className="border p-2 mb-2 rounded-[5px] text-black placeholder-gray"
+                  maxLength={50}
+                  required
+                />
+                <label className="block mb-1 text-[#858585] text-[12px] font-light">Apellido:</label>
+                <input
+                  type="text"
+                  name="apellido"
+                  placeholder="Apellido"
+                  value={nuevoCliente.apellido}
+                  onChange={handleInputChange}
+                  className="border p-2 rounded-[5px] text-black placeholder-gray"
+                  maxLength={50}
+                  required
+                />
+              </div>
+              {/* Campo para cargar foto */}
+              <div className="flex flex-col items-center justify-center border border-dashed border-[#CACACA] p-2 rounded-[5px] w-full h-[136px] cursor-pointer" onClick={() => document.getElementById('file-input')?.click()}>
+                {nuevoCliente.foto ? (
+                  <>
+                    <Image
+                      src="/img/check.svg" // Cambia esta ruta a la ubicación del icono de verificación
+                      alt="Subida exitosa"
+                      width={24}
+                      height={24}
+                      className="mb-1"
+                    />
+                    <p className="text-xs text-green-600">Subida exitosa</p>
+                    <Image
+                      src={URL.createObjectURL(nuevoCliente.foto)} // Vista previa de la imagen
+                      alt="Vista previa de la imagen"
+                      width={50}
+                      height={50}
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-blue-600 cursor-pointer mt-1" onClick={() => document.getElementById('file-input')?.click()}>
+                      Reemplazar imagen
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Image
+                      src="/img/foto.svg" // Cambia esta ruta a la ubicación del icono de carga
+                      alt="Cargar Foto"
+                      width={50}
+                      height={50}
+                    />
+                    <p className="text-xs text-gray-600">Cargar Foto</p>
+                  </>
+                )}
+                <input
+                  id="file-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </div>
             </div>
 
-            <input
-              type="text"
-              name="nombre"
-              placeholder="Nombre"
-              value={nuevoCliente.nombre}
-              onChange={handleInputChange}
-              className="border p-2 mb-2 w-full rounded-[5px] text-black placeholder-gray"
-              maxLength={50}
-              required
-            />
-            <input
-              type="text"
-              name="apellido"
-              placeholder="Apellido"
-              value={nuevoCliente.apellido}
-              onChange={handleInputChange}
-              className="border p-2 mb-2 w-full rounded-[5px] text-black placeholder-gray"
-              maxLength={50}
-              required
-            />
             <input
               type="tel"
               name="telefono"
@@ -146,39 +179,69 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
               maxLength={50}
             />
-            <div className="flex items-center mb-4">
-              <button
-                className="bg-[#0C101E] text-white py-2 px-4 rounded-l-[5px] w-1/3"
-                onClick={() => handleDescuentoChange(false)}
-              >
-                -
-              </button>
-              <input
-                type="number"
-                value={nuevoCliente.descuento}
-                readOnly
-                className="border p-2 w-1/3 text-center text-black placeholder-gray"
-              />
-              <button
-                className="bg-[#0C101E] text-white py-2 px-4 rounded-r-[5px] w-1/3"
-                onClick={() => handleDescuentoChange(true)}
-              >
-                +
-              </button>
+
+            {/* Contenedor de Descuento y Membresía */}
+            <div className="flex gap-5 justify-between items-center mb-4">
+              {/* Sección de Descuento */}
+              <div className="w-full">
+                <label className="block mb-1 text-[#858585] text-[12px] font-light">Descuento:</label>
+                <div className="border rounded-[5px] flex items-center max-w-[200px]">
+                  <button
+                    className={`px-4 flex justify-center ${nuevoCliente.descuento === 0 ? 'opacity-50' : ''}`}
+                    onClick={() => handleDescuentoChange(false)}
+                    disabled={nuevoCliente.descuento === 0}
+                  >
+                    <Image
+                      src="/img/minus.svg"
+                      alt="Decrementar"
+                      width={20}
+                      height={20}
+                      style={nuevoCliente.descuento === 0 ? { filter: 'grayscale(100%)' } : {}}
+                    />
+                  </button>
+                  <input
+                    type="number"
+                    value={nuevoCliente.descuento}
+                    readOnly
+                    className="p-2 text-center text-black placeholder-gray w-full"
+                    style={{ flex: 1 }} // Asegura que el input ocupe el espacio restante
+                  />
+                  <button
+                    className={`px-4 flex justify-center ${nuevoCliente.descuento === 100 ? 'opacity-50' : ''}`}
+                    onClick={() => handleDescuentoChange(true)}
+                    disabled={nuevoCliente.descuento === 100}
+                  >
+                    <Image
+                      src="/img/mas.svg"
+                      alt="Incrementar"
+                      width={20}
+                      height={20}
+                      style={nuevoCliente.descuento === 100 ? { filter: 'grayscale(100%)' } : {}}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* Sección de Membresía */}
+              <div className="w-full">
+                <label className="block mb-1 text-[#858585] text-[12px] font-light">¿Agregar Membresía?</label>
+                <div className="flex items-center px-2 py-2">
+                  <button
+                    className={`w-10 h-5 flex items-center rounded-full p-1 ${nuevoCliente.membresia ? 'bg-green-500' : 'bg-gray-300'}`}
+                    onClick={() => setNuevoCliente({ ...nuevoCliente, membresia: !nuevoCliente.membresia })}
+                  >
+                    <div
+                      className={`w-4 h-4 bg-white rounded-full shadow-md transform duration-300 ease-in-out ${nuevoCliente.membresia ? 'translate-x-5' : 'translate-x-0'}`}
+                    />
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center mb-4">
-              <label className="mr-2">Membresía:</label>
-              <input
-                type="checkbox"
-                checked={nuevoCliente.membresia}
-                onChange={() => setNuevoCliente({ ...nuevoCliente, membresia: !nuevoCliente.membresia })}
-              />
-            </div>
+
             <button
-              onClick={handleAddCliente}
-              className="bg-[#0C101E] text-white py-2 px-4 rounded-[5px] w-full"
-            >
-              Añadir Usuario
+              className="bg-[#0C101E] text-white rounded-[5px] p-2 w-full hover:bg-[#000000]"
+              onClick={handleAddCliente} >
+              Añadir Cliente
             </button>
           </div>
         </div>
