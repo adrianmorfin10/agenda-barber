@@ -9,7 +9,7 @@ interface AddUserModalProps {
 }
 
 const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen }) => {
-  const [nuevoCliente, setNuevoCliente] = useState({
+  const [nuevoEmpleado, setNuevoEmpleado] = useState({
     nombre: '',
     apellido: '',
     telefono: '',
@@ -22,19 +22,19 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNuevoCliente({ ...nuevoCliente, [name]: value });
+    setNuevoEmpleado({ ...nuevoEmpleado, [name]: value });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null; // Obtener el archivo seleccionado
-    setNuevoCliente({ ...nuevoCliente, foto: file });
+    setNuevoEmpleado({ ...nuevoEmpleado, foto: file });
   };
 
-  const handleAddCliente = () => {
-    // Aquí puedes añadir la lógica para añadir el cliente.
-    console.log('Añadiendo cliente:', nuevoCliente);
+  const handleAddEmpleado = () => {
+    // Aquí puedes añadir la lógica para añadir el Empleado.
+    console.log('Añadiendo Empleado:', nuevoEmpleado);
     // Restablece el formulario después de añadir
-    setNuevoCliente({
+    setNuevoEmpleado({
       nombre: '',
       apellido: '',
       telefono: '',
@@ -48,7 +48,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
   };
 
   const handleDescuentoChange = (increment: boolean) => {
-    setNuevoCliente((prev) => ({
+    setNuevoEmpleado((prev) => ({
       ...prev,
       descuento: increment
         ? Math.min(prev.descuento + 5, 100)
@@ -85,7 +85,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               type="text"
               name="nombre"
               placeholder="Nombre"
-              value={nuevoCliente.nombre}
+              value={nuevoEmpleado.nombre}
               onChange={handleInputChange}
               className="border p-2 mb-2 w-full rounded-[5px] text-black placeholder-gray"
               maxLength={50}
@@ -95,7 +95,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               type="text"
               name="apellido"
               placeholder="Apellido"
-              value={nuevoCliente.apellido}
+              value={nuevoEmpleado.apellido}
               onChange={handleInputChange}
               className="border p-2 mb-2 w-full rounded-[5px] text-black placeholder-gray"
               maxLength={50}
@@ -105,10 +105,10 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               type="tel"
               name="telefono"
               placeholder="Número de Teléfono"
-              value={nuevoCliente.telefono}
+              value={nuevoEmpleado.telefono}
               onChange={(e) => {
                 const value = e.target.value.replace(/\D/g, ''); // Solo números
-                setNuevoCliente({ ...nuevoCliente, telefono: value });
+                setNuevoEmpleado({ ...nuevoEmpleado, telefono: value });
               }}
               className="border p-2 mb-2 w-full rounded-[5px] text-black placeholder-gray"
               maxLength={50}
@@ -118,7 +118,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               type="email"
               name="email"
               placeholder="Correo Electrónico"
-              value={nuevoCliente.email}
+              value={nuevoEmpleado.email}
               onChange={handleInputChange}
               className="border p-2 mb-2 w-full rounded-[5px] text-black placeholder-gray"
               maxLength={50}
@@ -128,7 +128,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               type="text"
               name="instagram"
               placeholder="Usuario de Instagram (opcional)"
-              value={nuevoCliente.instagram}
+              value={nuevoEmpleado.instagram}
               onChange={handleInputChange}
               className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
               maxLength={50}
@@ -142,7 +142,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               </button>
               <input
                 type="number"
-                value={nuevoCliente.descuento}
+                value={nuevoEmpleado.descuento}
                 readOnly
                 className="border p-2 w-1/3 text-center text-black placeholder-gray"
               />
@@ -157,12 +157,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               <label className="mr-2">Membresía:</label>
               <input
                 type="checkbox"
-                checked={nuevoCliente.membresia}
-                onChange={() => setNuevoCliente({ ...nuevoCliente, membresia: !nuevoCliente.membresia })}
+                checked={nuevoEmpleado.membresia}
+                onChange={() => setNuevoEmpleado({ ...nuevoEmpleado, membresia: !nuevoEmpleado.membresia })}
               />
             </div>
             <button
-              onClick={handleAddCliente}
+              onClick={handleAddEmpleado}
               className="bg-[#0C101E] text-white py-2 px-4 rounded-[5px] w-full"
             >
               Añadir Usuario
