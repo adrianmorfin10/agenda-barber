@@ -1,0 +1,88 @@
+/* Archivo styles.css */
+
+/* Eliminar bordes entre las celdas del calendario */
+.rbc-month-view {
+    border-spacing: 0;
+}
+
+.rbc-month-view .rbc-row {
+    border: none;
+}
+
+.rbc-month-view .rbc-day-bg {
+    border: none;
+}
+
+/* Estilo para el día seleccionado (fondo negro y número blanco) */
+.rbc-month-view .rbc-date-cell.selected-day {
+    background-color: rgb(201, 218, 251) !important; /* Fondo del día seleccionado */
+    color: rgb(150, 26, 26) !important; /* Color del número del día seleccionado */
+    border-radius: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 38px;
+    min-width: 38px;
+}
+
+/* Estilo para el día actual (solo número rojo sin fondo) */
+.rbc-date-cell.today {
+    color: rgb(255, 72, 72) !important; /* Solo cambia el color del texto */
+}
+
+/* Cambiar estilo de hover */
+.rbc-day-bg:hover {
+    background-color: #854343;
+}
+/* Ocultar los botones de navegación */
+.rbc-btn-group {
+    display: none !important;
+  }
+  
+  /* Ocultar la etiqueta del mes (rbc-toolbar-label) */
+  .rbc-toolbar-label {
+    display: none !important;
+  }
+  
+
+/* Añadir borde externo al calendario pequeño */
+.rbc-month-view {
+    border: 1px solid rgb(255, 255, 255);
+    border-radius: 2px;
+}
+
+/* Centrar los números de los días */
+.rbc-month-view .rbc-date-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    cursor: pointer;
+}
+
+/* Tamaño del texto del día */
+.rbc-month-view .rbc-date-cell {
+    font-size: 14px;
+}
+
+/* Asegurar que el contorno del calendario pequeño sea visible */
+.rbc-header {
+    border-color: #f0f0f0;
+}
+
+/* Estilos para la altura de las celdas */
+.rbc-month-row {
+    max-height: 38px;
+    color: rgb(45, 45, 45);
+     
+}
+
+.rbc-date-cell {
+    min-height: 38px;
+    
+}
+.rbc-off-range{
+    color: #a1a1a1;
+    background-color: #f9f9f9;
+}
+
