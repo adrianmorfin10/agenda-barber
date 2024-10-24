@@ -11,7 +11,7 @@ const NavBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
-    { path: '/home', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },
+    { path: '/citas', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },
     { path: '/ventas', label: 'Ventas', icon: '/img/bill.svg', inactiveIcon: '/img/bill-inactive.svg' },
     { path: '/clientes', label: 'Clientes', icon: '/img/user.svg', inactiveIcon: '/img/user-inactive.svg' },
     { path: '/productos', label: 'Productos', icon: '/img/product.svg', inactiveIcon: '/img/product-inactive.svg' },
@@ -22,7 +22,7 @@ const NavBar = () => {
   return (
     <div>
       {/* Desktop NavBar */}
-      <div className="bg-[#0C0C0C] md:w-60 h-screen hidden md:flex flex-col p-5">
+      <div className="bg-[#0C0C0C] md:w-60 h-screen hidden md:flex flex-col p-5 sticky top-0 ">
         <div className="flex justify-center mb-5">
           <Image src="/img/logobarber.png" alt="Logo" width={150} height={80} />
         </div>
