@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { format } from "date-fns";
+import ClientesList from "../components/Clienteslist"; // Asegúrate de que la ruta es correcta
 
 const services = [
   { name: "Corte de Pelo", price: 100 },
@@ -9,7 +10,7 @@ const services = [
   { name: "Peinado", price: 150 },
 ];
 
-const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
+const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes }) => {
   const [newEvent, setNewEvent] = useState({
     title: "",
     startTime: slot?.start ? format(slot.start, "HH:mm") : "",
@@ -28,6 +29,11 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
     service: "",
     timeError: "",
   });
+
+  const [isClientListOpen, setIsClientListOpen] = useState(false); // Controla la visibilidad de ClientesList
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -51,8 +57,6 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
     setErrors((prev) => ({ ...prev, service: "" }));
   };
   
-  const [isClosing, setIsClosing] = useState(false);
-
   const handleClose = () => {
     setIsClosing(true); // Activar la animación de salida
     setTimeout(() => {
@@ -102,6 +106,16 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
     onClose();
   };
 
+  const handleToggleClientList = () => {
+    setIsClientListOpen((prev) => !prev);
+  };
+
+  const handleSelectCliente = (cliente) => {
+    setSelectedClient(cliente);
+    setNewEvent((prev) => ({ ...prev, client: `${cliente.nombre} ${cliente.apellido}` }));
+    setIsClientListOpen(false); // Cierra la lista de clientes al seleccionar uno
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -110,141 +124,163 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
       <div className="p-4 mb-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
-            <img src="/img/closemodal.svg" alt="Cerrar" className="h-6 w-6 cursor-pointer" onClick={onClose} />
-            <h2 className="text-xl font-bold text-black">Cita nueva</h2>
+            <img
+              src={isClientListOpen ? "/img/back.svg" : "/img/closemodal.svg"}
+              alt={isClientListOpen ? "Volver" : "Cerrar"}
+              className="h-6 w-6 cursor-pointer"
+              onClick={isClientListOpen ? () => setIsClientListOpen(false) : handleClose}
+            />
+            <h2 className="text-xl font-bold text-black">
+              {isClientListOpen ? "Selección de Cliente" : "Cita nueva"}
+            </h2>
           </div>
         </div>
 
         {/* Cliente selector */}
-        <div className="px-4 mb-4">
-          <div className="border-dashed border border-gray-400 p-4 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="bg-black text-white rounded-full h-[40px] w-[70px] flex items-center justify-center mr-3">
-                  <img src="/img/userw.svg" alt="Cliente" className="h-5 w-5" />
-                </div>
-                <span className="text-gray-500 font-light text-[16px]">
-                  Seleccione un cliente o déjelo en blanco si no tiene cita previa
-                </span>
-              </div>
+        {!isClientListOpen && (
+          <div className="px-4 mb-4">
+            <div className="border-dashed border border-gray-400 p-4 rounded-lg cursor-pointer" onClick={handleToggleClientList}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="bg-black text-white rounded-full h-[40px] w-[70px] flex items-center justify-center mr-3">
+                    <img src="/img/userw.svg" alt="Cliente" className="h-5 w-5" />
+                  </div>
+                  <span className="text-gray-500 font-light text-[16px]">
+                    {selectedClient ? `${selectedClient.nombre} ${selectedClient.apellido}` : " Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
+                  </span>
+                  </div>
               <img src="/img/add.svg" alt="Agregar cliente" className="h-5 w-5 cursor-pointer" />
             </div>
-          </div>
-        </div>
 
-        {/* Fecha */}
-        <div className="mb-4 px-4">
-          <label className="block text-black text-sm font-medium mb-1">Fecha</label>
-          <input
-            type="date"
-            name="date"
-            value={newEvent.date}
-            onChange={handleInputChange}
-            className="border p-2 w-full rounded placeholder-gray-600 text-black focus:border-black"
-            placeholder="Selecciona una fecha"
+              
+              </div>
+            </div>
+          
+        )}
+
+        {/* Mostrar ClientesList si isClientListOpen es true */}
+        {isClientListOpen ? (
+          <ClientesList
+            clientes={clientes}
+            onSelectCliente={handleSelectCliente}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
           />
-        </div>
+        ) : (
+          <>
+            {/* Contenido de Cita nueva cuando isClientListOpen es false */}
+            <div className="mb-4 px-4">
+              <label className="block text-black text-sm font-medium mb-1">Fecha</label>
+              <input
+                type="date"
+                name="date"
+                value={newEvent.date}
+                onChange={handleInputChange}
+                className="border p-2 w-full rounded placeholder-gray-600 text-black focus:border-black"
+                placeholder="Selecciona una fecha"
+              />
+            </div>
 
-        {/* Servicio */}
-        <div className="mb-4 px-4">
-          <label className="block text-black text-sm font-medium mb-1">Seleccionar servicio</label>
-          <select
-            name="service"
-            value={newEvent.service}
-            onChange={handleServiceChange}
-            className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.service && "border-red-500"}`}
-          >
-            <option value="">Selecciona un servicio</option>
-            {services.map((service) => (
-              <option key={service.name} value={service.name}>
-                {service.name}
-              </option>
-            ))}
-          </select>
-          {errors.service && <span className="text-red-500 text-xs">{errors.service}</span>}
-        </div>
+            <div className="mb-4 px-4">
+              <label className="block text-black text-sm font-medium mb-1">Seleccionar servicio</label>
+              <select
+                name="service"
+                value={newEvent.service}
+                onChange={handleServiceChange}
+                className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.service && "border-red-500"}`}
+              >
+                <option value="">Selecciona un servicio</option>
+                {services.map((service) => (
+                  <option key={service.name} value={service.name}>
+                    {service.name}
+                  </option>
+                ))}
+              </select>
+              {errors.service && <span className="text-red-500 text-xs">{errors.service}</span>}
+            </div>
 
-        {/* Horas de inicio y fin */}
-        <div className="flex space-x-4 mb-4 px-4">
-          <div className="w-1/2">
-            <label className="block text-black text-sm font-medium">Hora de inicio</label>
-            <input
-              type="time"
-              name="startTime"
-              value={newEvent.startTime}
-              onChange={handleInputChange}
-              className={`border p-2 w-full rounded placeholder-gray-600 text-black focus:border-black ${errors.startTime && "border-red-500"}`}
-              placeholder="Hora de inicio"
-            />
-            {errors.startTime && <span className="text-red-500 text-xs">{errors.startTime}</span>}
-          </div>
+            <div className="flex space-x-4 mb-4 px-4">
+              <div className="w-1/2">
+                <label className="block text-black text-sm font-medium">Hora de inicio</label>
+                <input
+                  type="time"
+                  name="startTime"
+                  value={newEvent.startTime}
+                  onChange={handleInputChange}
+                  className={`border p-2 w-full rounded placeholder-gray-600 text-black focus:border-black ${errors.startTime && "border-red-500"}`}
+                  placeholder="Hora de inicio"
+                />
+                {errors.startTime && <span className="text-red-500 text-xs">{errors.startTime}</span>}
+              </div>
 
-          <div className="w-1/2">
-            <label className="block text-black text-sm font-medium">Hora de fin</label>
-            <input
-              type="time"
-              name="endTime"
-              value={newEvent.endTime}
-              onChange={handleInputChange}
-              className={`border p-2 w-full rounded placeholder-gray-600 text-black focus:border-black ${errors.endTime && "border-red-500"}`}
-              placeholder="Hora de fin"
-            />
-            {errors.endTime && <span className="text-red-500 text-xs">{errors.endTime}</span>}
-          </div>
-        </div>
+              <div className="w-1/2">
+                <label className="block text-black text-sm font-medium">Hora de fin</label>
+                <input
+                  type="time"
+                  name="endTime"
+                  value={newEvent.endTime}
+                  onChange={handleInputChange}
+                  className={`border p-2 w-full rounded placeholder-gray-600 text-black focus:border-black ${errors.endTime && "border-red-500"}`}
+                  placeholder="Hora de fin"
+                />
+                {errors.endTime && <span className="text-red-500 text-xs">{errors.endTime}</span>}
+              </div>
+            </div>
 
-        {errors.timeError && <p className="text-red-500 text-xs px-4">{errors.timeError}</p>}
+            {errors.timeError && <p className="text-red-500 text-xs px-4">{errors.timeError}</p>}
 
-        {/* Empleado */}
-        <div className="mb-4 px-4">
-          <label className="block text-black text-sm font-medium mb-1">Empleado</label>
-          <select
-            name="employee"
-            value={newEvent.employee}
-            onChange={handleInputChange}
-            className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.employee && "border-red-500"}`}
-          >
-            <option value="">Selecciona un empleado</option>
-            {employees.map((emp) => (
-              <option key={emp.name} value={emp.name}>
-                {emp.name}
-              </option>
-            ))}
-          </select>
-          {errors.employee && <span className="text-red-500 text-xs">{errors.employee}</span>}
-        </div>
+            <div className="mb-4 px-4">
+              <label className="block text-black text-sm font-medium mb-1">Empleado</label>
+              <select
+                name="employee"
+                value={newEvent.employee}
+                onChange={handleInputChange}
+                className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.employee && "border-red-500"}`}
+              >
+                <option value="">Selecciona un empleado</option>
+                {employees.map((emp) => (
+                  <option key={emp.name} value={emp.name}>
+                    {emp.name}
+                  </option>
+                ))}
+              </select>
+              {errors.employee && <span className="text-red-500 text-xs">{errors.employee}</span>}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Contenedor inferior con total y botones */}
-      <div className="mt-auto px-4">
-        {/* Total y Pago */}
-        <div className="flex justify-between items-center border-t border-gray-300 py-4">
-          <div>
-            <p className="text-gray-500 text-sm">Total</p>
-            <p className="text-black text-lg font-semibold">${newEvent.price.toFixed(2)}</p>
+      {!isClientListOpen && (
+        <div className="mt-auto px-4">
+          {/* Total y Pago */}
+          <div className="flex justify-between items-center border-t border-gray-300 py-4">
+            <div>
+              <p className="text-gray-500 text-sm">Total</p>
+              <p className="text-black text-lg font-semibold">${newEvent.price.toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm text-right">A pagar</p>
+              <p className="text-black text-lg font-semibold text-right">${newEvent.price.toFixed(2)}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-gray-500 text-sm text-right">A pagar</p>
-            <p className="text-black text-lg font-semibold text-right">${newEvent.price.toFixed(2)}</p>
-          </div>
-        </div>
 
-        {/* Botones */}
-        <div className="flex space-x-2 mb-4">
-          <button
-            onClick={onClose}
-            className="border border-black text-black px-4 py-2 rounded-lg w-full font-semibold"
-          >
-            Descartar
-          </button>
-          <button
-            onClick={handleSave}
-            className="bg-black text-white px-4 py-2 rounded-lg w-full font-semibold"
-          >
-            Guardar
-          </button>
+          {/* Botones */}
+          <div className="flex space-x-2 mb-4">
+            <button
+              onClick={handleClose}
+              className="border border-black text-black px-4 py-2 rounded-lg w-full font-semibold"
+            >
+              Descartar
+            </button>
+            <button
+              onClick={handleSave}
+              className="bg-black text-white px-4 py-2 rounded-lg w-full font-semibold"
+            >
+              Guardar
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

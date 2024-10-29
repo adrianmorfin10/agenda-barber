@@ -30,7 +30,7 @@ interface ClientesListProps {
 }
 
 const ClientesList: React.FC<ClientesListProps> = ({
-  clientes,
+  clientes =[],
   onSelectCliente,
   searchTerm,
   setSearchTerm,
