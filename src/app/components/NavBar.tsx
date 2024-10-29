@@ -4,11 +4,40 @@ import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import SucursalModal from '../components/SucursalModal';
 
+interface Sucursal {
+  id: number;
+  nombre: string;
+  direccion: string;
+  encargado: string;
+}
 
-const NavBar = () => {
+const NavBar: React.FC = () => {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<Sucursal>({
+    id: 1,
+    nombre: "Sucursal 1",
+    direccion: "Calle Falsa 123",
+    encargado: "Carlos Perez"
+  });
+  const [sucursales, setSucursales] = useState<Sucursal[]>([
+    sucursalSeleccionada,
+    { id: 2, nombre: "Sucursal 2", direccion: "Avenida Siempre Viva 742", encargado: "Ana Gomez" }
+  ]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const handleSucursalSelect = (sucursal: Sucursal) => {
+    setSucursalSeleccionada(sucursal);
+    setIsModalOpen(false);
+  };
+
+  const handleAddSucursal = (nuevaSucursal: Sucursal) => {
+    setSucursales([...sucursales, nuevaSucursal]);
+    setSucursalSeleccionada(nuevaSucursal);
+    setIsModalOpen(false);
+  };
 
   const navItems = [
     { path: '/citas', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },
@@ -22,7 +51,7 @@ const NavBar = () => {
   return (
     <div>
       {/* Desktop NavBar */}
-      <div className="bg-[#0C0C0C] md:w-60 h-screen hidden md:flex flex-col p-5 sticky top-0 ">
+      <div className="bg-[#0C0C0C] md:w-60 h-screen hidden md:flex flex-col p-5 sticky top-0">
         <div className="flex justify-center mb-5">
           <Image src="/img/logobarber.png" alt="Logo" width={150} height={80} />
         </div>
@@ -40,11 +69,11 @@ const NavBar = () => {
             </Link>
           ))}
         </div>
-        <div className="mt-auto flex items-center text-white">
+        <div className="mt-auto flex items-center text-white cursor-pointer" onClick={() => setIsModalOpen(true)}>
           <div className="bg-[#1c1c1c] rounded-full p-2 mr-2">
             <Image src="/img/local.svg" alt="Sucursal" width={20} height={20} />
           </div>
-          <span>Tu Sucursal</span>
+          <span>{sucursalSeleccionada.nombre}</span>
         </div>
       </div>
 
@@ -54,36 +83,23 @@ const NavBar = () => {
           <Image src={menuOpen ? '/img/close.svg' : '/img/menu.svg'} alt="Menu" width={30} height={30} />
         </button>
         <Image src="/img/logo-responsive.png" alt="Logo" width={30} height={30} />
-        <div className="flex items-center">
+        <div className="flex items-center cursor-pointer" onClick={() => setIsModalOpen(true)}>
           <div className="bg-[#1c1c1c] rounded-full p-2">
             <Image src="/img/local.svg" alt="Sucursal" width={20} height={20} />
           </div>
         </div>
       </div>
 
-      {/* Overlay Menu */}
-      {menuOpen && (
-        <div className="fixed inset-0 bg-[#0C0C0C] flex flex-col p-4 z-40">
-          <div className="flex flex-col space-y-4 mt-16">
-            {navItems.map(item => (
-              <Link key={item.path} href={item.path} className={`flex items-center space-x-2 p-2 transition hover:bg-[#1D1D1D] rounded-md text-white ${pathname === item.path ? 'font-bold' : 'text-[#7C7C7C]'}`} onClick={() => setMenuOpen(false)}>
-                <Image 
-                  src={pathname === item.path ? item.icon : item.inactiveIcon} 
-                  alt={item.label} 
-                  width={20} 
-                  height={20} 
-                />
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
+      {/* Modal de Selección de Sucursal */}
+      {isModalOpen && (
+        <SucursalModal
+          sucursalSeleccionada={sucursalSeleccionada}
+          sucursales={sucursales}
+          onSelect={handleSucursalSelect}
+          onAddSucursal={handleAddSucursal}
+          onClose={() => setIsModalOpen(false)}
+        />
       )}
-
-      {/* Contenido Principal */}
-      <div className={`mt-16 md:mt-0 ${menuOpen ? 'hidden' : 'block'} z-30`}>
-       
-      </div>
     </div>
   );
 };
