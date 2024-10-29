@@ -9,8 +9,10 @@ import getDay from "date-fns/getDay";
 import es from "date-fns/locale/es";
 import addMonths from "date-fns/addMonths";
 import subMonths from "date-fns/subMonths";
+import addDays from "date-fns/addDays";
+import subDays from "date-fns/subDays";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { setHours, isToday, addMinutes } from "date-fns";
+import { setHours, setMinutes, isToday, addMinutes } from "date-fns";
 import "./styles.css"; // Aquí se manejará el CSS
 import EventModal from "./EventModal"; // Importando el componente desde otro archivo
 
@@ -53,6 +55,17 @@ const employees = [
   },
 ];
 
+// Redondear la hora al punto más cercano
+const roundToNearestHour = (date) => {
+  const minutes = date.getMinutes();
+  if (minutes !== 0) {
+    return setMinutes(date, 0);
+  }
+  return date;
+};
+
+const customWeekDays = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
+
 const CalendarApp = () => {
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -74,21 +87,9 @@ const CalendarApp = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
 
   const handleCreateEvent = (newEvent) => {
-    console.log("Iniciando creación de evento...");
-
-    // Verificamos qué datos se están pasando al crear el evento
-    console.log("Datos del evento recibidos:", newEvent);
-    console.log("Fecha del evento:", newEvent.date);
-    console.log("Hora de inicio:", newEvent.startTime);
-    console.log("Hora de fin:", newEvent.endTime);
-    console.log("Empleado:", newEvent.employee);
-    console.log("Cliente (opcional):", newEvent.client);
-
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
 
-    // Eliminamos la validación que da problemas
-    // Creamos el evento asegurándonos de que el cliente sea opcional.
     setEvents((prev) => [
       ...prev,
       {
@@ -106,8 +107,19 @@ const CalendarApp = () => {
   };
 
   const handleHourClick = (hour) => {
-    setSelectedSlot({ start: hour, end: addMinutes(hour, 60), date: selectedDay });
+    const roundedHour = roundToNearestHour(hour);
+    setSelectedSlot({ start: roundedHour, end: addMinutes(roundedHour, 60), date: selectedDay });
     setIsModalOpen(true);
+  };
+
+  // Avanzar al día siguiente
+  const handleNextDay = () => {
+    setSelectedDay(addDays(selectedDay, 1));
+  };
+
+  // Retroceder al día anterior
+  const handlePreviousDay = () => {
+    setSelectedDay(subDays(selectedDay, 1));
   };
 
   const handleNextMonth = () => {
@@ -121,69 +133,72 @@ const CalendarApp = () => {
   const currentHour = new Date();
   const isCurrentDay = isToday(selectedDay);
 
+  // Nombres de los días de la semana en español
+  const daysOfWeek = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
+
   return (
-    <div className="flex h-full bg-white">
-      {/* Calendario pequeño a la izquierda */}
-      <div className="w-1/4 p-4 border-r" style={{ maxWidth: "300px" }}>
-        <div className="flex justify-between mb-4">
-          <button onClick={handlePreviousMonth} className="bg-black px-2 py-1 rounded">{"<"}</button>
-          <span className="text-lg text-black font-bold">{format(currentMonth, "MMMM yyyy", { locale: locales.es })}</span>
-          <button onClick={handleNextMonth} className="bg-black px-2 py-1 rounded">{">"}</button>
-        </div>
-        <Calendar
-          localizer={localizer}
-          date={currentMonth}
-          events={[]} // No mostrar eventos en el calendario pequeño
-          startAccessor="start"
-          endAccessor="end"
-          style={{ height: 400 }} // Solo la altura, el resto de estilos los aplicas en styles.css
-          views={["month"]}
-          selectable
-          onSelectSlot={({ start }) => handleDayClick(start)}
-          onDrillDown={(date) => handleDayClick(date)}
-          dayPropGetter={(date) => {
-            const isSelectedDay = format(date, "yyyy-MM-dd") === format(selectedDay, "yyyy-MM-dd");
-
-            // Aseguramos que la clase se aplique a rbc-date-cell
-            return {
-              className: isSelectedDay ? "rbc-date-cell selected-day" : "rbc-date-cell"
-            };
-          }}
-          components={{
-            dateCellWrapper: ({ children, value }) => {
-              const isSelectedDay = format(value, "yyyy-MM-dd") === format(selectedDay, "yyyy-MM-dd");
-              return (
-                <div
-                  className={`rbc-date-cell ${isSelectedDay ? "selected-day" : ""}`}
-                  onClick={() => handleDayClick(value)}
-                >
-                  {children}
-                </div>
-              );
-            },
-          }}
-        />
-      </div>
-
-      {/* Vista diaria con layout de horas */}
-      <div className="flex-1 p-4">
-        <h2 className="text-xl font-bold text-black mb-4 ">
+    <div className="flex flex-col h-full bg-white">
+      {/* Barra de navegación de días */}
+      <div className="w-full bg-white border-b border-[#DADADA]flex items-center justify-between">
+      <div className="w-full bg-white  px-4  border-[#DADADA] rounded-t-md max-w-[400px] mx-auto mt-4 mb-4 flex items-center justify-between">
+        <button onClick={handlePreviousDay} className="text-black px-2 py-1 border border-[#DADADA] rounded">
+          <img src="/img/flecha.svg" alt="Previous" className="h-6 w-6 rotate-90" />
+        </button>
+        <h2 className="text-lg font-normal text-black text-center">
           Citas del {format(selectedDay, "dd MMMM yyyy", { locale: locales.es })}
         </h2>
+        <button onClick={handleNextDay} className="text-black px-2 py-1 border border-[#DADADA] rounded">
+          <img src="/img/flechar.svg" alt="Next" className="h-6 w-6 rotate-280" />
+        </button>
+      </div>
+      </div>
 
-        <EventModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onCreateEvent={handleCreateEvent}
-          slot={selectedSlot}
-          employees={employees} // Pasamos empleados como prop
-        />
+      {/* Contenedor del calendario pequeño y calendarios de trabajadores */}
+      <div className="flex flex-col lg:flex-row font-light lg:justify-between">
+        {/* Navegador del calendario pequeño */}
+        <div className="hidden lg:block w-full lg:w-1/4 p-4 lg:border-r max-w-[280px] font-light mx-auto text-center">
+          <div className="flex justify-between items-center  mb-4">
+            <button onClick={handlePreviousMonth} className="bg-black px-2 py-1 rounded text-white">{"<"}</button>
+            <span className="text-lg text-black font-normal">{format(currentMonth, "MMMM yyyy", { locale: locales.es })}</span>
+            <button onClick={handleNextMonth} className="bg-black px-2 py-1 rounded text-white">{">"}</button>
+          </div>
+          <Calendar
+            localizer={localizer}
+            date={currentMonth}
+            events={[]} // No mostrar eventos en el calendario pequeño
+            startAccessor="start"
+            endAccessor="end"
+            style={{ height: 400 }}
+            views={["month"]}
+            selectable
+            onSelectSlot={({ start }) => handleDayClick(start)}
+            onDrillDown={(date) => handleDayClick(date)}
+            dayPropGetter={(date) => {
+              const isSelectedDay = format(date, "yyyy-MM-dd") === format(selectedDay, "yyyy-MM-dd");
+              return {
+                className: isSelectedDay ? "rbc-date-cell selected-day" : "rbc-date-cell",
+              };
+            }}
+            components={{
+              // Personalizamos los encabezados de la semana
+              toolbar: () => null, // Eliminamos la barra de herramientas
+              month: {
+                header: ({ date }) => (
+                  <div className="text-center text-black  font-semibold">
+                    {customWeekDays[getDay(date)]}
+                  </div>
+                ),
+              },
+            }}
+          />
+        </div>
 
-        <div className="relative">
-          <div className={`grid grid-cols-${employees.length < 4 ? employees.length : 4} gap-0`}>
+        {/* Calendarios de los trabajadores */}
+        <div className="flex-1 p-4 overflow-x-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 overflow-x-auto">
             {employees.map((emp, index) => (
               <div key={emp.name} className="relative">
-                <div className="flex items-center mb-2 sticky top-0 bg-white z-10">
+                <div className="flex items-center mb-2 sticky top-0 bg-white z-10 border-b border-[#DADADA]">
                   <div className="bg-black text-white w-8 h-8 flex items-center justify-center rounded-full mr-2">
                     {emp.initials}
                   </div>
@@ -199,7 +214,7 @@ const CalendarApp = () => {
                   <div
                     className="absolute left-0 w-full border-t-2 border-red-500"
                     style={{
-                      top: `${(currentHour.getHours() - 7) * 60 + currentHour.getMinutes()}px`,
+                      top: `${(currentHour.getHours() - 7) * 60}px`,
                     }}
                   >
                     <span className="bg-red-500 text-white p-1 rounded absolute -left-10 text-xs">
@@ -209,7 +224,7 @@ const CalendarApp = () => {
                 )}
 
                 {Array.from({ length: 12 }, (_, hourIndex) => {
-                  const hour = setHours(new Date(), 7 + hourIndex);
+                  const hour = roundToNearestHour(setHours(new Date(), 7 + hourIndex));
                   const isWorkingDay = emp.workDays.includes(getDay(selectedDay));
                   return (
                     <div
@@ -257,6 +272,14 @@ const CalendarApp = () => {
           </div>
         </div>
       </div>
+
+      <EventModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreateEvent={handleCreateEvent}
+        slot={selectedSlot}
+        employees={employees}
+      />
     </div>
   );
 };

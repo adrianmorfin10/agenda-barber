@@ -15,14 +15,14 @@
 
 /* Estilo para el día seleccionado (fondo negro y número blanco) */
 .rbc-month-view .rbc-date-cell.selected-day {
-    background-color: rgb(201, 218, 251) !important; /* Fondo del día seleccionado */
-    color: rgb(150, 26, 26) !important; /* Color del número del día seleccionado */
-    border-radius: 30px;
+    background-color: rgb(204, 255, 210) !important; /* Fondo del día seleccionado */
+    color: rgb(181, 181, 181) !important; /* Color del número del día seleccionado */
+    border-radius: 5px;
     display: flex;
+    text-decoration: dashed;
     justify-content: center;
     align-items: center;
-    max-width: 38px;
-    min-width: 38px;
+    
 }
 
 /* Estilo para el día actual (solo número rojo sin fondo) */
