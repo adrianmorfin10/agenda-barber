@@ -15,7 +15,10 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { setHours, setMinutes, isToday, addMinutes } from "date-fns";
 import "./styles.css"; // Aquí se manejará el CSS
 import EventModal from "./EventModal"; // Importando el componente desde otro archivo
-
+import EmpleadoService from "../services/EmpleadoService";
+import ServicioService from "../services/ServicioService";
+const servicioObject = new ServicioService();
+const empleadoObject = new EmpleadoService();
 const locales = {
   es: es,
 };
@@ -85,7 +88,31 @@ const CalendarApp = () => {
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
-
+  const [ localId, setLocal ] = useState(1);
+  const [ servicios, setServicios ] = useState([]);
+  const [ empleados, setEmpleados] = useState([]);
+  React.useEffect(() => {
+    const getData = async () => {
+      const _servicios = await servicioObject.getServicios();
+      console.log("get servicios", _servicios);
+      setServicios(_servicios);
+      const empleados = await empleadoObject.getEmpleados();
+      
+      setEmpleados(empleados.map(item=>{
+        return {
+          ...item,
+          name: item.usuario.nombre,
+          initials: item.usuario.nombre.split(" ").map(name => name[0]).join(""),
+          workingHours: {
+            start: item.start_hour || "07:00",
+            end: item.end_hour || "18:00"
+          },
+          workDays: item.working_days || [ 1, 2, 3, 4, 5]
+        }
+      }));
+    }
+    getData().then();
+  }, []);
   const handleCreateEvent = (newEvent) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
@@ -196,7 +223,7 @@ const CalendarApp = () => {
         {/* Calendarios de los trabajadores */}
         <div className="flex-1 p-4 overflow-x-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 overflow-x-auto">
-            {employees.map((emp, index) => (
+            {empleados.map((emp, index) => (
               <div key={emp.name} className="relative">
                 <div className="flex items-center mb-2 sticky top-0 bg-white z-10 border-b border-[#DADADA]">
                   <div className="bg-black text-white w-8 h-8 flex items-center justify-center rounded-full mr-2">
@@ -205,7 +232,7 @@ const CalendarApp = () => {
                   <div>
                     <h3 className="text-lg font-bold text-black mb-1">{emp.name}</h3>
                     <p className="text-sm text-gray-500">
-                      {emp.workingHours.start} - {emp.workingHours.end}
+                      {emp.workingHours?.start} - {emp.workingHours?.end}
                     </p>
                   </div>
                 </div>
@@ -225,7 +252,7 @@ const CalendarApp = () => {
 
                 {Array.from({ length: 12 }, (_, hourIndex) => {
                   const hour = roundToNearestHour(setHours(new Date(), 7 + hourIndex));
-                  const isWorkingDay = emp.workDays.includes(getDay(selectedDay));
+                  const isWorkingDay = (emp.workDays || []).includes(getDay(selectedDay));
                   return (
                     <div
                       key={hourIndex}
@@ -278,7 +305,8 @@ const CalendarApp = () => {
         onClose={() => setIsModalOpen(false)}
         onCreateEvent={handleCreateEvent}
         slot={selectedSlot}
-        employees={employees}
+        employees={empleados}
+        services={servicios}
       />
     </div>
   );
