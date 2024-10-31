@@ -5,8 +5,9 @@ import { format } from "date-fns";
 import ClientesList from "../components/Clienteslist"; // Asegúrate de que la ruta es correcta
 import SolicitudService from "../services/SolicitudService";
 import ServicioService from "../services/ServicioService";
+import ClientService from "../services/ClientService";
 const servicioObject = new ServicioService();
-
+const clienteObject = new ClientService();
 const services = [
   { name: "Corte de Pelo", price: 100 },
   { name: "Coloración", price: 200 },
@@ -41,7 +42,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
   const [selectedClient, setSelectedClient] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [clientes, setClientes] = useState([]);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewEvent((prev) => ({ ...prev, [name]: value }));
@@ -64,6 +65,15 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
 
     setErrors((prev) => ({ ...prev, service: "" }));
   };
+
+  React.useEffect(() => {
+    clienteObject.getClients().then(data => {
+      console.log("data getClients", data);
+      setClientes(data);
+    }).catch(error => {
+      console.error("Error al obtener los clientes", error);
+    });
+  }, []);
 
   React.useEffect(() => {
     setNewEvent({
@@ -110,6 +120,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
       valid = false;
     }
 
+    
     setErrors(newErrors);
 
     // Si la validación falla, no se permite continuar
@@ -118,7 +129,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
     }
 
     // Crear el evento si todo es válido
-    onCreateEvent(newEvent);
+    onCreateEvent({ ...newEvent, client: selectedClient,  });
     onClose();
   };
 
@@ -127,13 +138,14 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
   };
 
   const handleSelectCliente = (cliente) => {
+    
     setSelectedClient(cliente);
-    setNewEvent((prev) => ({ ...prev, client: `${cliente.nombre} ${cliente.apellido}` }));
+    setNewEvent((prev) => ({ ...prev, client: `${cliente.usuario.nombre} ${cliente.usuario.apellido_paterno}` }));
     setIsClientListOpen(false); // Cierra la lista de clientes al seleccionar uno
   };
 
   if (!isOpen) return null;
-  console.log("services", services);
+
   return (
     <div className={`fixed top-0 right-0 h-full w-full max-w-xs sm:max-w-md bg-white shadow-xl z-50 flex flex-col ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
       {/* Header */}
@@ -162,7 +174,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
                     <img src="/img/userw.svg" alt="Cliente" className="h-5 w-5" />
                   </div>
                   <span className="text-gray-500 font-light text-[16px]">
-                    {selectedClient ? `${selectedClient.nombre} ${selectedClient.apellido}` : " Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
+                    {selectedClient ? `${selectedClient.usuario.nombre} ${selectedClient.usuario.apellido_paterno}` : " Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
                   </span>
                   </div>
               <img src="/img/add.svg" alt="Agregar cliente" className="h-5 w-5 cursor-pointer" />

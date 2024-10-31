@@ -17,6 +17,8 @@ import "./styles.css"; // Aquí se manejará el CSS
 import EventModal from "./EventModal"; // Importando el componente desde otro archivo
 import EmpleadoService from "../services/EmpleadoService";
 import ServicioService from "../services/ServicioService";
+import SolicitudService from "../services/SolicitudService";
+const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
 const locales = {
@@ -88,7 +90,7 @@ const CalendarApp = () => {
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [ localId, setLocal ] = useState(1);
+  const [ localId, setLocal ] = useState(6);
   const [ servicios, setServicios ] = useState([]);
   const [ empleados, setEmpleados] = useState([]);
   React.useEffect(() => {
@@ -116,17 +118,33 @@ const CalendarApp = () => {
   const handleCreateEvent = (newEvent) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
-
-    setEvents((prev) => [
-      ...prev,
-      {
-        title: `${newEvent.client ? newEvent.client : "Cliente sin cita previa"} - ${newEvent.employee}`,
-        start,
-        end,
-        employee: newEvent.employee,
-      },
-    ]);
-    setIsModalOpen(false); // Cerrar el modal después de crear el evento
+    console.log("newEvent", newEvent);
+    solicitudObject.createSolicitud({
+      cliente_id: parseInt(newEvent.client.id),
+      local_id: localId,
+      servicio_id: parseInt(newEvent.service),
+      fecha: newEvent.date,
+      start_hour: newEvent.startTime,
+      end_hour: newEvent.endTime,
+      barbero_id: parseInt(newEvent.employee),
+      precio: newEvent.price,
+      estado: "pendiente"
+    }).then(data=>{
+      setEvents((prev) => [
+        ...prev,
+        {
+          title: `${newEvent.client ? newEvent.client : "Cliente sin cita previa"} - ${newEvent.employee}`,
+          start,
+          end,
+          employee: newEvent.employee,
+        },
+      ]);
+  
+      setIsModalOpen(false);
+    }).catch(e=>{
+      console.log("error createSolicitud", e);
+    });
+     // Cerrar el modal después de crear el evento
   };
 
   const handleDayClick = (date) => {

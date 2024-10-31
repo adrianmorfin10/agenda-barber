@@ -75,9 +75,9 @@ const ClientesList: React.FC<ClientesListProps> = ({
             onClick={() => onSelectCliente(cliente)}
           >
             <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px]">
-              {cliente.nombre.charAt(0)}{cliente.apellido.charAt(0)}
+              {cliente.usuario.nombre.charAt(0)}{( cliente.usuario.apellido_paterno || cliente.usuario.apellido_materno ).charAt(0)}
             </div>
-            <span className="ml-3 poppins text-black">{`${cliente.nombre} ${cliente.apellido}`}</span>
+            <span className="ml-3 poppins text-black">{`${cliente.usuario.nombre} ${cliente.usuario.apellido_paterno}`}</span>
           </div>
         ))}
       </div>
