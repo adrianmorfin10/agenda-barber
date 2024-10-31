@@ -2,14 +2,17 @@
 
 import React, { useState } from "react";
 import { format } from "date-fns";
+import SolicitudService from "../services/SolicitudService";
+import ServicioService from "../services/ServicioService";
+const servicioObject = new ServicioService();
+// const services = [
+//   { name: "Corte de Pelo", price: 100 },
+//   { name: "Coloración", price: 200 },
+//   { name: "Peinado", price: 150 },
+// ];
 
-const services = [
-  { name: "Corte de Pelo", price: 100 },
-  { name: "Coloración", price: 200 },
-  { name: "Peinado", price: 150 },
-];
-
-const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
+const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
+  const [ servicios, setServicios ] = useState([]);
   const [newEvent, setNewEvent] = useState({
     title: "",
     startTime: slot?.start ? format(slot.start, "HH:mm") : "",
@@ -39,8 +42,9 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
 
   const handleServiceChange = (e) => {
     const selectedService = e.target.value;
-    const serviceDetails = services.find(service => service.name === selectedService);
-    const price = serviceDetails ? serviceDetails.price : 0;
+    const serviceDetails = services.find(service => service.id === selectedService);
+    const precio = serviceDetails && serviceDetails.precio_servicios.length > 0 ? serviceDetails.precio_servicios[0].precio : 0;
+    const price = Number(precio);
 
     setNewEvent((prev) => ({
       ...prev,
@@ -50,7 +54,12 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
 
     setErrors((prev) => ({ ...prev, service: "" }));
   };
-  
+  React.useEffect(() => {
+    setNewEvent({
+      ...newEvent,
+      startTime: slot?.start ? format(slot.start, "HH:mm") : ""
+    });
+  }, [slot]);
   const [isClosing, setIsClosing] = useState(false);
 
   const handleClose = () => {
@@ -103,7 +112,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
   };
 
   if (!isOpen) return null;
-
+  console.log("services", services);
   return (
     <div className={`fixed top-0 right-0 h-full w-full max-w-xs sm:max-w-md bg-white shadow-xl z-50 flex flex-col ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
       {/* Header */}
@@ -155,9 +164,9 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
             className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.service && "border-red-500"}`}
           >
             <option value="">Selecciona un servicio</option>
-            {services.map((service) => (
-              <option key={service.name} value={service.name}>
-                {service.name}
+            {(services || []).map((service) => (
+              <option key={service.id} value={service.id}>
+                {service.nombre}
               </option>
             ))}
           </select>
@@ -206,7 +215,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees }) => {
           >
             <option value="">Selecciona un empleado</option>
             {employees.map((emp) => (
-              <option key={emp.name} value={emp.name}>
+              <option key={emp.name} value={emp.id}>
                 {emp.name}
               </option>
             ))}
