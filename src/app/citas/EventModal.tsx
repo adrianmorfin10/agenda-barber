@@ -6,6 +6,7 @@ import ClientesList from "../components/Clienteslist"; // Asegúrate de que la r
 import SolicitudService from "../services/SolicitudService";
 import ServicioService from "../services/ServicioService";
 import ClientService from "../services/ClientService";
+import moment from "moment";
 const servicioObject = new ServicioService();
 const clienteObject = new ClientService();
 const services = [
@@ -50,17 +51,26 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
     // Limpiar errores al escribir
     setErrors((prev) => ({ ...prev, [name]: "", timeError: "" }));
   };
-
+  const handleChangeEmployee = (e)=>{
+    const { name, value } = e.target;
+    setNewEvent((prev) => ({ ...prev, employee: { name, id: value } }));
+    // Limpiar errores al escribir
+    setErrors((prev) => ({ ...prev, employee: "", timeError: "" }));
+  }
   const handleServiceChange = (e) => {
     const selectedService = e.target.value;
     const serviceDetails = services.find(service => service.id === selectedService);
     const precio = serviceDetails && serviceDetails.precio_servicios.length > 0 ? serviceDetails.precio_servicios[0].precio : 0;
+    const tiempo_servicio = serviceDetails?.tiempo || 0;
+    const { startTime } = newEvent;
     const price = Number(precio);
-
+    const startTimeMoment = moment(`2020-12-12 ${startTime}`);
+    const endTime = startTimeMoment.add(tiempo_servicio, 'minutes').format("hh:mm");
     setNewEvent((prev) => ({
       ...prev,
       service: selectedService,
       price: price,
+      endTime
     }));
 
     setErrors((prev) => ({ ...prev, service: "" }));
@@ -68,7 +78,6 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
 
   React.useEffect(() => {
     clienteObject.getClients().then(data => {
-      console.log("data getClients", data);
       setClientes(data);
     }).catch(error => {
       console.error("Error al obtener los clientes", error);
@@ -264,7 +273,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
               <select
                 name="employee"
                 value={newEvent.employee}
-                onChange={handleInputChange}
+                onChange={handleChangeEmployee}
                 className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.employee && "border-red-500"}`}
               >
                 <option value="">Selecciona un empleado</option>

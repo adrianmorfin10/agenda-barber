@@ -18,6 +18,7 @@ import EventModal from "./EventModal"; // Importando el componente desde otro ar
 import EmpleadoService from "../services/EmpleadoService";
 import ServicioService from "../services/ServicioService";
 import SolicitudService from "../services/SolicitudService";
+import moment from "moment";
 const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
@@ -69,19 +70,20 @@ const roundToNearestHour = (date) => {
   return date;
 };
 
+/**
+ * {
+      title: "Corte de pelo - Juan Pérez",
+      start: new Date("2024-10-22T07:00:00"),
+      end: new Date("2024-10-22T08:00:00"),
+      employee: "Pedro López",
+    }
+ */
 const customWeekDays = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
 
 const CalendarApp = () => {
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [events, setEvents] = useState([
-    {
-      title: "Corte de pelo - Juan Pérez",
-      start: new Date("2024-10-22T07:00:00"),
-      end: new Date("2024-10-22T08:00:00"),
-      employee: "Pedro López",
-    },
-    {
+  const [events, setEvents] = useState([{
       title: "Coloración - Ana Martínez",
       start: new Date("2024-10-22T07:00:00"),
       end: new Date("2024-10-22T08:00:00"),
@@ -96,10 +98,8 @@ const CalendarApp = () => {
   React.useEffect(() => {
     const getData = async () => {
       const _servicios = await servicioObject.getServicios();
-      console.log("get servicios", _servicios);
       setServicios(_servicios);
       const empleados = await empleadoObject.getEmpleados();
-      
       setEmpleados(empleados.map(item=>{
         return {
           ...item,
@@ -112,13 +112,14 @@ const CalendarApp = () => {
           workDays: item.working_days || [ 1, 2, 3, 4, 5]
         }
       }));
+      const eventos = await solicitudObject.getSolicitudes();
+      setEvents(eventos.map(item=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
     }
     getData().then();
   }, []);
   const handleCreateEvent = (newEvent) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
-    console.log("newEvent", newEvent);
     solicitudObject.createSolicitud({
       cliente_id: parseInt(newEvent.client.id),
       local_id: localId,
@@ -126,17 +127,18 @@ const CalendarApp = () => {
       fecha: newEvent.date,
       start_hour: newEvent.startTime,
       end_hour: newEvent.endTime,
-      barbero_id: parseInt(newEvent.employee),
+      barbero_id: parseInt(newEvent.employee.id),
       precio: newEvent.price,
       estado: "pendiente"
     }).then(data=>{
       setEvents((prev) => [
         ...prev,
         {
-          title: `${newEvent.client ? newEvent.client : "Cliente sin cita previa"} - ${newEvent.employee}`,
+          title: `${newEvent.client ? newEvent.client : "Cliente sin cita previa"} - ${newEvent.employee.name}`,
           start,
           end,
-          employee: newEvent.employee,
+          employee: newEvent.employee.name,
+          employee_id: newEvent.employee.id
         },
       ]);
   
@@ -180,7 +182,6 @@ const CalendarApp = () => {
 
   // Nombres de los días de la semana en español
   const daysOfWeek = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
-
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Barra de navegación de días */}
@@ -285,12 +286,14 @@ const CalendarApp = () => {
                       {events
                         .filter(
                           (event) =>
-                            event.employee === emp.name &&
-                            format(event.start, "yyyy-MM-dd") === format(selectedDay, "yyyy-MM-dd") &&
-                            event.start.getHours() === hour.getHours()
+                            event.barbero_id === emp.id &&
+                            hour.getHours() === moment(events[events.length - 1].start_hour, "hh").hours() &&
+                            selectedDay.getDate() === (new Date(event.fecha)).getDate()
                         )
                         .map((event, i) => {
-                          const eventDuration = (event.end - event.start) / (1000 * 60);
+                          const start_hour = moment(`2019-01-01 ${event.start_hour}`);
+                          const end_hour = moment(`2019-01-01 ${event.end_hour}`);
+                          const eventDuration = (end_hour - start_hour) / (1000 * 60);
                           const colors = ["bg-blue-400", "bg-green-400", "bg-red-400", "bg-purple-400"];
                           const employeeColor = colors[index % colors.length];
                           return (
@@ -305,7 +308,7 @@ const CalendarApp = () => {
                                 left: index === 0 ? "40px" : "0",
                               }}
                             >
-                              {event.title} ({format(event.start, "HH:mm")} - {format(event.end, "HH:mm")})
+                              {event.title} {event.start_hour} - {event.end_hour}
                             </div>
                           );
                         })}
