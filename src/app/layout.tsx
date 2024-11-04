@@ -22,18 +22,18 @@ export const metadata: Metadata = {
 // src/app/layout.tsx
 import './globals.css';
 
-import NavBar from './components/NavBar';
-
+import MainComponent from './components/MainComponent';
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+
   return (
     <html lang="es">
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="flex">
-        <NavBar />
-        {/* Margen superior aplicado solo en dispositivos pequeños */}
-        <main className="flex-grow min-h-screen mt-16 md:mt-0">{children}</main>
+        
+          <MainComponent children={children} />
+        
       </body>
     </html>
   );

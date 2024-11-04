@@ -5,6 +5,9 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import SucursalModal from '../components/SucursalModal';
+import LocalService from '../services/LocalService';
+import { AppContext, useAppContext } from './AppContext';
+const localServiceObejct = new LocalService();
 
 interface Sucursal {
   id: number;
@@ -22,22 +25,45 @@ const NavBar: React.FC = () => {
     direccion: "Calle Falsa 123",
     encargado: "Carlos Perez"
   });
-  const [sucursales, setSucursales] = useState<Sucursal[]>([
-    sucursalSeleccionada,
-    { id: 2, nombre: "Sucursal 2", direccion: "Avenida Siempre Viva 742", encargado: "Ana Gomez" }
-  ]);
+  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
+  const [ appState, dispatchState ] = useAppContext()
   const handleSucursalSelect = (sucursal: Sucursal) => {
-    setSucursalSeleccionada(sucursal);
-    setIsModalOpen(false);
+    
+    const promises = [
+      localServiceObejct.updateLocal({ ...sucursal, seleccionado: true }, sucursal.id),
+      localServiceObejct.updateLocal({ ...sucursalSeleccionada, seleccionado: false }, sucursalSeleccionada.id)
+    ]
+    Promise.all(promises).then(()=>{
+      setSucursalSeleccionada(sucursal);
+      setIsModalOpen(false);
+    }).catch(e=>{
+
+    })
+    
   };
 
   const handleAddSucursal = (nuevaSucursal: Sucursal) => {
     setSucursales([...sucursales, nuevaSucursal]);
-    setSucursalSeleccionada(nuevaSucursal);
+    //setSucursalSeleccionada(nuevaSucursal);
+    localServiceObejct.getLocales().then((locales)=>{
+      setSucursales(locales);
+    }).catch(e=>{
+
+    })
     setIsModalOpen(false);
   };
+
+  React.useEffect(()=>{
+    localServiceObejct.getLocales().then((locales)=>{
+      const selected = locales.find(item=>item.seleccionado);
+      dispatchState({ key: "sucursal", value: selected });
+      setSucursales(locales);
+      setSucursalSeleccionada(selected);
+    }).catch(e=>{
+
+    })
+  },[]);
 
   const navItems = [
     { path: '/citas', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },
@@ -73,7 +99,7 @@ const NavBar: React.FC = () => {
           <div className="bg-[#1c1c1c] rounded-full p-2 mr-2">
             <Image src="/img/local.svg" alt="Sucursal" width={20} height={20} />
           </div>
-          <span>{sucursalSeleccionada.nombre}</span>
+          <span>{sucursalSeleccionada?.nombre || 'Seleccione la sucursal'}</span>
         </div>
       </div>
 
