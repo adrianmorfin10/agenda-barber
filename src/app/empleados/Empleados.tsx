@@ -16,16 +16,16 @@ const Empleados = () => {
     nombre: `Nombre${index + 1}`,
     apellido: `Apellido${index + 1}`,
     telefono: `555-012${index}`,
+    email: `usuario${index}@example.com`,
     instagram: `@usuario${index}`,
     citas: Math.floor(Math.random() * 10),
     inasistencias: Math.floor(Math.random() * 5),
     cancelaciones: Math.floor(Math.random() * 3),
     ultimaVisita: 'Oct, 8, 2024',
-    descuento: 'Sin descuento',
     ingresosTotales: `$${Math.floor(Math.random() * 100)}.00`,
-    membresia: 'Activa',
     tipo: 'Black',
-    serviciosDisponibles: Math.floor(Math.random() * 10),
+    diasTrabajo: [1, 2, 3],
+    servicios: [1, 2],
     proximoPago: '23/10/2024',
   }));
 
@@ -49,6 +49,10 @@ const Empleados = () => {
     setSelectedEmpleado(empleado);
   };
 
+  const handleAddEmpleado = (nuevoEmpleado: Empleado) => {
+    setEmpleados([...empleados, nuevoEmpleado]);
+  };
+
   return (
     <div className="bg-white h-screen p-5 flex flex-col">
       <SubNavBar />
@@ -60,13 +64,14 @@ const Empleados = () => {
             onSelectEmpleado={handleSelectEmpleado}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
+            onAddEmpleado={handleAddEmpleado}
           />
         </div>
 
         <div className={`${selectedEmpleado ? 'block' : 'hidden'} md:block w-full md:w-2/3`}>
           <EmpleadoDetails
             empleado={selectedEmpleado}
-            onBack={() => setSelectedEmpleado(null)} // Opción para regresar a la lista
+            onBack={() => setSelectedEmpleado(null)}
           />
         </div>
       </div>

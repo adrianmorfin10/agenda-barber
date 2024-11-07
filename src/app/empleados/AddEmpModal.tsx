@@ -3,21 +3,32 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 
-interface AddUserModalProps {
+interface AddEmpModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
+  onAddEmpleado: (empleado: Empleado) => void;
 }
 
-const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen }) => {
-  const [nuevoEmpleado, setNuevoEmpleado] = useState({
+interface Empleado {
+  id: number;
+  nombre: string;
+  apellido: string;
+  telefono: string;
+  email: string;
+  instagram?: string;
+  diasTrabajo: number[];
+  servicios: number[];
+}
+
+const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, onAddEmpleado }) => {
+  const [nuevoEmpleado, setNuevoEmpleado] = useState<Omit<Empleado, 'id'>>({
     nombre: '',
     apellido: '',
     telefono: '',
     email: '',
     instagram: '',
-    descuento: 0,
-    membresia: false,
-    foto: null as File | null, // Cambiamos el tipo a File | null
+    diasTrabajo: [],
+    servicios: [],
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,35 +36,37 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     setNuevoEmpleado({ ...nuevoEmpleado, [name]: value });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null; // Obtener el archivo seleccionado
-    setNuevoEmpleado({ ...nuevoEmpleado, foto: file });
+  const toggleDiaTrabajo = (dia: number) => {
+    setNuevoEmpleado((prev) => ({
+      ...prev,
+      diasTrabajo: prev.diasTrabajo.includes(dia)
+        ? prev.diasTrabajo.filter((d) => d !== dia)
+        : [...prev.diasTrabajo, dia],
+    }));
+  };
+
+  const toggleServicio = (servicioId: number) => {
+    setNuevoEmpleado((prev) => ({
+      ...prev,
+      servicios: prev.servicios.includes(servicioId)
+        ? prev.servicios.filter((id) => id !== servicioId)
+        : [...prev.servicios, servicioId],
+    }));
   };
 
   const handleAddEmpleado = () => {
-    // Aquí puedes añadir la lógica para añadir el Empleado.
-    console.log('Añadiendo Empleado:', nuevoEmpleado);
-    // Restablece el formulario después de añadir
+    const empleadoConId: Empleado = { ...nuevoEmpleado, id: Date.now() };
+    onAddEmpleado(empleadoConId);
+    setIsModalOpen(false);
     setNuevoEmpleado({
       nombre: '',
       apellido: '',
       telefono: '',
       email: '',
       instagram: '',
-      descuento: 0,
-      membresia: false,
-      foto: null, // Restablece la foto también
+      diasTrabajo: [],
+      servicios: [],
     });
-    setIsModalOpen(false);
-  };
-
-  const handleDescuentoChange = (increment: boolean) => {
-    setNuevoEmpleado((prev) => ({
-      ...prev,
-      descuento: increment
-        ? Math.min(prev.descuento + 5, 100)
-        : Math.max(prev.descuento - 5, 0),
-    }));
   };
 
   return (
@@ -70,16 +83,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
                 className="cursor-pointer"
                 onClick={() => setIsModalOpen(false)}
               />
-              <h2 className="text-lg font-semibold ml-2 text-[#0C101E]">Añadir Nuevo Usuario</h2>
+              <h2 className="text-lg font-semibold ml-2 text-[#0C101E]">Añadir Nuevo Empleado</h2>
             </div>
-
-            {/* Campo para cargar foto */}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
-            />
 
             <input
               type="text"
@@ -133,39 +138,46 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
               maxLength={50}
             />
-            <div className="flex items-center mb-4">
-              <button
-                className="bg-[#0C101E] text-white py-2 px-4 rounded-l-[5px] w-1/3"
-                onClick={() => handleDescuentoChange(false)}
-              >
-                -
-              </button>
-              <input
-                type="number"
-                value={nuevoEmpleado.descuento}
-                readOnly
-                className="border p-2 w-1/3 text-center text-black placeholder-gray"
-              />
-              <button
-                className="bg-[#0C101E] text-white py-2 px-4 rounded-r-[5px] w-1/3"
-                onClick={() => handleDescuentoChange(true)}
-              >
-                +
-              </button>
+
+            {/* Selección de días de trabajo en horizontal */}
+            <div className="flex flex-col mb-4">
+              <label className="font-semibold mb-2 text-black">Días de Trabajo</label>
+              <div className="flex gap-2">
+                {["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"].map((dia, index) => (
+                  <div key={index} className="flex items-center mb-1">
+                    <input
+                      type="checkbox"
+                      checked={nuevoEmpleado.diasTrabajo.includes(index + 1)}
+                      onChange={() => toggleDiaTrabajo(index + 1)}
+                      className="mr-1"
+                    />
+                    <label className="text-black">{dia}</label>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex items-center mb-4">
-              <label className="mr-2">Membresía:</label>
-              <input
-                type="checkbox"
-                checked={nuevoEmpleado.membresia}
-                onChange={() => setNuevoEmpleado({ ...nuevoEmpleado, membresia: !nuevoEmpleado.membresia })}
-              />
+
+            {/* Selección de servicios */}
+            <div className="flex flex-col mb-4">
+              <label className="font-semibold mb-2 text-black">Servicios que Puede Brindar</label>
+              {["Corte de Cabello", "Afeitado", "Coloración"].map((servicio, servicioId) => (
+                <div key={servicioId} className="flex items-center mb-1">
+                  <input
+                    type="checkbox"
+                    checked={nuevoEmpleado.servicios.includes(servicioId + 1)}
+                    onChange={() => toggleServicio(servicioId + 1)}
+                    className="mr-1"
+                  />
+                  <label className="text-black">{servicio}</label>
+                </div>
+              ))}
             </div>
+
             <button
               onClick={handleAddEmpleado}
               className="bg-[#0C101E] text-white py-2 px-4 rounded-[5px] w-full"
             >
-              Añadir Usuario
+              Añadir Empleado
             </button>
           </div>
         </div>
@@ -174,4 +186,4 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
   );
 };
 
-export default AddUserModal;
+export default AddEmpModal;
