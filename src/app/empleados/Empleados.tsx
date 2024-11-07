@@ -4,25 +4,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import EmpleadosList from './EmpleadosList';
 import EmpleadoDetails from './EmpleadosDetail';
-import SubNavBar from '../components/SubNavBar'; // Asegúrate de que la ruta sea correcta
-
-interface Empleado {
-  id: number;
-  nombre: string;
-  apellido: string;
-  telefono: string;
-  instagram: string;
-  citas: number;
-  inasistencias: number;
-  cancelaciones: number;
-  ultimaVisita: string;
-  descuento: string;
-  ingresosTotales: string;
-  membresia: string;
-  tipo: string;
-  serviciosDisponibles: number;
-  proximoPago: string;
-}
+import SubNavBar from '../components/SubNavBar';
+import { Empleado } from '../interfaces/empleado'; // Importa desde el archivo centralizado
 
 const Empleados = () => {
   const initialEmpleados: Empleado[] = Array.from({ length: 10 }, (_, index) => ({
@@ -30,26 +13,30 @@ const Empleados = () => {
     nombre: `Nombre${index + 1}`,
     apellido: `Apellido${index + 1}`,
     telefono: `555-012${index}`,
+    email: `usuario${index}@example.com`,
     instagram: `@usuario${index}`,
     citas: Math.floor(Math.random() * 10),
     inasistencias: Math.floor(Math.random() * 5),
     cancelaciones: Math.floor(Math.random() * 3),
     ultimaVisita: 'Oct, 8, 2024',
-    descuento: 'Sin descuento',
     ingresosTotales: `$${Math.floor(Math.random() * 100)}.00`,
-    membresia: 'Activa',
     tipo: 'Black',
-    serviciosDisponibles: Math.floor(Math.random() * 10),
+    diasTrabajo: [1, 2, 3],
+    servicios: [1, 2],
     proximoPago: '23/10/2024',
   }));
 
-  const [empleados] = useState<Empleado[]>(initialEmpleados);
+  const [empleados, setEmpleados] = useState<Empleado[]>(initialEmpleados);
   const [selectedEmpleado, setSelectedEmpleado] = useState<Empleado | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
 
   const handleSelectEmpleado = (empleado: Empleado) => {
     setSelectedEmpleado(empleado);
+  };
+
+  const handleAddEmpleado = (nuevoEmpleado: Empleado) => {
+    setEmpleados([...empleados, nuevoEmpleado]);
   };
 
   return (
@@ -63,13 +50,14 @@ const Empleados = () => {
             onSelectEmpleado={handleSelectEmpleado}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
+            onAddEmpleado={handleAddEmpleado}
           />
         </div>
 
         <div className={`${selectedEmpleado ? 'block' : 'hidden'} md:block w-full md:w-2/3`}>
           <EmpleadoDetails
             empleado={selectedEmpleado}
-            onBack={() => setSelectedEmpleado(null)} // Opción para regresar a la lista
+            onBack={() => setSelectedEmpleado(null)}
           />
         </div>
       </div>
