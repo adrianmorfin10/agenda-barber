@@ -95,6 +95,7 @@ const CalendarApp = () => {
   const [ localId, setLocal ] = useState(6);
   const [ servicios, setServicios ] = useState([]);
   const [ empleados, setEmpleados] = useState([]);
+  
   React.useEffect(() => {
     const getData = async () => {
       const _servicios = await servicioObject.getServicios();
@@ -112,11 +113,16 @@ const CalendarApp = () => {
           workDays: item.working_days || [ 1, 2, 3, 4, 5]
         }
       }));
-      const eventos = await solicitudObject.getSolicitudes();
-      setEvents(eventos.map(item=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
+      await getAndSetEvents();
     }
     getData().then();
   }, []);
+
+  const getAndSetEvents = async ()=>{
+    const eventos = await solicitudObject.getSolicitudes();
+    setEvents(eventos.map(item=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
+  }
+
   const handleCreateEvent = (newEvent) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
@@ -131,18 +137,10 @@ const CalendarApp = () => {
       precio: newEvent.price,
       estado: "pendiente"
     }).then(data=>{
-      setEvents((prev) => [
-        ...prev,
-        {
-          title: `${newEvent.client ? newEvent.client : "Cliente sin cita previa"} - ${newEvent.employee.name}`,
-          start,
-          end,
-          employee: newEvent.employee.name,
-          employee_id: newEvent.employee.id
-        },
-      ]);
-  
       setIsModalOpen(false);
+      return getAndSetEvents();
+    }).then((data)=>{
+      
     }).catch(e=>{
       console.log("error createSolicitud", e);
     });
@@ -272,6 +270,7 @@ const CalendarApp = () => {
                 {Array.from({ length: 12 }, (_, hourIndex) => {
                   const hour = roundToNearestHour(setHours(new Date(), 7 + hourIndex));
                   const isWorkingDay = (emp.workDays || []).includes(getDay(selectedDay));
+                  
                   return (
                     <div
                       key={hourIndex}
@@ -287,8 +286,8 @@ const CalendarApp = () => {
                         .filter(
                           (event) =>
                             event.barbero_id === emp.id &&
-                            hour.getHours() === moment(events[events.length - 1].start_hour, "hh").hours() &&
-                            selectedDay.getDate() === (new Date(event.fecha)).getDate()
+                            hour.getHours() === moment(`2019-01-01 ${event.start_hour}`).hours() &&
+                            selectedDay.getDate() === (new Date(event.fecha)).getUTCDate()
                         )
                         .map((event, i) => {
                           const start_hour = moment(`2019-01-01 ${event.start_hour}`);
