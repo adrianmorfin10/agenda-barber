@@ -1,18 +1,18 @@
-interface Empleado {
+// src/app/interfaces/Empleado.ts
+
+export interface Empleado {
     id: number;
     nombre: string;
     apellido: string;
-    telefono?: string;
+    telefono: string;
+    email: string;
     instagram?: string;
-    citas?: number;
-    inasistencias?: number;
-    cancelaciones?: number;
-    ultimaVisita?: string;
-    descuento?: string;
-    ingresosTotales?: string;
-    membresia?: string;
-    tipo?: string;
-    serviciosDisponibles?: number;
-    proximoPago?: string;
-  }
-export default Empleado;
+    citas: number;             // Total de citas del empleado
+    inasistencias: number;      // Número de inasistencias
+    cancelaciones: number;      // Número de cancelaciones
+    ultimaVisita: string;       // Fecha de última visita
+    ingresosTotales: string;    // Ingresos totales en formato string
+    tipo: string;               // Tipo de empleado (ej. "Black")
+    diasTrabajo: number[];      // Días de trabajo en formato [1,2,3,...]
+    servicios: number[];        // Servicios que el empleado puede brindar
+}
