@@ -36,10 +36,11 @@ const ClientesList: React.FC<ClientesListProps> = ({
   setSearchTerm,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const filteredClientes = clientes.filter(cliente =>
-    `${cliente.nombre} ${cliente.apellido}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  console.log("clientes", clientes);
+  const filteredClientes = clientes;
+  // .filter(cliente =>
+  //   `${cliente.nombre} ${cliente.apellido}`.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
 
   return (
     <div className="p-5 w-full md:max-w-[450px] overflow-y-auto">
@@ -75,9 +76,9 @@ const ClientesList: React.FC<ClientesListProps> = ({
             onClick={() => onSelectCliente(cliente)}
           >
             <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px]">
-              {cliente.usuario.nombre.charAt(0)}{( cliente.usuario.apellido_paterno || cliente.usuario.apellido_materno ).charAt(0)}
+              {cliente.nombre.charAt(0)}{( cliente.apellido ).charAt(0)}
             </div>
-            <span className="ml-3 poppins text-black">{`${cliente.usuario.nombre} ${cliente.usuario.apellido_paterno}`}</span>
+            <span className="ml-3 poppins text-black">{`${cliente.nombre} ${cliente.apellido}`}</span>
           </div>
         ))}
       </div>

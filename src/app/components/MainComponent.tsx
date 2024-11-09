@@ -26,6 +26,7 @@ interface Action {
 // Reducer con tipado
 export const reducer = (state: State = initialState, action: Action) => {
     const { key, value } = action;
+    console.log("action reducer", action)
     return {
         ...state,
         [key]: value,

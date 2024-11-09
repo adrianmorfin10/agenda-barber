@@ -7,6 +7,7 @@ import SolicitudService from "../services/SolicitudService";
 import ServicioService from "../services/ServicioService";
 import ClientService from "../services/ClientService";
 import moment from "moment";
+import { AppContext } from "../components/AppContext";
 const servicioObject = new ServicioService();
 const clienteObject = new ClientService();
 const services = [
@@ -44,6 +45,8 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [clientes, setClientes] = useState([]);
+  const [ state, dispatchState ]= React.useContext(AppContext);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewEvent((prev) => ({ ...prev, [name]: value }));
@@ -77,12 +80,13 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
   };
 
   React.useEffect(() => {
-    clienteObject.getClients().then(data => {
+    
+    clienteObject.getClients(state.sucursal ? { local_id: state.sucursal.id } : false ).then(data => {
       setClientes(data);
     }).catch(error => {
       console.error("Error al obtener los clientes", error);
     });
-  }, []);
+  }, [state.sucursal]);
 
   React.useEffect(() => {
     setNewEvent({

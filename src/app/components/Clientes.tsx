@@ -5,12 +5,13 @@ import ClientesList from './Clienteslist';
 import ClienteDetails from './ClienteDetails';
 import ClientService from '../services/ClientService';
 import Cliente from '../interfaces/cliente';
+import { AppContext } from './AppContext';
 
 
 
-const getClients = async (): Promise<Cliente[]> => {
+const getClients = async (filter:any): Promise<Cliente[]> => {
   const clientService = new ClientService();
-  const clientsData = await clientService.getClients();
+  const clientsData = await clientService.getClients(filter);
   const clients:Cliente[] = clientsData.map((client: any) => ({
     id: client.id,
     nombre: client.usuario.nombre,
@@ -37,14 +38,15 @@ const Clientes = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null); // Comienza sin cliente seleccionado
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [ state, dispatchState ]= React.useContext(AppContext);
   const handleSelectCliente = (cliente: Cliente) => {
     setSelectedCliente(cliente);
   };
 
   React.useEffect(() => {
-    getClients().then(setClientes);
-  }, []);
+    
+    getClients( state.sucursal ? { local_id: state.sucursal.id } : false ).then(setClientes);
+  }, [state]);
   
   return (
     <div className="flex bg-[#FFFFFF] min-h-screen">
