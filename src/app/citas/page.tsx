@@ -19,6 +19,7 @@ import EmpleadoService from "../services/EmpleadoService";
 import ServicioService from "../services/ServicioService";
 import SolicitudService from "../services/SolicitudService";
 import moment from "moment";
+import { useAppContext } from '../components/AppContext';
 const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
@@ -95,12 +96,12 @@ const CalendarApp = () => {
   const [ localId, setLocal ] = useState(6);
   const [ servicios, setServicios ] = useState([]);
   const [ empleados, setEmpleados] = useState([]);
-  
+  const [ state, dispatchState ]= useAppContext();
   React.useEffect(() => {
     const getData = async () => {
       const _servicios = await servicioObject.getServicios();
       setServicios(_servicios);
-      const empleados = await empleadoObject.getEmpleados();
+      const empleados = await empleadoObject.getEmpleados( state.sucursal ? { local_id: state.sucursal  } : null );
       setEmpleados(empleados.map(item=>{
         return {
           ...item,
@@ -116,7 +117,7 @@ const CalendarApp = () => {
       await getAndSetEvents();
     }
     getData().then();
-  }, []);
+  }, [state]);
 
   const getAndSetEvents = async ()=>{
     const eventos = await solicitudObject.getSolicitudes();
@@ -140,7 +141,7 @@ const CalendarApp = () => {
       setIsModalOpen(false);
       return getAndSetEvents();
     }).then((data)=>{
-      
+
     }).catch(e=>{
       console.log("error createSolicitud", e);
     });

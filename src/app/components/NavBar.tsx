@@ -37,6 +37,7 @@ const NavBar: React.FC = () => {
     Promise.all(promises).then(()=>{
       setSucursalSeleccionada(sucursal);
       setIsModalOpen(false);
+      dispatchState({ key: "sucursal", value: sucursal });
     }).catch(e=>{
 
     })
