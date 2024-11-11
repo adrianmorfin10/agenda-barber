@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import ClientService from '../services/ClientService';
+import { AppContext } from './AppContext';
 
 interface AddUserModalProps {
   isModalOpen: boolean;
@@ -10,6 +11,7 @@ interface AddUserModalProps {
 }
 
 const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen }) => {
+  const [ state, dispatchState ]= React.useContext(AppContext);
   const [nuevoCliente, setNuevoCliente] = useState({
     nombre: '',
     apellido: '',
@@ -34,7 +36,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
   const handleAddCliente = () => {
     console.log('Añadiendo cliente:', nuevoCliente);
     const clientService = new ClientService();
-    clientService.createClient(nuevoCliente).then((response) => {
+    clientService.createClient({...nuevoCliente, local_id: state?.sucursal?.id }).then((response) => {
       setNuevoCliente({
         nombre: '',
         apellido: '',
