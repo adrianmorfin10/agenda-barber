@@ -15,7 +15,14 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { setHours, setMinutes, isToday, addMinutes } from "date-fns";
 import "./styles.css"; // Aquí se manejará el CSS
 import EventModal from "./EventModal"; // Importando el componente desde otro archivo
-
+import EmpleadoService from "../services/EmpleadoService";
+import ServicioService from "../services/ServicioService";
+import SolicitudService from "../services/SolicitudService";
+import moment from "moment";
+import { useAppContext } from '../components/AppContext';
+const solicitudObject = new SolicitudService();
+const servicioObject = new ServicioService();
+const empleadoObject = new EmpleadoService();
 const locales = {
   es: es,
 };
@@ -64,19 +71,20 @@ const roundToNearestHour = (date) => {
   return date;
 };
 
+/**
+ * {
+      title: "Corte de pelo - Juan Pérez",
+      start: new Date("2024-10-22T07:00:00"),
+      end: new Date("2024-10-22T08:00:00"),
+      employee: "Pedro López",
+    }
+ */
 const customWeekDays = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
 
 const CalendarApp = () => {
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [events, setEvents] = useState([
-    {
-      title: "Corte de pelo - Juan Pérez",
-      start: new Date("2024-10-22T07:00:00"),
-      end: new Date("2024-10-22T08:00:00"),
-      employee: "Pedro López",
-    },
-    {
+  const [events, setEvents] = useState([{
       title: "Coloración - Ana Martínez",
       start: new Date("2024-10-22T07:00:00"),
       end: new Date("2024-10-22T08:00:00"),
@@ -85,21 +93,59 @@ const CalendarApp = () => {
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [ localId, setLocal ] = useState(6);
+  const [ servicios, setServicios ] = useState([]);
+  const [ empleados, setEmpleados] = useState([]);
+  const [ state, dispatchState ]= useAppContext();
+  React.useEffect(() => {
+    const getData = async () => {
+      const _servicios = await servicioObject.getServicios();
+      setServicios(_servicios);
+      const empleados = await empleadoObject.getEmpleados( state.sucursal ? { local_id: state.sucursal  } : null );
+      setEmpleados(empleados.map(item=>{
+        return {
+          ...item,
+          name: item.usuario.nombre,
+          initials: item.usuario.nombre.split(" ").map(name => name[0]).join(""),
+          workingHours: {
+            start: item.start_hour || "07:00",
+            end: item.end_hour || "18:00"
+          },
+          workDays: item.working_days || [ 1, 2, 3, 4, 5]
+        }
+      }));
+      await getAndSetEvents();
+    }
+    getData().then();
+  }, [state]);
+
+  const getAndSetEvents = async ()=>{
+    const eventos = await solicitudObject.getSolicitudes();
+    setEvents(eventos.map(item=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
+  }
 
   const handleCreateEvent = (newEvent) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
+    solicitudObject.createSolicitud({
+      cliente_id: parseInt(newEvent.client.id),
+      local_id: localId,
+      servicio_id: parseInt(newEvent.service),
+      fecha: newEvent.date,
+      start_hour: newEvent.startTime,
+      end_hour: newEvent.endTime,
+      barbero_id: parseInt(newEvent.employee.id),
+      precio: newEvent.price,
+      estado: "pendiente"
+    }).then(data=>{
+      setIsModalOpen(false);
+      return getAndSetEvents();
+    }).then((data)=>{
 
-    setEvents((prev) => [
-      ...prev,
-      {
-        title: `${newEvent.client ? newEvent.client : "Cliente sin cita previa"} - ${newEvent.employee}`,
-        start,
-        end,
-        employee: newEvent.employee,
-      },
-    ]);
-    setIsModalOpen(false); // Cerrar el modal después de crear el evento
+    }).catch(e=>{
+      console.log("error createSolicitud", e);
+    });
+     // Cerrar el modal después de crear el evento
   };
 
   const handleDayClick = (date) => {
@@ -135,7 +181,6 @@ const CalendarApp = () => {
 
   // Nombres de los días de la semana en español
   const daysOfWeek = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
-
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Barra de navegación de días */}
@@ -196,7 +241,7 @@ const CalendarApp = () => {
         {/* Calendarios de los trabajadores */}
         <div className="flex-1 p-4 overflow-x-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 overflow-x-auto">
-            {employees.map((emp, index) => (
+            {empleados.map((emp, index) => (
               <div key={emp.name} className="relative">
                 <div className="flex items-center mb-2 sticky top-0 bg-white z-10 border-b border-[#DADADA]">
                   <div className="bg-black text-white w-8 h-8 flex items-center justify-center rounded-full mr-2">
@@ -205,7 +250,7 @@ const CalendarApp = () => {
                   <div>
                     <h3 className="text-lg font-bold text-black mb-1">{emp.name}</h3>
                     <p className="text-sm text-gray-500">
-                      {emp.workingHours.start} - {emp.workingHours.end}
+                      {emp.workingHours?.start} - {emp.workingHours?.end}
                     </p>
                   </div>
                 </div>
@@ -225,7 +270,8 @@ const CalendarApp = () => {
 
                 {Array.from({ length: 12 }, (_, hourIndex) => {
                   const hour = roundToNearestHour(setHours(new Date(), 7 + hourIndex));
-                  const isWorkingDay = emp.workDays.includes(getDay(selectedDay));
+                  const isWorkingDay = (emp.workDays || []).includes(getDay(selectedDay));
+                  
                   return (
                     <div
                       key={hourIndex}
@@ -240,12 +286,14 @@ const CalendarApp = () => {
                       {events
                         .filter(
                           (event) =>
-                            event.employee === emp.name &&
-                            format(event.start, "yyyy-MM-dd") === format(selectedDay, "yyyy-MM-dd") &&
-                            event.start.getHours() === hour.getHours()
+                            event.barbero_id === emp.id &&
+                            hour.getHours() === moment(`2019-01-01 ${event.start_hour}`).hours() &&
+                            selectedDay.getDate() === (new Date(event.fecha)).getUTCDate()
                         )
                         .map((event, i) => {
-                          const eventDuration = (event.end - event.start) / (1000 * 60);
+                          const start_hour = moment(`2019-01-01 ${event.start_hour}`);
+                          const end_hour = moment(`2019-01-01 ${event.end_hour}`);
+                          const eventDuration = (end_hour - start_hour) / (1000 * 60);
                           const colors = ["bg-blue-400", "bg-green-400", "bg-red-400", "bg-purple-400"];
                           const employeeColor = colors[index % colors.length];
                           return (
@@ -260,7 +308,7 @@ const CalendarApp = () => {
                                 left: index === 0 ? "40px" : "0",
                               }}
                             >
-                              {event.title} ({format(event.start, "HH:mm")} - {format(event.end, "HH:mm")})
+                              {event.title} {event.start_hour} - {event.end_hour}
                             </div>
                           );
                         })}
@@ -278,7 +326,8 @@ const CalendarApp = () => {
         onClose={() => setIsModalOpen(false)}
         onCreateEvent={handleCreateEvent}
         slot={selectedSlot}
-        employees={employees}
+        employees={empleados}
+        services={servicios}
       />
     </div>
   );

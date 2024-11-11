@@ -3,14 +3,24 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
 import ClientesList from "../components/Clienteslist"; // Asegúrate de que la ruta es correcta
-
+import SolicitudService from "../services/SolicitudService";
+import ServicioService from "../services/ServicioService";
+import ClientService from "../services/ClientService";
+import moment from "moment";
+import { AppContext } from "../components/AppContext";
+const servicioObject = new ServicioService();
+const clienteObject = new ClientService();
 const services = [
   { name: "Corte de Pelo", price: 100 },
   { name: "Coloración", price: 200 },
   { name: "Peinado", price: 150 },
 ];
 
-const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes }) => {
+
+const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
+
+  const [ servicios, setServicios ] = useState([]);
+
   const [newEvent, setNewEvent] = useState({
     title: "",
     startTime: slot?.start ? format(slot.start, "HH:mm") : "",
@@ -34,6 +44,8 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes 
   const [selectedClient, setSelectedClient] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [clientes, setClientes] = useState([]);
+  const [ state, dispatchState ]= React.useContext(AppContext);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -42,21 +54,48 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes 
     // Limpiar errores al escribir
     setErrors((prev) => ({ ...prev, [name]: "", timeError: "" }));
   };
-
+  const handleChangeEmployee = (e)=>{
+    const { name, value } = e.target;
+    setNewEvent((prev) => ({ ...prev, employee: { name, id: value } }));
+    // Limpiar errores al escribir
+    setErrors((prev) => ({ ...prev, employee: "", timeError: "" }));
+  }
   const handleServiceChange = (e) => {
     const selectedService = e.target.value;
-    const serviceDetails = services.find(service => service.name === selectedService);
-    const price = serviceDetails ? serviceDetails.price : 0;
-
+    const serviceDetails = services.find(service => service.id === selectedService);
+    const precio = serviceDetails && serviceDetails.precio_servicios.length > 0 ? serviceDetails.precio_servicios[0].precio : 0;
+    const tiempo_servicio = serviceDetails?.tiempo || 0;
+    const { startTime } = newEvent;
+    const price = Number(precio);
+    const startTimeMoment = moment(`2020-12-12 ${startTime}`);
+    const endTime = startTimeMoment.add(tiempo_servicio, 'minutes').format("hh:mm");
     setNewEvent((prev) => ({
       ...prev,
       service: selectedService,
       price: price,
+      endTime
     }));
 
     setErrors((prev) => ({ ...prev, service: "" }));
   };
-  
+
+  React.useEffect(() => {
+    
+    clienteObject.getClients(state.sucursal ? { local_id: state.sucursal.id } : false ).then(data => {
+      setClientes(data);
+    }).catch(error => {
+      console.error("Error al obtener los clientes", error);
+    });
+  }, [state.sucursal]);
+
+  React.useEffect(() => {
+    setNewEvent({
+      ...newEvent,
+      startTime: slot?.start ? format(slot.start, "HH:mm") : ""
+    });
+  }, [slot]);
+
+
   const handleClose = () => {
     setIsClosing(true); // Activar la animación de salida
     setTimeout(() => {
@@ -94,6 +133,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes 
       valid = false;
     }
 
+    
     setErrors(newErrors);
 
     // Si la validación falla, no se permite continuar
@@ -102,7 +142,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes 
     }
 
     // Crear el evento si todo es válido
-    onCreateEvent(newEvent);
+    onCreateEvent({ ...newEvent, client: selectedClient,  });
     onClose();
   };
 
@@ -111,8 +151,9 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes 
   };
 
   const handleSelectCliente = (cliente) => {
+    
     setSelectedClient(cliente);
-    setNewEvent((prev) => ({ ...prev, client: `${cliente.nombre} ${cliente.apellido}` }));
+    setNewEvent((prev) => ({ ...prev, client: `${cliente.usuario.nombre} ${cliente.usuario.apellido_paterno}` }));
     setIsClientListOpen(false); // Cierra la lista de clientes al seleccionar uno
   };
 
@@ -146,7 +187,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes 
                     <img src="/img/userw.svg" alt="Cliente" className="h-5 w-5" />
                   </div>
                   <span className="text-gray-500 font-light text-[16px]">
-                    {selectedClient ? `${selectedClient.nombre} ${selectedClient.apellido}` : " Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
+                    {selectedClient ? `${selectedClient.usuario.nombre} ${selectedClient.usuario.apellido_paterno}` : " Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
                   </span>
                   </div>
               <img src="/img/add.svg" alt="Agregar cliente" className="h-5 w-5 cursor-pointer" />
@@ -181,6 +222,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes 
               />
             </div>
 
+            {/* Servicio */}
             <div className="mb-4 px-4">
               <label className="block text-black text-sm font-medium mb-1">Seleccionar servicio</label>
               <select
@@ -190,9 +232,9 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes 
                 className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.service && "border-red-500"}`}
               >
                 <option value="">Selecciona un servicio</option>
-                {services.map((service) => (
-                  <option key={service.name} value={service.name}>
-                    {service.name}
+                {(services || []).map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.nombre}
                   </option>
                 ))}
               </select>
@@ -229,17 +271,18 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes 
 
             {errors.timeError && <p className="text-red-500 text-xs px-4">{errors.timeError}</p>}
 
+            {/* Empleado */}
             <div className="mb-4 px-4">
               <label className="block text-black text-sm font-medium mb-1">Empleado</label>
               <select
                 name="employee"
                 value={newEvent.employee}
-                onChange={handleInputChange}
+                onChange={handleChangeEmployee}
                 className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.employee && "border-red-500"}`}
               >
                 <option value="">Selecciona un empleado</option>
                 {employees.map((emp) => (
-                  <option key={emp.name} value={emp.name}>
+                  <option key={emp.name} value={emp.id}>
                     {emp.name}
                   </option>
                 ))}
@@ -248,6 +291,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, clientes 
             </div>
           </>
         )}
+
       </div>
 
       {!isClientListOpen && (

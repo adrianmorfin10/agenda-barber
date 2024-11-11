@@ -1,35 +1,31 @@
 "use client";
 
 import React, { useState } from 'react';
-
-interface Sucursal {
-  id: number;
-  nombre: string;
-  direccion: string;
-  encargado: string;
-}
-
-interface SucursalModalProps {
-  sucursalSeleccionada: Sucursal;
-  sucursales: Sucursal[];
-  onSelect: (sucursal: Sucursal) => void;
-  onAddSucursal: (sucursal: Sucursal) => void;
-  onClose: () => void;
-}
+import { Sucursal, SucursalModalProps } from '../interfaces/sucursal';
+import LocalService from '../services/LocalService';
+const localServiceObject = new LocalService();
 
 const SucursalModal: React.FC<SucursalModalProps> = ({ sucursalSeleccionada, sucursales, onSelect, onAddSucursal, onClose }) => {
   const [isAddingSucursal, setIsAddingSucursal] = useState(false); // Controla la vista de agregar sucursal
-  const [nuevaSucursal, setNuevaSucursal] = useState<Sucursal>({ id: 0, nombre: "", direccion: "", encargado: "" });
+  const [nuevaSucursal, setNuevaSucursal] = useState<Sucursal>({ nombre: "", direccion: "", encargado: "" });
 
   const handleAddSucursal = () => {
     if (nuevaSucursal.nombre && nuevaSucursal.direccion && nuevaSucursal.encargado) {
       onAddSucursal({ ...nuevaSucursal, id: sucursales.length + 1 });
-      setNuevaSucursal({ id: 0, nombre: "", direccion: "", encargado: "" });
+      setNuevaSucursal({ nombre: "", direccion: "", encargado: "" });
       setIsAddingSucursal(false); // Regresa a la vista de selección
     } else {
       alert("Todos los campos son obligatorios");
     }
   };
+
+  const addSucursal = ()=>{
+    localServiceObject.createLocal(nuevaSucursal).then((response)=>{
+      onAddSucursal(response);
+    }).catch(e=>{
+      console.log(e)
+    })
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -65,13 +61,13 @@ const SucursalModal: React.FC<SucursalModalProps> = ({ sucursalSeleccionada, suc
 
             <div className="flex justify-between space-x-4">
               <button
-                onClick={handleAddSucursal}
+                onClick={()=>{ addSucursal(); }}
                 className="bg-black text-white px-6 py-3 rounded-lg font-semibold w-full"
               >
                 Agregar
               </button>
               <button
-                onClick={() => setIsAddingSucursal(false)}
+                onClick={() =>{ setIsAddingSucursal(false);  }}
                 className="border border-black text-black px-6 py-3 rounded-lg font-semibold w-full"
               >
                 Cancelar
@@ -86,7 +82,7 @@ const SucursalModal: React.FC<SucursalModalProps> = ({ sucursalSeleccionada, suc
                 <button
                   key={sucursal.id}
                   onClick={() => onSelect(sucursal)}
-                  className={`p-4 text-left rounded-md border ${sucursalSeleccionada.id === sucursal.id ? 'border-2 border-black bg-white text-black' : 'border border-gray-300 bg-gray-200 text-gray-700'}`}
+                  className={`p-4 text-left rounded-md border ${sucursalSeleccionada?.id === sucursal.id ? 'border-2 border-black bg-white text-black' : 'border border-gray-300 bg-gray-200 text-gray-700'}`}
                 >
                   <div className="font-semibold text-black">{sucursal.nombre}</div>
                   <div className="text-sm text-black">{sucursal.direccion}</div>
