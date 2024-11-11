@@ -1,11 +1,12 @@
-// /empleados/page.tsx
-import React from 'react';
-import Empleados from './Empleados';
+"use client";
+
+import React from "react";
+import UnderConstruction from "../components/UnderConstruction";
 
 const Page = () => {
   return (
-    <div>
-      <Empleados />
+    <div className="flex flex-col items-center justify-center h-screen bg-white">
+      <UnderConstruction />
     </div>
   );
 };
