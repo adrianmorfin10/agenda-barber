@@ -8,11 +8,19 @@ import Carrito from '../components/Carrito';
 // Define SectionType en VentasPage para mantener compatibilidad con ListaDeElementos
 type SectionType = "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías";
 
+// Define el tipo de los elementos en el carrito
+interface CartItemType {
+  id: number;
+  nombre: string;
+  precio: number;
+  cantidad: number;
+}
+
 const VentasPage: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState<SectionType>("Venta Rápida"); // Selección predeterminada
-  const [cartItems, setCartItems] = useState<any[]>([]); // Elementos en el carrito
+  const [cartItems, setCartItems] = useState<CartItemType[]>([]); // Elementos en el carrito
 
-  const handleAddToCart = (item: any) => {
+  const handleAddToCart = (item: Omit<CartItemType, 'cantidad'>) => {
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((cartItem) => cartItem.id === item.id);
       if (existingItem) {
