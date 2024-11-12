@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import SucursalModal from '../components/SucursalModal';
 import LocalService from '../services/LocalService';
-import { useAppContext } from './AppContext';
-
-const localServiceObject = new LocalService();
+import { AppContext, useAppContext } from './AppContext';
+const localServiceObejct = new LocalService();
 
 interface Sucursal {
   id: number;
@@ -28,35 +27,44 @@ const NavBar: React.FC = () => {
   });
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [ , dispatchState ] = useAppContext();
-
+  const [ appState, dispatchState ] = useAppContext()
   const handleSucursalSelect = (sucursal: Sucursal) => {
+    
     const promises = [
-      localServiceObject.updateLocal({ ...sucursal, seleccionado: true }, sucursal.id),
-      localServiceObject.updateLocal({ ...sucursalSeleccionada, seleccionado: false }, sucursalSeleccionada.id)
-    ];
-    Promise.all(promises).then(() => {
+      localServiceObejct.updateLocal({ ...sucursal, seleccionado: true }, sucursal.id),
+      localServiceObejct.updateLocal({ ...sucursalSeleccionada, seleccionado: false }, sucursalSeleccionada.id)
+    ]
+    Promise.all(promises).then(()=>{
       setSucursalSeleccionada(sucursal);
       setIsModalOpen(false);
       dispatchState({ key: "sucursal", value: sucursal });
-    });
+    }).catch(e=>{
+
+    })
+    
   };
 
   const handleAddSucursal = (nuevaSucursal: Sucursal) => {
-    localServiceObject.getLocales().then((locales) => {
+    setSucursales([...sucursales, nuevaSucursal]);
+    //setSucursalSeleccionada(nuevaSucursal);
+    localServiceObejct.getLocales().then((locales)=>{
       setSucursales(locales);
-    });
+    }).catch(e=>{
+
+    })
     setIsModalOpen(false);
   };
 
-  useEffect(() => {
-    localServiceObject.getLocales().then((locales) => {
-      const selected = locales.find(item => item.seleccionado);
+  React.useEffect(()=>{
+    localServiceObejct.getLocales().then((locales)=>{
+      const selected = locales.find(item=>item.seleccionado);
       dispatchState({ key: "sucursal", value: selected });
       setSucursales(locales);
       setSucursalSeleccionada(selected);
-    });
-  }, [dispatchState]);
+    }).catch(e=>{
+
+    })
+  },[]);
 
   const navItems = [
     { path: '/citas', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },
