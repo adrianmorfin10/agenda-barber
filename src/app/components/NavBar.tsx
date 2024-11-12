@@ -6,8 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import SucursalModal from '../components/SucursalModal';
 import LocalService from '../services/LocalService';
-import { AppContext, useAppContext } from './AppContext';
-const localServiceObejct = new LocalService();
+import { useAppContext } from './AppContext';
+const localServiceObject = new LocalService();
 
 interface Sucursal {
   id: number;
@@ -19,52 +19,57 @@ interface Sucursal {
 const NavBar: React.FC = () => {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<Sucursal>({
+  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<Sucursal | any>({
     id: 1,
     nombre: "Sucursal 1",
     direccion: "Calle Falsa 123",
     encargado: "Carlos Perez"
   });
-  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+  const [sucursales, setSucursales] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [ appState, dispatchState ] = useAppContext()
-  const handleSucursalSelect = (sucursal: Sucursal) => {
-    
-    const promises = [
-      localServiceObejct.updateLocal({ ...sucursal, seleccionado: true }, sucursal.id),
-      localServiceObejct.updateLocal({ ...sucursalSeleccionada, seleccionado: false }, sucursalSeleccionada.id)
-    ]
-    Promise.all(promises).then(()=>{
-      setSucursalSeleccionada(sucursal);
-      setIsModalOpen(false);
-      dispatchState({ key: "sucursal", value: sucursal });
-    }).catch(e=>{
+  const [appState, dispatchState] = useAppContext();
 
-    })
-    
+  const handleSucursalSelect = (sucursal: Sucursal) => {
+    const promises = [
+      localServiceObject.updateLocal({ ...sucursal, seleccionado: true }, sucursal.id),
+      localServiceObject.updateLocal({ ...sucursalSeleccionada, seleccionado: false }, sucursalSeleccionada.id)
+    ];
+
+    Promise.all(promises)
+      .then(() => {
+        setSucursalSeleccionada(sucursal);
+        setIsModalOpen(false);
+        dispatchState({ key: "sucursal", value: sucursal });
+      })
+      .catch((e) => {
+        console.error("Error updating selected branch:", e);
+      });
   };
 
   const handleAddSucursal = (nuevaSucursal: Sucursal) => {
     setSucursales([...sucursales, nuevaSucursal]);
-    //setSucursalSeleccionada(nuevaSucursal);
-    localServiceObejct.getLocales().then((locales)=>{
-      setSucursales(locales);
-    }).catch(e=>{
-
-    })
+    localServiceObject.getLocales()
+      .then((locales) => {
+        setSucursales(locales);
+      })
+      .catch((e) => {
+        console.error("Error fetching branches:", e);
+      });
     setIsModalOpen(false);
   };
 
-  React.useEffect(()=>{
-    localServiceObejct.getLocales().then((locales)=>{
-      const selected = locales.find(item=>item.seleccionado);
-      dispatchState({ key: "sucursal", value: selected });
-      setSucursales(locales);
-      setSucursalSeleccionada(selected);
-    }).catch(e=>{
-
-    })
-  },[]);
+  React.useEffect(() => {
+    localServiceObject.getLocales()
+      .then((locales) => {
+        const selected = locales.find(item => item.seleccionado);
+        dispatchState({ key: "sucursal", value: selected });
+        setSucursales(locales);
+        setSucursalSeleccionada(selected);
+      })
+      .catch((e) => {
+        console.error("Error fetching branches on load:", e);
+      });
+  }, [dispatchState]);
 
   const navItems = [
     { path: '/citas', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },

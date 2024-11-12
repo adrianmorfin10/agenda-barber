@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 
 const UnderConstruction = () => {
   return (
@@ -9,7 +10,7 @@ const UnderConstruction = () => {
       <p className="text-gray-600 mb-4">
         Lo sentimos, esta sección se encuentra en construcción. Regresa más tarde.
       </p>
-      <img src="/img/cons.svg" alt="En construcción" className="w-full max-w-[500px]" />
+      <Image src="/img/cons.svg" alt="En construcción" width={500} height={500} className="w-full max-w-[500px]" />
     </div>
   );
 };
