@@ -7,7 +7,7 @@ class EmpleadoService extends HttpService {
         super();
     }
 
-    async getEmpleados(filterData: any) {
+    async getEmpleados(filterData?: any) {
         const response = await axios.get(`${this.baseUrl}/barbero`, filterData);
         return response.data;
     }

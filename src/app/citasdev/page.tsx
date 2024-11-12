@@ -64,7 +64,7 @@ const employees = [
 ];
 
 // Redondear la hora al punto más cercano
-const roundToNearestHour = (date) => {
+const roundToNearestHour = (date:any) => {
   const minutes = date.getMinutes();
   if (minutes !== 0) {
     return setMinutes(date, 0);
@@ -85,7 +85,7 @@ const customWeekDays = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
 const CalendarApp = () => {
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [events, setEvents] = useState([{
+  const [events, setEvents] = useState<any>([{
       title: "Coloración - Ana Martínez",
       start: new Date("2024-10-22T07:00:00"),
       end: new Date("2024-10-22T08:00:00"),
@@ -93,7 +93,7 @@ const CalendarApp = () => {
     },
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [ localId, setLocal ] = useState(6);
   const [ servicios, setServicios ] = useState([]);
   const [ empleados, setEmpleados] = useState([]);
@@ -102,11 +102,11 @@ const CalendarApp = () => {
       const _servicios = await servicioObject.getServicios();
       setServicios(_servicios);
       const empleados = await empleadoObject.getEmpleados();
-      setEmpleados(empleados.map(item=>{
+      setEmpleados(empleados.map((item:any)=>{
         return {
           ...item,
           name: item.usuario.nombre,
-          initials: item.usuario.nombre.split(" ").map(name => name[0]).join(""),
+          initials: item.usuario.nombre.split(" ").map((name:any) => name[0]).join(""),
           workingHours: {
             start: item.start_hour || "07:00",
             end: item.end_hour || "18:00"
@@ -115,11 +115,11 @@ const CalendarApp = () => {
         }
       }));
       const eventos = await solicitudObject.getSolicitudes();
-      setEvents(eventos.map(item=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
+      setEvents(eventos.map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
     }
     getData().then();
   }, []);
-  const handleCreateEvent = (newEvent) => {
+  const handleCreateEvent = (newEvent:any) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
     solicitudObject.createSolicitud({
@@ -133,7 +133,7 @@ const CalendarApp = () => {
       precio: newEvent.price,
       estado: "pendiente"
     }).then(data=>{
-      setEvents((prev) => [
+      setEvents((prev:any) => [
         ...prev,
         {
           title: `${newEvent.client ? newEvent.client : "Cliente sin cita previa"} - ${newEvent.employee.name}`,
@@ -151,11 +151,11 @@ const CalendarApp = () => {
      // Cerrar el modal después de crear el evento
   };
 
-  const handleDayClick = (date) => {
+  const handleDayClick = (date:any) => {
     setSelectedDay(date);
   };
 
-  const handleHourClick = (hour) => {
+  const handleHourClick = (hour:any) => {
     const roundedHour = roundToNearestHour(hour);
     setSelectedSlot({ start: roundedHour, end: addMinutes(roundedHour, 60), date: selectedDay });
     setIsModalOpen(true);
@@ -193,7 +193,7 @@ const CalendarApp = () => {
         <Image src="/img/flecha.svg" alt="Previous" width={24} height={24} className="h-6 w-6 rotate-90" />
         </button>
         <h2 className="text-lg font-normal text-black text-center">
-          Citas del {format(selectedDay, "dd MMMM yyyy", { locale: locales.es })}
+          Citas del {format(selectedDay, "dd MMMM yyyy")}
         </h2>
         <button onClick={handleNextDay} className="text-black px-2 py-1 border border-[#DADADA] rounded">
         <Image src="/img/flecha.svg" alt="Previous" width={24} height={24} className="h-6 w-6 rotate-90" />
@@ -207,7 +207,7 @@ const CalendarApp = () => {
         <div className="hidden lg:block w-full lg:w-1/4 p-4 lg:border-r max-w-[280px] font-light mx-auto text-center">
           <div className="flex justify-between items-center  mb-4">
             <button onClick={handlePreviousMonth} className="bg-black px-2 py-1 rounded text-white">{"<"}</button>
-            <span className="text-lg text-black font-normal">{format(currentMonth, "MMMM yyyy", { locale: locales.es })}</span>
+            <span className="text-lg text-black font-normal">{format(currentMonth, "MMMM yyyy")}</span>
             <button onClick={handleNextMonth} className="bg-black px-2 py-1 rounded text-white">{">"}</button>
           </div>
           <Calendar
@@ -219,9 +219,9 @@ const CalendarApp = () => {
             style={{ height: 400 }}
             views={["month"]}
             selectable
-            onSelectSlot={({ start }) => handleDayClick(start)}
-            onDrillDown={(date) => handleDayClick(date)}
-            dayPropGetter={(date) => {
+            onSelectSlot={({ start }:any) => handleDayClick(start)}
+            onDrillDown={(date:any) => handleDayClick(date)}
+            dayPropGetter={(date:any) => {
               const isSelectedDay = format(date, "yyyy-MM-dd") === format(selectedDay, "yyyy-MM-dd");
               return {
                 className: isSelectedDay ? "rbc-date-cell selected-day" : "rbc-date-cell",
@@ -231,7 +231,7 @@ const CalendarApp = () => {
               // Personalizamos los encabezados de la semana
               toolbar: () => null, // Eliminamos la barra de herramientas
               month: {
-                header: ({ date }) => (
+                header: ({ date }:any) => (
                   <div className="text-center text-black  font-semibold">
                     {customWeekDays[getDay(date)]}
                   </div>
@@ -244,7 +244,7 @@ const CalendarApp = () => {
         {/* Calendarios de los trabajadores */}
         <div className="flex-1 p-4 overflow-x-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 overflow-x-auto">
-            {empleados.map((emp, index) => (
+            {empleados.map((emp:any, index) => (
               <div key={emp.name} className="relative">
                 <div className="flex items-center mb-2 sticky top-0 bg-white z-10 border-b border-[#DADADA]">
                   <div className="bg-black text-white w-8 h-8 flex items-center justify-center rounded-full mr-2">
@@ -287,14 +287,14 @@ const CalendarApp = () => {
 
                       {events
                         .filter(
-                          (event) =>
+                          (event:any) =>
                             event.barbero_id === emp.id &&
                             hour.getHours() === moment(events[events.length - 1].start_hour, "hh").hours() &&
                             selectedDay.getDate() === (new Date(event.fecha)).getDate()
                         )
-                        .map((event, i) => {
-                          const start_hour = moment(`2019-01-01 ${event.start_hour}`);
-                          const end_hour = moment(`2019-01-01 ${event.end_hour}`);
+                        .map((event:any, i:number) => {
+                          const start_hour:any = moment(`2019-01-01 ${event.start_hour}`);
+                          const end_hour:any = moment(`2019-01-01 ${event.end_hour}`);
                           const eventDuration = (end_hour - start_hour) / (1000 * 60);
                           const colors = ["bg-blue-400", "bg-green-400", "bg-red-400", "bg-purple-400"];
                           const employeeColor = colors[index % colors.length];
