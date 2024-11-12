@@ -9,7 +9,7 @@ const SucursalModal: React.FC<SucursalModalProps> = ({ sucursalSeleccionada, suc
   const [isAddingSucursal, setIsAddingSucursal] = useState(false); // Controla la vista de agregar sucursal
   const [nuevaSucursal, setNuevaSucursal] = useState<Sucursal>({ nombre: "", direccion: "", encargado: "" });
 
-  const handleAddSucursal = () => {
+  /*const handleAddSucursal = () => {
     if (nuevaSucursal.nombre && nuevaSucursal.direccion && nuevaSucursal.encargado) {
       onAddSucursal({ ...nuevaSucursal, id: sucursales.length + 1 });
       setNuevaSucursal({ nombre: "", direccion: "", encargado: "" });
@@ -18,6 +18,7 @@ const SucursalModal: React.FC<SucursalModalProps> = ({ sucursalSeleccionada, suc
       alert("Todos los campos son obligatorios");
     }
   };
+  */
 
   const addSucursal = ()=>{
     localServiceObject.createLocal(nuevaSucursal).then((response)=>{
