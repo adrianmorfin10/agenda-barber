@@ -11,7 +11,8 @@ import {
   Title,
   registerables,
 } from 'chart.js';
-import chevron from '/img/chevron.svg'; // Cambia la ruta a esta
+// Eliminamos la importación de chevron, ya que no se utiliza directamente
+// import chevron from '/img/chevron.svg'; 
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title, ...registerables);
 
@@ -171,24 +172,21 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
           </div>
 
           <h2 className="font-semibold text-lg mb-3 text-black">Informes</h2>
-<div className="border-t border-[#CACACA] pt-2">
-  <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
-    <p className="font-light text-black">Resumen de Ventas</p>
-    <img src="/img/chevron.svg" alt="Chevron" className="w-6 h-6" />
-  </div>
-  <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
-    <p className="font-light text-black">Ventas por Producto</p>
-    <img src="/img/chevron.svg" alt="Chevron" className="w-6 h-6" />
-  </div>
-  <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
-    <p className="font-light text-black">Ventas por Servicio</p>
-    <img src="/img/chevron.svg" alt="Chevron" className="w-6 h-6" />
-  </div>
-</div>
-
-        
+          <div className="border-t border-[#CACACA] pt-2">
+            <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
+              <p className="font-light text-black">Resumen de Ventas</p>
+              <img src="/img/chevron.svg" alt="Chevron" className="w-6 h-6" />
+            </div>
+            <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
+              <p className="font-light text-black">Ventas por Producto</p>
+              <img src="/img/chevron.svg" alt="Chevron" className="w-6 h-6" />
+            </div>
+            <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
+              <p className="font-light text-black">Ventas por Servicio</p>
+              <img src="/img/chevron.svg" alt="Chevron" className="w-6 h-6" />
+            </div>
+          </div>
         </div>
-        
       </div>
     </div>
   );
