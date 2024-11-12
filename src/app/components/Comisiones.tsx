@@ -1,24 +1,9 @@
-'use client'; // Asegúrate de que este componente sea un Client Component
+"use client";
 
 import React, { useState } from 'react';
 import SelectorArbol from './SelectorArbol';
 import DetallesComisiones from './DetallesComisiones';
 import SubNavBar from './SubNavBar';
-
-interface Producto {
-  id: number;
-  nombre: string;
-}
-
-interface Servicio {
-  id: number;
-  nombre: string;
-}
-
-interface Membresia {
-  id: number;
-  tipo: string;
-}
 
 interface Comision {
   empleadoId: number;
@@ -34,7 +19,7 @@ interface Empleado {
 }
 
 const Comisiones: React.FC = () => {
-  const [empleados, setEmpleados] = useState<Empleado[]>([
+  const [empleados] = useState<Empleado[]>([
     { id: 1, nombre: 'Juan', apellido: 'Pérez' },
     { id: 2, nombre: 'María', apellido: 'Gómez' },
   ]);
@@ -49,7 +34,7 @@ const Comisiones: React.FC = () => {
 
   return (
     <div className="bg-white h-screen p-5 flex flex-col">
-      <SubNavBar /> {/* Aquí se incluye la barra de navegación */}
+      <SubNavBar />
       <div className="flex flex-grow">
         <SelectorArbol
           empleados={empleados}
