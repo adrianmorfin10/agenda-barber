@@ -37,10 +37,8 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
   const [isClientListOpen, setIsClientListOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [discount, setDiscount] = useState<number>(0);
-  const [showDiscountInput, setShowDiscountInput] = useState(false);
 
   const subtotal = items.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-  const total = Math.max(subtotal - discount, 0);
 
   const handleToggleClientList = () => {
     setIsClientListOpen((prev) => !prev);
@@ -49,11 +47,6 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
   const handleSelectCliente = (cliente: Cliente) => {
     setSelectedClient(cliente);
     setIsClientListOpen(false);
-  };
-
-  const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const discountValue = parseFloat(e.target.value);
-    setDiscount(discountValue >= 0 ? discountValue : 0);
   };
 
   return (
