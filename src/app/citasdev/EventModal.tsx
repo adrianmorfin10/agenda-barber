@@ -98,7 +98,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
   const handleSave = () => {
     const { startTime, endTime, employee, service } = newEvent;
     let valid = true;
-    let newErrors = { startTime: "", endTime: "", employee: "", service: "", timeError: "" };
+    const newErrors = { startTime: "", endTime: "", employee: "", service: "", timeError: "" };
 
     // Validación de campos requeridos
     if (!startTime) {

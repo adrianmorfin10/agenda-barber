@@ -7,7 +7,7 @@ import { AppContext } from "../components/AppContext";
 interface AddUserModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
-  onCreateSuccess?: Function
+  onCreateSuccess?: () => void
 }
 
 const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen, onCreateSuccess }) => {

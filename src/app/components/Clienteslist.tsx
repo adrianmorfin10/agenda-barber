@@ -27,7 +27,7 @@ interface ClientesListProps {
   onSelectCliente: (cliente: Cliente) => void;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  reloadClients?: Function
+  reloadClients?: () => void
 }
 
 const ClientesList: React.FC<ClientesListProps> = ({
