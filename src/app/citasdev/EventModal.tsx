@@ -6,6 +6,9 @@ import ClientesList from "../components/Clienteslist";
 import ClientService from "../services/ClientService";
 import moment from "moment";
 import { AppContext } from "../components/AppContext";
+import Image from 'next/image';
+
+
 const clienteObject = new ClientService();
 
 
@@ -156,7 +159,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
       <div className="p-4 mb-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
-            <img
+            <Image
               src={isClientListOpen ? "/img/back.svg" : "/img/closemodal.svg"}
               alt={isClientListOpen ? "Volver" : "Cerrar"}
               className="h-6 w-6 cursor-pointer"
@@ -175,13 +178,13 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="bg-black text-white rounded-full h-[40px] w-[70px] flex items-center justify-center mr-3">
-                    <img src="/img/userw.svg" alt="Cliente" className="h-5 w-5" />
+                    <Image src="/img/userw.svg" alt="Cliente" className="h-5 w-5" />
                   </div>
                   <span className="text-gray-500 font-light text-[16px]">
                     {selectedClient ? `${selectedClient.usuario.nombre} ${selectedClient.usuario.apellido_paterno}` : " Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
                   </span>
                   </div>
-              <img src="/img/add.svg" alt="Agregar cliente" className="h-5 w-5 cursor-pointer" />
+              <Image src="/img/add.svg" alt="Agregar cliente" className="h-5 w-5 cursor-pointer" />
             </div>
 
               
