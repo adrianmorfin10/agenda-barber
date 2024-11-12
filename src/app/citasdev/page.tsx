@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import  { dateFnsLocalizer, Calendar } from "react-big-calendar";
+import  {  dateFnsLocalizer } from "react-big-calendar";
+
 import format from "date-fns/format";
 import parse from "date-fns/parse";
 import { startOfWeek } from "date-fns/startOfWeek";
@@ -199,46 +200,9 @@ const CalendarApp = () => {
         </button>
       </div>
       </div>
-
       {/* Contenedor del calendario pequeño y calendarios de trabajadores */}
       <div className="flex flex-col lg:flex-row font-light lg:justify-between">
-        {/* Navegador del calendario pequeño */}
-        <div className="hidden lg:block w-full lg:w-1/4 p-4 lg:border-r max-w-[280px] font-light mx-auto text-center">
-          <div className="flex justify-between items-center  mb-4">
-            <button onClick={handlePreviousMonth} className="bg-black px-2 py-1 rounded text-white">{"<"}</button>
-            <span className="text-lg text-black font-normal">{format(currentMonth, "MMMM yyyy")}</span>
-            <button onClick={handleNextMonth} className="bg-black px-2 py-1 rounded text-white">{">"}</button>
-          </div>
-          <Calendar
-            localizer={localizer}
-            date={currentMonth}
-            events={[]} // No mostrar eventos en el calendario pequeño
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: 400 }}
-            views={["month"]}
-            selectable
-            onSelectSlot={({ start }:any) => handleDayClick(start)}
-            onDrillDown={(date:any) => handleDayClick(date)}
-            dayPropGetter={(date:any) => {
-              const isSelectedDay = format(date, "yyyy-MM-dd") === format(selectedDay, "yyyy-MM-dd");
-              return {
-                className: isSelectedDay ? "rbc-date-cell selected-day" : "rbc-date-cell",
-              };
-            }}
-            components={{
-              // Personalizamos los encabezados de la semana
-              toolbar: () => null, // Eliminamos la barra de herramientas
-              month: {
-                header: ({ date }:any) => (
-                  <div className="text-center text-black  font-semibold">
-                    {customWeekDays[getDay(date)]}
-                  </div>
-                ),
-              },
-            }}
-          />
-        </div>
+        
 
         {/* Calendarios de los trabajadores */}
         <div className="flex-1 p-4 overflow-x-auto">
