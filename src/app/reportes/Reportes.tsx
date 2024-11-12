@@ -3,6 +3,8 @@
 import React from 'react';
 import DateSelector from './DateSelector';
 import { Doughnut } from 'react-chartjs-2';
+import Image from 'next/image';
+
 import {
   Chart as ChartJS,
   ArcElement,
@@ -175,15 +177,15 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
           <div className="border-t border-[#CACACA] pt-2">
             <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
               <p className="font-light text-black">Resumen de Ventas</p>
-              <img src="/img/chevron.svg" alt="Chevron" className="w-6 h-6" />
+              <Image src="/img/chevron.svg" alt="Chevron" width={24} height={24} />
             </div>
             <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
               <p className="font-light text-black">Ventas por Producto</p>
-              <img src="/img/chevron.svg" alt="Chevron" className="w-6 h-6" />
+              <Image src="/img/chevron.svg" alt="Chevron" width={24} height={24} />
             </div>
             <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
               <p className="font-light text-black">Ventas por Servicio</p>
-              <img src="/img/chevron.svg" alt="Chevron" className="w-6 h-6" />
+              <Image src="/img/chevron.svg" alt="Chevron" width={24} height={24} />
             </div>
           </div>
         </div>
