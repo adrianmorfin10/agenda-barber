@@ -9,9 +9,7 @@ import { AppContext } from "../components/AppContext";
 const clienteObject = new ClientService();
 
 
-
-
-const EventModal:React.FC<{isOpen:boolean, onClose: void, onCreateEvent: void, slot:any, employees:any, services:any}> = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
+const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (value:any)=>void, slot:any, employees:any[], services:any[]}> = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
 
 
   const [newEvent, setNewEvent] = useState({
@@ -47,13 +45,12 @@ const EventModal:React.FC<{isOpen:boolean, onClose: void, onCreateEvent: void, s
     // Limpiar errores al escribir
     setErrors((prev) => ({ ...prev, [name]: "", timeError: "" }));
   };
-  const handleChangeEmployee = (e:any)=>{
-    const { name, value } = e.target;
-    const newEventTemp = { ...newEvent, employee: { name, id: value } }
+  const handleChangeEmployee = (e:any): void => {
+    const { value, name } = e.target;
+    const newEventTemp:any = { ...newEvent, employee: { name, id: value } };
     setNewEvent(newEventTemp);
-    // Limpiar errores al escribir
-    setErrors((prev) => ({ ...prev, employee: "", timeError: "" }));
-  }
+    setErrors((prev:any) => ({ ...prev, employee: "", timeError: "" }));
+  };
   const handleServiceChange = (e:any) => {
     const selectedService = e.target.value;
     const serviceDetails = services.find((service:any) => service.id === selectedService);
