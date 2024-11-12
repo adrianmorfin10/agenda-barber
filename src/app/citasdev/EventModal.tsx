@@ -2,24 +2,17 @@
 
 import React, { useState } from "react";
 import { format } from "date-fns";
-import ClientesList from "../components/Clienteslist"; // Asegúrate de que la ruta es correcta
-import SolicitudService from "../services/SolicitudService";
-import ServicioService from "../services/ServicioService";
+import ClientesList from "../components/Clienteslist"; 
 import ClientService from "../services/ClientService";
 import moment from "moment";
 import { AppContext } from "../components/AppContext";
-const servicioObject = new ServicioService();
 const clienteObject = new ClientService();
-const services = [
-  { name: "Corte de Pelo", price: 100 },
-  { name: "Coloración", price: 200 },
-  { name: "Peinado", price: 150 },
-];
+
+
 
 
 const EventModal:React.FC<{isOpen:Boolean, onClose: Function, onCreateEvent: Function, slot:any, employees:any, services:any}> = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
 
-  const [ servicios, setServicios ] = useState([]);
 
   const [newEvent, setNewEvent] = useState({
     title: "",
