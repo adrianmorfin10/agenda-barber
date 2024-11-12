@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import EmpleadosList from './EmpleadosList';
 import EmpleadoDetails from './EmpleadosDetail';
 import SubNavBar from '../components/SubNavBar'; // Asegúrate de que la ruta sea correcta
-import Empleado from '../interfaces/empleado';
+import {Empleado} from '../interfaces/empleado';
 import EmpleadoService from '../services/EmpleadoService';
 const empleadoServiceObject = new EmpleadoService();
 
@@ -34,7 +34,7 @@ const Empleados = () => {
   const [searchTerm, setSearchTerm] = useState('');
   React.useEffect(()=>{
     empleadoServiceObject.getEmpleados().then(response=>{
-      const empleados = response.map(item=>({
+      const empleados = response.map((item:any)=>({
         id: item.id,
         nombre: item.usuario.nombre,
         apellido: item.usuario.apellido_paterno,
