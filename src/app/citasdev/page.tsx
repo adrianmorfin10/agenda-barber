@@ -160,6 +160,7 @@ const CalendarApp = () => {
     setSelectedSlot({ start: roundedHour, end: addMinutes(roundedHour, 60), date: selectedDay });
     setIsModalOpen(true);
   };
+  
 
   // Avanzar al día siguiente
   const handleNextDay = () => {

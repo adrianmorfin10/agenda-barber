@@ -122,6 +122,23 @@ const NavBar: React.FC = () => {
         </div>
       </div>
 
+      {/* Mobile Menu */}
+      <div className={`md:hidden fixed inset-0 bg-[#0C0C0C] z-40 transition-transform transform ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-5">
+          {navItems.map(item => (
+            <Link key={item.path} href={item.path} className={`flex items-center space-x-2 p-2 transition hover:bg-[#1D1D1D] rounded-md ${pathname === item.path ? 'text-white' : 'text-[#7C7C7C]'}`} onClick={() => setMenuOpen(false)}>
+              <Image 
+                src={pathname === item.path ? item.icon : item.inactiveIcon} 
+                alt={item.label} 
+                width={20} 
+                height={20} 
+              />
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* Modal de Selección de Sucursal */}
       {isModalOpen && (
         <SucursalModal
