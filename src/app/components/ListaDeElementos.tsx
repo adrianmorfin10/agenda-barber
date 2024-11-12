@@ -4,13 +4,19 @@ import React from 'react';
 
 type SectionType = "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías";
 
+interface Item {
+  id: number;
+  nombre: string;
+  precio: number;
+}
+
 interface ListaDeElementosProps {
   section: SectionType;
-  onAddToCart: (item: any) => void;
+  onAddToCart: (item: Item) => void;
 }
 
 const ListaDeElementos: React.FC<ListaDeElementosProps> = ({ section, onAddToCart }) => {
-  const items: Record<SectionType, { id: number; nombre: string; precio: number }[]> = {
+  const items: Record<SectionType, Item[]> = {
     "Venta Rápida": [
       { id: 1, nombre: "Corte de Cabello", precio: 100 },
       { id: 2, nombre: "Peinado", precio: 80 },

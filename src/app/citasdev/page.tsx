@@ -19,6 +19,7 @@ import EmpleadoService from "../services/EmpleadoService";
 import ServicioService from "../services/ServicioService";
 import SolicitudService from "../services/SolicitudService";
 import moment from "moment";
+import Image from 'next/image';
 const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
@@ -188,13 +189,13 @@ const CalendarApp = () => {
       <div className="w-full bg-white border-b border-[#DADADA]flex items-center justify-between">
       <div className="w-full bg-white  px-4  border-[#DADADA] rounded-t-md max-w-[400px] mx-auto mt-4 mb-4 flex items-center justify-between">
         <button onClick={handlePreviousDay} className="text-black px-2 py-1 border border-[#DADADA] rounded">
-          <img src="/img/flecha.svg" alt="Previous" className="h-6 w-6 rotate-90" />
+        <Image src="/img/flecha.svg" alt="Previous" width={24} height={24} className="h-6 w-6 rotate-90" />
         </button>
         <h2 className="text-lg font-normal text-black text-center">
           Citas del {format(selectedDay, "dd MMMM yyyy", { locale: locales.es })}
         </h2>
         <button onClick={handleNextDay} className="text-black px-2 py-1 border border-[#DADADA] rounded">
-          <img src="/img/flechar.svg" alt="Next" className="h-6 w-6 rotate-280" />
+        <Image src="/img/flecha.svg" alt="Previous" width={24} height={24} className="h-6 w-6 rotate-90" />
         </button>
       </div>
       </div>
