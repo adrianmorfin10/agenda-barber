@@ -85,9 +85,9 @@ const NavBar: React.FC = () => {
       {/* Desktop NavBar */}
       <div className="bg-[#0C0C0C] md:w-60 h-screen hidden md:flex flex-col p-5 sticky top-0">
         <div className="flex justify-center mb-5">
-          <Image src="/img/logobarber.png" alt="Logo" width={150} height={80} />
+          <Image src="/img/logobarber.png" alt="Logo" width={130} height={40} />
         </div>
-        <hr className="border-t border-[#1D1D1D] my-5" />
+        <hr className="border-t border-[#1D1D1D] my-1" />
         <div className="flex flex-col space-y-4">
           {navItems.map(item => (
             <Link key={item.path} href={item.path} className={`flex items-center space-x-2 p-2 transition hover:bg-[#1D1D1D] rounded-md ${pathname === item.path ? 'text-white' : 'text-[#7C7C7C]'}`}>
