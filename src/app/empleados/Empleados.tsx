@@ -49,7 +49,7 @@ const Empleados = () => {
     setSelectedEmpleado(empleado);
   };
 
-  const handleAddEmpleado = (nuevoEmpleado: Empleado) => {
+  const handleAddEmpleado = (nuevoEmpleado: Empleado | any) => {
     setEmpleados([...empleados, nuevoEmpleado]);
   };
 

@@ -53,7 +53,7 @@ const EmpleadosList: React.FC<EmpleadosListProps> = ({
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         onAddEmpleado={(newEmpleado) => {
-          const empleadoConId = { ...newEmpleado, id: Date.now() };
+          const empleadoConId:any = { ...newEmpleado };
           onAddEmpleado(empleadoConId);
         }}
       />
