@@ -1,8 +1,6 @@
 import axios from "axios";
 import HttpService from "./HttpService";
 
-
-
 class EmpleadoService extends HttpService {
 
     constructor() {

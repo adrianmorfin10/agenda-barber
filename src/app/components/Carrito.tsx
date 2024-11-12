@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import ClientesList from './Clienteslist';
+import Image from 'next/image';
 
 interface CartItem {
   id: number;
@@ -54,7 +55,7 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
       <div className="flex items-center justify-between mb-4">
         {isClientListOpen && (
           <button onClick={() => setIsClientListOpen(false)} className="text-gray-500 flex items-center">
-            <img src="/img/back.svg" alt="Volver" className="h-5 w-5 inline mr-2" />
+            <Image src="/img/back.svg" alt="Volver" className="h-5 w-5 inline mr-2" />
             <span className="text-xl font-semibold">Selección de Cliente</span>
           </button>
         )}
@@ -70,7 +71,7 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="bg-black text-white rounded-full h-[40px] w-[70px] flex items-center justify-center mr-3">
-                  <img src="/img/userw.svg" alt="Cliente" className="h-5 w-5" />
+                  <Image src="/img/userw.svg" alt="Cliente" className="h-5 w-5" />
                 </div>
                 <span className="text-gray-500 font-light text-[16px]">
                   {selectedClient
@@ -78,7 +79,7 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
                     : "Seleccione un cliente (opcional)"}
                 </span>
               </div>
-              <img src="/img/add.svg" alt="Agregar cliente" className="h-5 w-5 cursor-pointer" />
+              <Image src="/img/add.svg" alt="Agregar cliente" className="h-5 w-5 cursor-pointer" />
             </div>
           </div>
         </div>
