@@ -19,13 +19,13 @@ interface Sucursal {
 const NavBar: React.FC = () => {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<Sucursal>({
+  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<Sucursal|any>({
     id: 1,
     nombre: "Sucursal 1",
     direccion: "Calle Falsa 123",
     encargado: "Carlos Perez"
   });
-  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+  const [sucursales, setSucursales] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [ appState, dispatchState ] = useAppContext()
   const handleSucursalSelect = (sucursal: Sucursal) => {

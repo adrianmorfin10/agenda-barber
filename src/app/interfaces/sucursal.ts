@@ -8,7 +8,7 @@ export interface Sucursal {
 export interface SucursalModalProps {
     sucursalSeleccionada: Sucursal;
     sucursales: Sucursal[];
-    onSelect: (sucursal: Sucursal) => void;
-    onAddSucursal: (sucursal: Sucursal) => void;
+    onSelect: (sucursal: Sucursal|any) => void;
+    onAddSucursal: (sucursal: Sucursal|any) => void;
     onClose: () => void;
-  }
+}

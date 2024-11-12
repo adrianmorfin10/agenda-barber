@@ -3,13 +3,15 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import ClientService from '../services/ClientService';
-
+import { AppContext } from "../components/AppContext";
 interface AddUserModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
+  onCreateSuccess?: Function
 }
 
-const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen }) => {
+const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen, onCreateSuccess }) => {
+  const [ state, dispatchState ]= React.useContext(AppContext);
   const [nuevoCliente, setNuevoCliente] = useState({
     nombre: '',
     apellido: '',
@@ -34,7 +36,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
   const handleAddCliente = () => {
     console.log('Añadiendo cliente:', nuevoCliente);
     const clientService = new ClientService();
-    clientService.createClient(nuevoCliente).then((response) => {
+    clientService.createClient({ ...nuevoCliente, local_id: parseInt(state?.sucursal.id) }).then((response) => {
       setNuevoCliente({
         nombre: '',
         apellido: '',
@@ -45,6 +47,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
         membresia: false,
         foto: null,
       });
+      if(typeof onCreateSuccess === "function")
+        onCreateSuccess();
       setIsModalOpen(false);
     }).catch((error) => {
       console.error('Error al añadir cliente:', error);

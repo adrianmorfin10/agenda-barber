@@ -27,6 +27,7 @@ interface ClientesListProps {
   onSelectCliente: (cliente: Cliente) => void;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
+  reloadClients?: Function
 }
 
 const ClientesList: React.FC<ClientesListProps> = ({
@@ -34,6 +35,7 @@ const ClientesList: React.FC<ClientesListProps> = ({
   onSelectCliente,
   searchTerm,
   setSearchTerm,
+  reloadClients
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   console.log("clientes", clientes);
@@ -65,7 +67,7 @@ const ClientesList: React.FC<ClientesListProps> = ({
       </div>
 
       {/* Modal para añadir usuario */}
-      <AddUserModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+      <AddUserModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onCreateSuccess={reloadClients} />
 
       {/* Lista de usuarios filtrados */}
       <div className="overflow-y-auto max-h-[450px]">

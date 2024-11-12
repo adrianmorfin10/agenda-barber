@@ -17,7 +17,7 @@ const services = [
 ];
 
 
-const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
+const EventModal:React.FC<{isOpen:Boolean, onClose: Function, onCreateEvent: Function, slot:any, employees:any, services:any}> = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
 
   const [ servicios, setServicios ] = useState([]);
 
@@ -25,7 +25,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
     title: "",
     startTime: slot?.start ? format(slot.start, "HH:mm") : "",
     endTime: slot?.end ? format(slot.end, "HH:mm") : "",
-    employee: "",
+    employee: { name: "", id: 0 },
     client: "",
     date: slot?.date ? format(slot.date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
     service: "",
@@ -41,28 +41,29 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
   });
 
   const [isClientListOpen, setIsClientListOpen] = useState(false); // Controla la visibilidad de ClientesList
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [clientes, setClientes] = useState([]);
   const [ state, dispatchState ]= React.useContext(AppContext);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e:any) => {
     const { name, value } = e.target;
     setNewEvent((prev) => ({ ...prev, [name]: value }));
 
     // Limpiar errores al escribir
     setErrors((prev) => ({ ...prev, [name]: "", timeError: "" }));
   };
-  const handleChangeEmployee = (e)=>{
+  const handleChangeEmployee = (e:any)=>{
     const { name, value } = e.target;
-    setNewEvent((prev) => ({ ...prev, employee: { name, id: value } }));
+    const newEventTemp = { ...newEvent, employee: { name, id: value } }
+    setNewEvent(newEventTemp);
     // Limpiar errores al escribir
     setErrors((prev) => ({ ...prev, employee: "", timeError: "" }));
   }
-  const handleServiceChange = (e) => {
+  const handleServiceChange = (e:any) => {
     const selectedService = e.target.value;
-    const serviceDetails = services.find(service => service.id === selectedService);
+    const serviceDetails = services.find((service:any) => service.id === selectedService);
     const precio = serviceDetails && serviceDetails.precio_servicios.length > 0 ? serviceDetails.precio_servicios[0].precio : 0;
     const tiempo_servicio = serviceDetails?.tiempo || 0;
     const { startTime } = newEvent;
@@ -150,7 +151,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
     setIsClientListOpen((prev) => !prev);
   };
 
-  const handleSelectCliente = (cliente) => {
+  const handleSelectCliente = (cliente:any) => {
     
     setSelectedClient(cliente);
     setNewEvent((prev) => ({ ...prev, client: `${cliente.usuario.nombre} ${cliente.usuario.apellido_paterno}` }));
@@ -232,7 +233,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
                 className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.service && "border-red-500"}`}
               >
                 <option value="">Selecciona un servicio</option>
-                {(services || []).map((service) => (
+                {(services || []).map((service:any) => (
                   <option key={service.id} value={service.id}>
                     {service.nombre}
                   </option>
@@ -276,12 +277,12 @@ const EventModal = ({ isOpen, onClose, onCreateEvent, slot, employees, services 
               <label className="block text-black text-sm font-medium mb-1">Empleado</label>
               <select
                 name="employee"
-                value={newEvent.employee}
+                value={newEvent.employee?.id}
                 onChange={handleChangeEmployee}
                 className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.employee && "border-red-500"}`}
               >
                 <option value="">Selecciona un empleado</option>
-                {employees.map((emp) => (
+                {employees.map((emp:any) => (
                   <option key={emp.name} value={emp.id}>
                     {emp.name}
                   </option>

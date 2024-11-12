@@ -7,8 +7,8 @@ class ClientService extends HttpService {
         super();
     }
 
-    async getClients() {
-        const response = await axios.get(`${this.baseUrl}/clients`);
+    async getClients(filter:any) {
+        const response = await axios.get(`${this.baseUrl}/clients${filter ? `?l=${filter.local_id}` : '' }`);
         return response.data;
     }
 

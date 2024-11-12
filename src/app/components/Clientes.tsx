@@ -58,6 +58,9 @@ const Clientes = () => {
           onSelectCliente={handleSelectCliente}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          reloadClients={()=>{
+            getClients( state.sucursal ? { local_id: state.sucursal.id } : false ).then(setClientes);
+          }}
         />
       </div>
 

@@ -13,6 +13,7 @@ interface Local {
     id: number;
     name: string;
     address: string;
+    seleccionado?: boolean;
     // Agrega otras propiedades aquí según la estructura de un local
 }
 
@@ -26,11 +27,11 @@ class LocalService extends HttpService {
         return response.data;
     }
 
-    async createLocal(newLocal: Local): Promise<void> {
+    async createLocal(newLocal: Local|any): Promise<void> {
         await axios.post(`${this.baseUrl}/local/create`, newLocal);
     }
 
-    async updateLocal(local: Local, id: number): Promise<void> {
+    async updateLocal(local: Local|any, id: number): Promise<void> {
         await axios.post(`${this.baseUrl}/local/${id}/update`, local);
     }
 }
