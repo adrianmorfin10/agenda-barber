@@ -11,6 +11,7 @@ import { AppContext } from './AppContext';
 
 const getClients = async (filter:any): Promise<Cliente[]> => {
   const clientService = new ClientService();
+  console.log("filter", filter);
   const clientsData = await clientService.getClients(filter);
   const clients:Cliente[] = clientsData.map((client: any) => ({
     id: client.id,
@@ -44,9 +45,9 @@ const Clientes = () => {
   };
 
   React.useEffect(() => {
-    
+    console.log("state sucursal", state.sucursal);
     getClients( state.sucursal ? { local_id: state.sucursal.id } : false ).then(setClientes);
-  }, [state]);
+  }, [state.sucursal]);
   
   return (
     <div className="flex bg-[#FFFFFF] min-h-screen">
