@@ -11,7 +11,7 @@ const clienteObject = new ClientService();
 
 
 
-const EventModal:React.FC<{isOpen:Boolean, onClose: Function, onCreateEvent: Function, slot:any, employees:any, services:any}> = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
+const EventModal:React.FC<{isOpen:boolean, onClose: Function, onCreateEvent: void, slot:any, employees:any, services:any}> = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
 
 
   const [newEvent, setNewEvent] = useState({
