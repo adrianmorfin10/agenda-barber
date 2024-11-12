@@ -4,14 +4,15 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import ClientService from '../services/ClientService';
 import { AppContext } from "../components/AppContext";
+
 interface AddUserModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
-  onCreateSuccess?: () => void
+  onCreateSuccess?: () => void;
 }
 
 const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen, onCreateSuccess }) => {
-  const [ state, dispatchState ]= React.useContext(AppContext);
+  const [state, dispatchState] = React.useContext(AppContext);
   const [nuevoCliente, setNuevoCliente] = useState({
     nombre: '',
     apellido: '',
@@ -28,11 +29,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     setNuevoCliente({ ...nuevoCliente, [name]: value });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setNuevoCliente({ ...nuevoCliente, foto: file });
-  };
-
   const handleAddCliente = () => {
     console.log('Añadiendo cliente:', nuevoCliente);
     const clientService = new ClientService();
@@ -47,8 +43,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
         membresia: false,
         foto: null,
       });
-      if(typeof onCreateSuccess === "function")
-        onCreateSuccess();
+      if (typeof onCreateSuccess === "function") onCreateSuccess();
       setIsModalOpen(false);
     }).catch((error) => {
       console.error('Error al añadir cliente:', error);
@@ -58,17 +53,15 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
   const handleDescuentoChange = (increment: boolean) => {
     setNuevoCliente((prev) => ({
       ...prev,
-      descuento: increment
-        ? Math.min(prev.descuento + 5, 100)
-        : Math.max(prev.descuento - 5, 0),
+      descuento: increment ? Math.min(prev.descuento + 5, 100) : Math.max(prev.descuento - 5, 0),
     }));
   };
 
   return (
     <>
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-5 rounded-[10px] max-w-[450px] w-full">
+        <div className="fixed inset-y-0 right-0 flex flex-col bg-white h-full w-[450px] z-50 shadow-lg p-5">
+          <div className="flex-1 overflow-y-auto">
             <div className="flex items-center mb-4">
               <Image
                 src="/img/closemodal.svg"
@@ -82,73 +75,29 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
             </div>
 
             {/* Campos de Nombre y Apellido */}
-            <div className="flex mb-4">
-              <div className="flex flex-col mr-2" style={{ height: '136px' }}>
-                <label className="block mb-1 text-[#858585] text-[12px] font-light">Nombre:</label>
-                <input
-                  type="text"
-                  name="nombre"
-                  placeholder="Nombre"
-                  value={nuevoCliente.nombre}
-                  onChange={handleInputChange}
-                  className="border p-2 mb-2 rounded-[5px] text-black placeholder-gray"
-                  maxLength={50}
-                  required
-                />
-                <label className="block mb-1 text-[#858585] text-[12px] font-light">Apellido:</label>
-                <input
-                  type="text"
-                  name="apellido"
-                  placeholder="Apellido"
-                  value={nuevoCliente.apellido}
-                  onChange={handleInputChange}
-                  className="border p-2 rounded-[5px] text-black placeholder-gray"
-                  maxLength={50}
-                  required
-                />
-              </div>
-              {/* Campo para cargar foto */}
-              <div className="flex flex-col items-center justify-center border border-dashed border-[#CACACA] p-2 rounded-[5px] w-full h-[136px] cursor-pointer" onClick={() => document.getElementById('file-input')?.click()}>
-                {nuevoCliente.foto ? (
-                  <>
-                    <Image
-                      src="/img/check.svg" // Cambia esta ruta a la ubicación del icono de verificación
-                      alt="Subida exitosa"
-                      width={24}
-                      height={24}
-                      className="mb-1"
-                    />
-                    <p className="text-xs text-green-600">Subida exitosa</p>
-                    <Image
-                      src={URL.createObjectURL(nuevoCliente.foto)} // Vista previa de la imagen
-                      alt="Vista previa de la imagen"
-                      width={50}
-                      height={50}
-                      className="mt-2"
-                    />
-                    <p className="text-xs text-blue-600 cursor-pointer mt-1" onClick={() => document.getElementById('file-input')?.click()}>
-                      Reemplazar imagen
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <Image
-                      src="/img/foto.svg" // Cambia esta ruta a la ubicación del icono de carga
-                      alt="Cargar Foto"
-                      width={50}
-                      height={50}
-                    />
-                    <p className="text-xs text-gray-600">Cargar Foto</p>
-                  </>
-                )}
-                <input
-                  id="file-input"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </div>
+            <div className="mb-4">
+              <label className="block mb-1 text-[#858585] text-[12px] font-light">Nombre:</label>
+              <input
+                type="text"
+                name="nombre"
+                placeholder="Nombre"
+                value={nuevoCliente.nombre}
+                onChange={handleInputChange}
+                className="border p-2 mb-2 rounded-[5px] text-black placeholder-gray w-full"
+                maxLength={50}
+                required
+              />
+              <label className="block mb-1 text-[#858585] text-[12px] font-light">Apellido:</label>
+              <input
+                type="text"
+                name="apellido"
+                placeholder="Apellido"
+                value={nuevoCliente.apellido}
+                onChange={handleInputChange}
+                className="border p-2 rounded-[5px] text-black placeholder-gray w-full"
+                maxLength={50}
+                required
+              />
             </div>
 
             <input
@@ -208,7 +157,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
                     value={nuevoCliente.descuento}
                     readOnly
                     className="p-2 text-center text-black placeholder-gray w-full"
-                    style={{ flex: 1 }} // Asegura que el input ocupe el espacio restante
+                    style={{ flex: 1 }}
                   />
                   <button
                     className={`px-4 flex justify-center ${nuevoCliente.descuento === 100 ? 'opacity-50' : ''}`}
@@ -241,13 +190,14 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
                 </div>
               </div>
             </div>
-
-            <button
-              className="bg-[#0C101E] text-white rounded-[5px] p-2 w-full hover:bg-[#000000]"
-              onClick={handleAddCliente} >
-              Añadir Cliente
-            </button>
           </div>
+
+          <button
+            className="bg-[#0C101E] text-white rounded-[5px] p-2 w-full hover:bg-[#000000] mt-auto"
+            onClick={handleAddCliente}
+          >
+            Añadir Cliente
+          </button>
         </div>
       )}
     </>
