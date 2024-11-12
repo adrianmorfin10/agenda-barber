@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import {  dateFnsLocalizer } from "react-big-calendar";
-import Calendar from "react-big-calendar";
+import Calendar, {  dateFnsLocalizer } from "react-big-calendar";
+
 import format from "date-fns/format";
 import parse from "date-fns/parse";
 import { startOfWeek } from "date-fns/startOfWeek";
-import getDay from "date-fns/getDay";
-import es from "date-fns/locale/es";
-import addMonths from "date-fns/addMonths";
-import subMonths from "date-fns/subMonths";
-import addDays from "date-fns/addDays";
-import subDays from "date-fns/subDays";
+import {getDay} from "date-fns/getDay";
+import {es} from "date-fns/locale/es";
+import {addMonths} from "date-fns/addMonths";
+import {subMonths} from "date-fns/subMonths";
+import {addDays} from "date-fns/addDays";
+import {subDays} from "date-fns/subDays";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { setHours, setMinutes, isToday, addMinutes } from "date-fns";
 import "./styles.css"; // Aquí se manejará el CSS
