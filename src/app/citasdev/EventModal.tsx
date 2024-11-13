@@ -159,12 +159,14 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
       <div className="p-4 mb-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
-            <Image
-              src={isClientListOpen ? "/img/back.svg" : "/img/closemodal.svg"}
-              alt={isClientListOpen ? "Volver" : "Cerrar"}
-              className="h-6 w-6 cursor-pointer"
-              onClick={isClientListOpen ? () => setIsClientListOpen(false) : handleClose}
-            />
+          <Image
+  src={isClientListOpen ? "/img/back.svg" : "/img/closemodal.svg"}
+  alt={isClientListOpen ? "Volver" : "Cerrar"}
+  width={24} // Specify appropriate width
+  height={24} // Specify appropriate height
+  className="h-6 w-6 cursor-pointer"
+  onClick={isClientListOpen ? () => setIsClientListOpen(false) : handleClose}
+/>
             <h2 className="text-xl font-bold text-black">
               {isClientListOpen ? "Selección de Cliente" : "Cita nueva"}
             </h2>
@@ -178,13 +180,25 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="bg-black text-white rounded-full h-[40px] w-[70px] flex items-center justify-center mr-3">
-                    <Image src="/img/userw.svg" alt="Cliente" className="h-5 w-5" />
-                  </div>
-                  <span className="text-gray-500 font-light text-[16px]">
-                    {selectedClient ? `${selectedClient.usuario.nombre} ${selectedClient.usuario.apellido_paterno}` : " Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
-                  </span>
-                  </div>
-              <Image src="/img/add.svg" alt="Agregar cliente" className="h-5 w-5 cursor-pointer" />
+                  <Image 
+  src="/img/userw.svg" 
+  alt="Cliente" 
+  width={20} // Set appropriate width
+  height={20} // Set appropriate height
+  className="h-5 w-5" 
+/>
+</div>
+<span className="text-gray-500 font-light text-[16px]">
+  {selectedClient ? `${selectedClient.usuario.nombre} ${selectedClient.usuario.apellido_paterno}` : "Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
+</span>
+</div>
+<Image 
+  src="/img/add.svg" 
+  alt="Agregar cliente" 
+  width={20} // Set appropriate width
+  height={20} // Set appropriate height
+  className="h-5 w-5 cursor-pointer" 
+/>
             </div>
 
               
