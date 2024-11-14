@@ -2,7 +2,7 @@ class HttpService {
     protected baseUrl: string;
 
     constructor() {
-        this.baseUrl = process.env.REACT_APPBASE_URL || "http://localhost:5001";
+        this.baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5001";
     }
 }
 export default HttpService;
