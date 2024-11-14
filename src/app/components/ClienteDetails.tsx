@@ -71,6 +71,13 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
     }
   };
 
+  const handleCancelClick = () => {
+    setIsEditing(false);
+    setEditedNombre(cliente.nombre);
+    setEditedApellido(cliente.apellido);
+    setEditedTelefono(cliente.telefono);
+  };
+
   return (
     <div className="flex flex-col justify-center p-4 md:p-5 w-full h-full bg-[#F8F8F8]">
       
@@ -81,16 +88,11 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
       
       <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 md:p-5 rounded-[5px] mb-4">
         
-        {/* Botón Editar */}
+        {/* Botón Editar con cambio de texto en modo de edición */}
         <div className="flex flex-col items-center mb-4 md:mb-0">
           <div className="flex items-center border border-gray-400 bg-white rounded px-4 py-2 cursor-pointer">
             {isEditing ? (
-              <button
-                onClick={handleSaveClick}
-                className="text-black text-sm md:text-base"
-              >
-                Guardar
-              </button>
+              <span className="text-black text-sm md:text-base">Editando</span>
             ) : (
               <div onClick={handleEditClick} className="flex items-center">
                 <Image src="/img/edit.svg" alt="Editar" width={20} height={20} />
@@ -149,14 +151,32 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
             <Image src="/img/calendara.svg" alt="Agendar" width={20} height={20} />
             <span className="ml-2 poppins text-black">Agendar</span>
           </button>
-          <span className="mt-1 text-xs md:text-sm text-gray-500">(Próximamente disponible)</span>
+          <span className="mt-1 text-xs md:text-sm text-gray-500">(Próximamente)</span>
         </div>
 
       </div>
 
+      {/* Botones Guardar y Cancelar en modo de edición */}
+      {isEditing && (
+        <div className="flex space-x-4 mt-4">
+          <button
+            onClick={handleSaveClick}
+            className="bg-black text-white px-4 py-2 rounded text-sm md:text-base w-full"
+          >
+            Guardar
+          </button>
+          <button
+            onClick={handleCancelClick}
+            className="border border-gray-400 text-black px-4 py-2 rounded text-sm md:text-base w-full"
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+
       {/* Contenedor de estadísticas */}
       
-      <div className="bg-white p-4 md:p-5 rounded mb-4">
+      <div className="bg-white p-4 md:p-5 rounded mb-4 mt-6">
         <div className="grid grid-cols-3 gap-4">
           <div className="text-black poppins text-xs md:text-sm">Citas</div>
           <div className="text-black poppins text-xs md:text-sm">Inasistencias</div>
@@ -179,7 +199,6 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
         </div>
       </div>
       
-
       {/* Contenedor de membresía y servicios */}
       {/*
       <div className="bg-white p-4 md:p-5 rounded">
