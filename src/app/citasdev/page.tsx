@@ -85,38 +85,33 @@ const customWeekDays = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
 const CalendarApp = () => {
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [events, setEvents] = useState<any>([{
-      title: "Coloración - Ana Martínez",
-      start: new Date("2024-10-22T07:00:00"),
-      end: new Date("2024-10-22T08:00:00"),
-      employee: "Ana Chávez",
-    },
-  ]);
+  const [events, setEvents] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [ localId, setLocal ] = useState(6);
   const [ servicios, setServicios ] = useState([]);
   const [ empleados, setEmpleados] = useState([]);
+  const getData = async () => {
+    const _servicios = await servicioObject.getServicios();
+    setServicios(_servicios);
+    const empleados = await empleadoObject.getEmpleados();
+    setEmpleados(empleados.map((item:any)=>{
+      return {
+        ...item,
+        name: item.usuario.nombre,
+        initials: item.usuario.nombre.split(" ").map((name:any) => name[0]).join(""),
+        workingHours: {
+          start: item.start_hour || "07:00",
+          end: item.end_hour || "18:00"
+        },
+        workDays: item.working_days || [ 1, 2, 3, 4, 5]
+      }
+    }));
+    const eventos = await solicitudObject.getSolicitudes();
+    setEvents(eventos.map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
+  }
   React.useEffect(() => {
-    const getData = async () => {
-      const _servicios = await servicioObject.getServicios();
-      setServicios(_servicios);
-      const empleados = await empleadoObject.getEmpleados();
-      setEmpleados(empleados.map((item:any)=>{
-        return {
-          ...item,
-          name: item.usuario.nombre,
-          initials: item.usuario.nombre.split(" ").map((name:any) => name[0]).join(""),
-          workingHours: {
-            start: item.start_hour || "07:00",
-            end: item.end_hour || "18:00"
-          },
-          workDays: item.working_days || [ 1, 2, 3, 4, 5]
-        }
-      }));
-      const eventos = await solicitudObject.getSolicitudes();
-      setEvents(eventos.map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
-    }
+    
     getData().then();
   }, []);
   const handleCreateEvent = (newEvent:any) => {
@@ -133,18 +128,10 @@ const CalendarApp = () => {
       precio: newEvent.price,
       estado: "pendiente"
     }).then(data=>{
-      setEvents((prev:any) => [
-        ...prev,
-        {
-          title: `${newEvent.client ? newEvent.client : "Cliente sin cita previa"} - ${newEvent.employee.name}`,
-          start,
-          end,
-          employee: newEvent.employee.name,
-          employee_id: newEvent.employee.id
-        },
-      ]);
-  
       setIsModalOpen(false);
+      return getData();
+    }).then(()=>{
+      
     }).catch(e=>{
       console.log("error createSolicitud", e);
     });
@@ -185,6 +172,7 @@ const CalendarApp = () => {
 
   // Nombres de los días de la semana en español
   const daysOfWeek = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
+  console.log("eventos", events)
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Barra de navegación de días */}
@@ -196,7 +184,7 @@ const CalendarApp = () => {
         <h2 className="text-lg font-normal text-black text-center">
           Citas del {format(selectedDay, "dd MMMM yyyy")}
         </h2>
-        <button onClick={handleNextDay} className="text-black px-2 py-1 border border-[#DADADA] rounded">
+        <button onClick={handleNextDay} className="text-black px-2 py-1 border border-[#DADADA] rounded transform rotate-180">
         <Image src="/img/flecha.svg" alt="Previous" width={24} height={24} className="h-6 w-6 rotate-90" />
         </button>
       </div>
@@ -251,15 +239,24 @@ const CalendarApp = () => {
 
                       {events
                         .filter(
-                          (event:any) =>
-                            event.barbero_id === emp.id &&
-                            hour.getHours() === moment(events[events.length - 1].start_hour, "hh").hours() &&
-                            selectedDay.getDate() === (new Date(event.fecha)).getDate()
+                          (event:any) =>{
+                            
+                            if(!event.start_hour)
+                              return false;
+                            //
+                            
+                            const isDate = moment(event.fecha).utcOffset(0, false).format("YYYY-MM-DD") === moment(selectedDay, "YYYY-MM-DD").utcOffset(0, true).format("YYYY-MM-DD")
+                            //console.log("event", event.fecha, moment(event.fecha).utcOffset(0, false).format("YYYY-MM-DD"), moment(selectedDay, "YYYY-MM-DD").utcOffset(0, true).format("YYYY-MM-DD"))
+                            const isEmployee = event.barbero_id === emp.id;
+                            const isHourStart = moment(`2012-12-12 ${event.start_hour}`).format("HH:mm") === moment(hour).format("HH:mm");
+                            
+                            return (isDate && isEmployee && isHourStart)
+                            
+                          }
+                            
                         )
                         .map((event:any, i:number) => {
-                          const start_hour:any = moment(`2019-01-01 ${event.start_hour}`);
-                          const end_hour:any = moment(`2019-01-01 ${event.end_hour}`);
-                          const eventDuration = (end_hour - start_hour) / (1000 * 60);
+                          const eventDuration = ((new Date(`2012-12-12 ${event.end_hour}`)).getTime() - (new Date(`2012-12-12 ${event.start_hour}`)).getTime()) / (1000 * 60);
                           const colors = ["bg-blue-400", "bg-green-400", "bg-red-400", "bg-purple-400"];
                           const employeeColor = colors[index % colors.length];
                           return (
@@ -274,7 +271,7 @@ const CalendarApp = () => {
                                 left: index === 0 ? "40px" : "0",
                               }}
                             >
-                              {event.title} {event.start_hour} - {event.end_hour}
+                              {event.title} ({ event.start_hour ? event.start_hour : ""} - { event.end_hour ? event.end_hour : ""})
                             </div>
                           );
                         })}
