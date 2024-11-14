@@ -7,18 +7,16 @@ import ClientService from '../services/ClientService';
 import Cliente from '../interfaces/cliente';
 import { AppContext } from './AppContext';
 
-
-
-const getClients = async (filter:any): Promise<Cliente[]> => {
+const getClients = async (filter: any): Promise<Cliente[]> => {
   const clientService = new ClientService();
   console.log("filter", filter);
   const clientsData = await clientService.getClients(filter);
-  const clients:Cliente[] = clientsData.map((client: any) => ({
+  const clients: Cliente[] = clientsData.map((client: any) => ({
     id: client.id,
     nombre: client.usuario.nombre,
     apellido: client.usuario.apellido_paterno + " " + client.usuario.apellido_materno,
     telefono: client.usuario.telefono,
-    instagram: client.instagram,
+    instagram: client.instagram || "Sin Instagram",
     citas: client.citas || 0,
     inasistencias: client.inasistencias || 0,
     cancelaciones: client.cancelaciones || 0,
@@ -34,41 +32,48 @@ const getClients = async (filter:any): Promise<Cliente[]> => {
 }
 
 const Clientes = () => {
-  
-
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null); // Comienza sin cliente seleccionado
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null); 
   const [searchTerm, setSearchTerm] = useState('');
-  const [ state, dispatchState ]= React.useContext(AppContext);
+  const [state, dispatchState] = React.useContext(AppContext);
+
   const handleSelectCliente = (cliente: Cliente) => {
     setSelectedCliente(cliente);
   };
 
+  const updateClientInList = (updatedCliente: Cliente) => {
+    setClientes((prevClientes) =>
+      prevClientes.map((cliente) =>
+        cliente.id === updatedCliente.id ? updatedCliente : cliente
+      )
+    );
+    setSelectedCliente(updatedCliente); // Actualiza también el cliente seleccionado
+  };
+
   React.useEffect(() => {
     console.log("state sucursal", state.sucursal);
-    getClients( state.sucursal ? { local_id: state.sucursal.id } : false ).then(setClientes);
+    getClients(state.sucursal ? { local_id: state.sucursal.id } : false).then(setClientes);
   }, [state.sucursal]);
-  
+
   return (
     <div className="flex bg-[#FFFFFF] min-h-screen">
-      {/* Mostrar lista de clientes en mobile, siempre visible en desktop */}
       <div className={`${selectedCliente ? 'hidden' : 'block'} md:block w-full md:w-1/3`}>
         <ClientesList
           clientes={clientes}
           onSelectCliente={handleSelectCliente}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          reloadClients={()=>{
-            getClients( state.sucursal ? { local_id: state.sucursal.id } : false ).then(setClientes);
+          reloadClients={() => {
+            getClients(state.sucursal ? { local_id: state.sucursal.id } : false).then(setClientes);
           }}
         />
       </div>
 
-      {/* Mostrar detalles de cliente seleccionado solo si hay uno en mobile, siempre visible en desktop */}
       <div className={`${selectedCliente ? 'block' : 'hidden'} md:block w-full md:w-2/3`}>
         <ClienteDetails
           cliente={selectedCliente}
-          onBack={() => setSelectedCliente(null)} // Solo se usa en mobile
+          onBack={() => setSelectedCliente(null)}
+          onUpdate={updateClientInList} // Pasamos la función updateClientInList
         />
       </div>
     </div>

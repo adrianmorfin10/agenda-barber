@@ -83,7 +83,7 @@ const NavBar: React.FC = () => {
   return (
     <div>
       {/* Desktop NavBar */}
-      <div className="bg-[#0C0C0C] md:w-60 h-screen hidden md:flex flex-col p-5 sticky top-0">
+      <div className="bg-[#0C0C0C] md:w-50 h-screen hidden md:flex flex-col p-5 sticky top-0">
         <div className="flex justify-center mb-5">
           <Image src="/img/logobarber.png" alt="Logo" width={130} height={40} />
         </div>
