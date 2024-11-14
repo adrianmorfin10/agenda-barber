@@ -250,16 +250,14 @@ const CalendarApp = () => {
                       {index === 0 && <span className="text-gray-500 text-xs">{format(hour, "HH:mm")}</span>}
 
                       {events
-                        .filter(
-                          (event:any) =>
-                            event.barbero_id === emp.id &&
-                            hour.getHours() === moment(events[events.length - 1].start_hour, "hh").hours() &&
-                            selectedDay.getDate() === (new Date(event.fecha)).getDate()
-                        )
+                        // .filter(
+                        //   (event:any) =>
+                        //     event.employee === emp.name &&
+                        //     format(event.start, "yyyy-MM-dd") === format(selectedDay, "yyyy-MM-dd") &&
+                        //     event.start.getHours() === hour.getHours()
+                        // )
                         .map((event:any, i:number) => {
-                          const start_hour:any = moment(`2019-01-01 ${event.start_hour}`);
-                          const end_hour:any = moment(`2019-01-01 ${event.end_hour}`);
-                          const eventDuration = (end_hour - start_hour) / (1000 * 60);
+                          const eventDuration = (event.end - event.start) / (1000 * 60);
                           const colors = ["bg-blue-400", "bg-green-400", "bg-red-400", "bg-purple-400"];
                           const employeeColor = colors[index % colors.length];
                           return (
@@ -274,7 +272,7 @@ const CalendarApp = () => {
                                 left: index === 0 ? "40px" : "0",
                               }}
                             >
-                              {event.title} {event.start_hour} - {event.end_hour}
+                              {event.title} ({format(event.start, "HH:mm")} - {format(event.end, "HH:mm")})
                             </div>
                           );
                         })}
