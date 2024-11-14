@@ -7,10 +7,33 @@ import ClientService from "../services/ClientService";
 import moment from "moment";
 import { AppContext } from "../components/AppContext";
 import Image from 'next/image';
+import Cliente from "../interfaces/cliente";
 
 
-const clienteObject = new ClientService();
+const clientService = new ClientService();
 
+const getClients = async (filter:any): Promise<Cliente[]> => {
+  
+  const clientsData = await clientService.getClients(filter);
+  const clients:Cliente[] = clientsData.map((client: any) => ({
+    id: client.id,
+    nombre: client.usuario.nombre,
+    apellido: client.usuario.apellido_paterno + " " + client.usuario.apellido_materno,
+    telefono: client.usuario.telefono,
+    instagram: client.instagram,
+    citas: client.citas || 0,
+    inasistencias: client.inasistencias || 0,
+    cancelaciones: client.cancelaciones || 0,
+    ultimaVisita: client.ultima_visita || "Sin fecha",
+    descuento: client.descuento || "Sin descuento",
+    ingresosTotales: client.ingresos_totales || "Sin ingresos",
+    membresia: client.is_member ? "Activa" : "Inactiva",
+    tipo: client.usuario.tipo || "Sin tipo",
+    serviciosDisponibles: client.servicios_disponibles || 0,
+    proximoPago: client.proximo_pago || "Sin proximo pago"
+  }));
+  return clients;
+}
 
 const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (value:any)=>void, slot:any, employees:any[], services:any[]}> = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
 
@@ -38,7 +61,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [clientes, setClientes] = useState([]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
   const [ state, dispatchState ]= React.useContext(AppContext);
 
   const handleInputChange = (e:any) => {
@@ -75,7 +98,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
 
   React.useEffect(() => {
     
-    clienteObject.getClients(state.sucursal ? { local_id: state.sucursal.id } : false ).then(data => {
+    getClients(state.sucursal ? { local_id: state.sucursal.id } : false ).then(data => {
       setClientes(data);
     }).catch(error => {
       console.error("Error al obtener los clientes", error);
@@ -147,7 +170,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
   const handleSelectCliente = (cliente:any) => {
     
     setSelectedClient(cliente);
-    setNewEvent((prev) => ({ ...prev, client: `${cliente.usuario.nombre} ${cliente.usuario.apellido_paterno}` }));
+    setNewEvent((prev) => ({ ...prev, client: `${cliente.nombre} ${cliente.apellido}` }));
     setIsClientListOpen(false); // Cierra la lista de clientes al seleccionar uno
   };
 
@@ -189,7 +212,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
 />
 </div>
 <span className="text-gray-500 font-light text-[16px]">
-  {selectedClient ? `${selectedClient.usuario.nombre} ${selectedClient.usuario.apellido_paterno}` : "Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
+  {selectedClient ? `${selectedClient.nombre} ${selectedClient.apellido}` : "Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
 </span>
 </div>
 <Image 
@@ -214,6 +237,9 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
             onSelectCliente={handleSelectCliente}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
+            reloadClients={()=>{
+              getClients( state.sucursal ? { local_id: state.sucursal.id } : false ).then(setClientes);
+            }}
           />
         ) : (
           <>
