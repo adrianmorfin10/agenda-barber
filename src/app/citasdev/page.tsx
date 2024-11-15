@@ -21,6 +21,7 @@ import ServicioService from "../services/ServicioService";
 import SolicitudService from "../services/SolicitudService";
 import moment from "moment";
 import Image from 'next/image';
+import { AppContext } from '../components/AppContext';
 const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
@@ -91,10 +92,11 @@ const CalendarApp = () => {
   const [ localId, setLocal ] = useState(6);
   const [ servicios, setServicios ] = useState([]);
   const [ empleados, setEmpleados] = useState([]);
-  const getData = async () => {
+  const [state, dispatchState] = React.useContext(AppContext);
+  const getData = async (filter:any) => {
     const _servicios = await servicioObject.getServicios();
     setServicios(_servicios);
-    const empleados = await empleadoObject.getEmpleados();
+    const empleados = await empleadoObject.getEmpleados(filter);
     setEmpleados(empleados.map((item:any)=>{
       return {
         ...item,
@@ -111,9 +113,8 @@ const CalendarApp = () => {
     setEvents(eventos.map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
   }
   React.useEffect(() => {
-    
-    getData().then();
-  }, []);
+    getData(state.sucursal ? { local_id: state.sucursal.id } : false).then();
+  }, [state.sucursal]);
   const handleCreateEvent = (newEvent:any) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
@@ -129,7 +130,7 @@ const CalendarApp = () => {
       estado: "pendiente"
     }).then(data=>{
       setIsModalOpen(false);
-      return getData();
+      return getData(state.sucursal ? { local_id: state.sucursal.id } : false);
     }).then(()=>{
       
     }).catch(e=>{
