@@ -185,7 +185,7 @@ const CalendarApp = () => {
         <h2 className="text-lg font-normal text-black text-center">
           Citas del {format(selectedDay, "dd MMMM yyyy")}
         </h2>
-        <button onClick={handleNextDay} className="text-black px-2 py-1 border border-[#DADADA] rounded">
+        <button onClick={handleNextDay} className="text-black px-2 py-1 border border-[#DADADA] rounded transform rotate-180">
         <Image src="/img/flecha.svg" alt="Previous" width={24} height={24} className="h-6 w-6 rotate-90" />
         </button>
       </div>
