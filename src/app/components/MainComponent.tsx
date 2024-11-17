@@ -3,7 +3,8 @@ import React, { useReducer, useMemo, useEffect, useState, ReactNode } from 'reac
 import { AppContext } from './AppContext';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner'; // Asegúrate de tener este componente
-
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 // Estado inicial
 const initialState = {
     user: null,
@@ -39,12 +40,13 @@ interface MainComponentProps {
 }
 
 const MainComponent: React.FC<MainComponentProps> = ({ children }) => {
+    
     const [state, dispatch] = useReducer(reducer, initialState);
     const store = useMemo(() => [state, dispatch], [state]);
-
-    // Estado de loading
     const [isLoading, setIsLoading] = useState(false);
+    const { user, error, isLoading: userLoading } = useUser();
 
+    
     // Simulación de carga al montar (esto es opcional)
     useEffect(() => {
         setIsLoading(true);
@@ -52,6 +54,9 @@ const MainComponent: React.FC<MainComponentProps> = ({ children }) => {
         return () => clearTimeout(timer);
     }, []);
 
+    if (userLoading) return <div>Loading...</div>;
+    if (error) return <div>{error.message}</div>;
+    // Estado de loading
     return (
         <AppContext.Provider value={store}>
             <NavBar />
@@ -65,4 +70,4 @@ const MainComponent: React.FC<MainComponentProps> = ({ children }) => {
     );
 };
 
-export default MainComponent;
+export default withPageAuthRequired(MainComponent);

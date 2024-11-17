@@ -21,7 +21,7 @@ const EmpleadosList: React.FC<EmpleadosListProps> = ({
   onAddEmpleado,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  console.log("empleados", empleados)
   const filteredEmpleados = empleados.filter((empleado) =>
     `${empleado.nombre} ${empleado.apellido}`.toLowerCase().includes(searchTerm.toLowerCase())
   );

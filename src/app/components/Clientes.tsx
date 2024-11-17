@@ -51,7 +51,6 @@ const Clientes = () => {
   };
 
   React.useEffect(() => {
-    console.log("state sucursal", state.sucursal);
     getClients(state.sucursal ? { local_id: state.sucursal.id } : false).then(setClientes);
   }, [state.sucursal]);
 
