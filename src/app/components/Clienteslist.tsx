@@ -38,7 +38,6 @@ const ClientesList: React.FC<ClientesListProps> = ({
   reloadClients
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  console.log("clientes", clientes);
   const filteredClientes = clientes;
   // .filter(cliente =>
   //   `${cliente.nombre} ${cliente.apellido}`.toLowerCase().includes(searchTerm.toLowerCase())

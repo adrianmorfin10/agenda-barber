@@ -97,7 +97,7 @@ const CalendarApp = () => {
     const _servicios = await servicioObject.getServicios();
     setServicios(_servicios);
     const empleados = await empleadoObject.getEmpleados(filter);
-    setEmpleados(empleados.map((item:any)=>{
+    setEmpleados(empleados.filter((item:any)=>item.usuario).map((item:any)=>{
       return {
         ...item,
         name: item.usuario.nombre,

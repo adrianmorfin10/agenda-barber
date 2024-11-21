@@ -10,7 +10,7 @@ interface EmpleadosListProps {
   onSelectEmpleado: (empleado: Empleado) => void;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  onAddEmpleado: (empleado: Empleado) => void;
+  onAddEmpleado: () => void;
 }
 
 const EmpleadosList: React.FC<EmpleadosListProps> = ({
@@ -21,7 +21,6 @@ const EmpleadosList: React.FC<EmpleadosListProps> = ({
   onAddEmpleado,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  console.log("empleados", empleados)
   const filteredEmpleados = empleados.filter((empleado) =>
     `${empleado.nombre} ${empleado.apellido}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -52,10 +51,7 @@ const EmpleadosList: React.FC<EmpleadosListProps> = ({
       <AddEmpModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
-        onAddEmpleado={(newEmpleado) => {
-          const empleadoConId:any = { ...newEmpleado };
-          onAddEmpleado(empleadoConId);
-        }}
+        onAddEmpleado={onAddEmpleado}
       />
 
       <div className="overflow-y-auto max-h-[450px]">

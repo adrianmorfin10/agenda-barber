@@ -2,15 +2,19 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-
+import ServicioService from '../services/ServicioService';
+import EmpleadoService from '../services/EmpleadoService';
+import { AppContext } from '../components/AppContext';
+const serviciosObject = new ServicioService();
+const empleadoObject = new EmpleadoService();
 interface AddEmpModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
-  onAddEmpleado: (empleado: Empleado) => void;
+  onAddEmpleado: () => void;
 }
 
 interface Empleado {
-  id: number;
+  id?: number;
   nombre: string;
   apellido: string;
   telefono: string;
@@ -18,9 +22,12 @@ interface Empleado {
   instagram?: string;
   diasTrabajo: number[];
   servicios: number[];
+  local_id?: number;
 }
 
 const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, onAddEmpleado }) => {
+  const [ servicios, setServicios ] = useState([]);
+  const [state, dispatchState] = React.useContext(AppContext);
   const [nuevoEmpleado, setNuevoEmpleado] = useState<Omit<Empleado, 'id'>>({
     nombre: '',
     apellido: '',
@@ -30,6 +37,17 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
     diasTrabajo: [],
     servicios: [],
   });
+
+  React.useEffect(()=>{
+    serviciosObject.getServicios().then(data=>{
+      setServicios(data);
+    }).catch(e=>{});
+  },[])
+
+  const onSubmitForm = (e:any)=>{
+    e.preventDefault();
+
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,25 +73,31 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
   };
 
   const handleAddEmpleado = () => {
-    const empleadoConId: Empleado = { ...nuevoEmpleado, id: Date.now() };
-    onAddEmpleado(empleadoConId);
-    setIsModalOpen(false);
-    setNuevoEmpleado({
-      nombre: '',
-      apellido: '',
-      telefono: '',
-      email: '',
-      instagram: '',
-      diasTrabajo: [],
-      servicios: [],
-    });
+  
+    empleadoObject.createEmpleado({ ...nuevoEmpleado, local_id: state.sucursal.id }).then(data=>{
+      setIsModalOpen(false);
+      setNuevoEmpleado({
+        nombre: '',
+        apellido: '',
+        telefono: '',
+        email: '',
+        instagram: '',
+        diasTrabajo: [],
+        servicios: [],
+      });
+      onAddEmpleado();
+
+    }).catch(e=>{
+      console.log(e)
+    })
+    
   };
 
   return (
     <>
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-5 rounded-[10px] max-w-[450px] w-full">
+          <form className="bg-white p-5 rounded-[10px] max-w-[450px] w-full" onSubmit={onSubmitForm}> 
             <div className="flex items-center mb-4">
               <Image
                 src="/img/closemodal.svg"
@@ -160,15 +184,15 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
             {/* Selección de servicios */}
             <div className="flex flex-col mb-4">
               <label className="font-semibold mb-2 text-black">Servicios que Puede Brindar</label>
-              {["Corte de Cabello", "Afeitado", "Coloración"].map((servicio, servicioId) => (
-                <div key={servicioId} className="flex items-center mb-1">
+              {servicios.map(({ id, nombre }) => (
+                <div key={id} className="flex items-center mb-1">
                   <input
                     type="checkbox"
-                    checked={nuevoEmpleado.servicios.includes(servicioId + 1)}
-                    onChange={() => toggleServicio(servicioId + 1)}
+                    checked={nuevoEmpleado.servicios.includes(id)}
+                    onChange={() => toggleServicio(id)}
                     className="mr-1"
                   />
-                  <label className="text-black">{servicio}</label>
+                  <label className="text-black">{nombre}</label>
                 </div>
               ))}
             </div>
@@ -179,7 +203,7 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
             >
               Añadir Empleado
             </button>
-          </div>
+          </form>
         </div>
       )}
     </>
