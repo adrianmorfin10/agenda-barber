@@ -7,7 +7,7 @@ interface MembershipModalProps {
   isOpen: boolean;
   services: any[];
   onClose: () => void;
-  onCreateMembership: (name: string, services: string[]) => void;
+  onCreateMembership: (name: string, services: number[]) => void;
 }
 
 const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCreateMembership, services }) => {
