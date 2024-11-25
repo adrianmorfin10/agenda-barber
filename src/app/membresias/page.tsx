@@ -4,29 +4,35 @@ import React, { useState } from 'react';
 import MembershipModal from '../components/MembershipModal'; // Asegúrate de la ruta correcta
 import SubProductBar from '../components/SubProductBar'; // Importar SubProductBar correctamente
 import Image from 'next/image'; // Importa el componente Image
-
-const initialMemberships = [
-  {
-    id: '1',
-    nombre: 'Black',
-    servicios: ['Corte de Cabello'],
-  },
-  {
-    id: '2',
-    nombre: 'White',
-    servicios: ['Corte de Cabello', 'Colorimetría'],
-  },
-];
+import { AppContext } from '../components/AppContext';
+import MembresiaService from '../services/MembresiaService';
+import ServicioService from '../services/ServicioService';
+const membresíaObject = new MembresiaService();
+const serviciosObject = new ServicioService();
 
 const MembershipsPage = () => {
-  const [memberships, setMemberships] = useState(initialMemberships);
+  const [memberships, setMemberships] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [ services, setServices ] = useState([]);
+  const [state, dispatchState] = React.useContext(AppContext);
 
-  const handleCreateMembership = (name: string, services: string[]) => {
-    setMemberships((prev) => [
-      ...prev,
-      { id: String(prev.length + 1), nombre: name, servicios: services },
-    ]);
+  React.useEffect(()=>{
+    getMembreships();
+    serviciosObject.getServicios(state.sucursal ? { local_id: state.sucursal.id } : false).then(services=>{
+      setServices(services);
+    }).catch(e=>{});
+  },[state.sucursal])
+
+  const getMembreships = ()=>{
+    membresíaObject.getMembresias(state.sucursal ? { local_id: state.sucursal.id } : false).then((membresias:any)=>{
+      setMemberships(membresias);
+    }).catch(e=>{})
+  }
+  const handleCreateMembership = (nombre: string, servicios: any) => {
+    membresíaObject.createMembresia({ nombre, servicios, local_id: state.sucursal.id }).then(()=>{
+      getMembreships();
+      setIsModalOpen(false)
+    }).catch(e=>{});
   };
 
   return (
@@ -61,7 +67,7 @@ const MembershipsPage = () => {
           {memberships.map((membership) => (
             <tr key={membership.id} className="hover:bg-gray-100 cursor-pointer border-b">
               <td className="border-b border-gray-200 p-2">{membership.nombre}</td>
-              <td className="border-b border-gray-200 p-2">{membership.servicios.join(', ')}</td>
+              <td className="border-b border-gray-200 p-2"></td>
             </tr>
           ))}
         </tbody>
@@ -72,6 +78,7 @@ const MembershipsPage = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreateMembership={handleCreateMembership}
+        services={services}
       />
     </div>
   );

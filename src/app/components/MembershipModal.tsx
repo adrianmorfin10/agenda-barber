@@ -5,22 +5,17 @@ import Image from 'next/image'; // Para usar el icono SVG
 
 interface MembershipModalProps {
   isOpen: boolean;
+  services: any[];
   onClose: () => void;
   onCreateMembership: (name: string, services: string[]) => void;
 }
 
-const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCreateMembership }) => {
+const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCreateMembership, services }) => {
   const [membershipName, setMembershipName] = useState('');
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [selectedServices, setSelectedServices] = useState<number[]>([]);
 
-  const services = [
-    { id: '1', nombre: 'Corte de Cabello', color: '#FF5733' }, // Color asociado al servicio
-    { id: '2', nombre: 'Afeitado', color: '#33FF57' }, 
-    { id: '3', nombre: 'Colorimetría', color: '#3357FF' },
-    // Añadir más servicios según sea necesario
-  ];
 
-  const handleServiceToggle = (serviceId: string) => {
+  const handleServiceToggle = (serviceId: number) => {
     setSelectedServices((prev) =>
       prev.includes(serviceId)
         ? prev.filter((id) => id !== serviceId)
@@ -30,11 +25,9 @@ const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedServiceNames = services
-      .filter(service => selectedServices.includes(service.id))
-      .map(service => service.nombre);
-    onCreateMembership(membershipName, selectedServiceNames);
-    onClose();
+    
+    onCreateMembership(membershipName, selectedServices);
+
   };
 
   if (!isOpen) return null;
