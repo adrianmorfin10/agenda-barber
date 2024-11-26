@@ -67,7 +67,7 @@ const MembershipsPage = () => {
           {memberships.map((membership) => (
             <tr key={membership.id} className="hover:bg-gray-100 cursor-pointer border-b">
               <td className="border-b border-gray-200 p-2">{membership.nombre}</td>
-              <td className="border-b border-gray-200 p-2"></td>
+              <td className="border-b border-gray-200 p-2">{membership.membresia_servicios.map((item:any)=>item.servicio.nombre).join(", ")}</td>
             </tr>
           ))}
         </tbody>

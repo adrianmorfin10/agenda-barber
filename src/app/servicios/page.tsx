@@ -26,8 +26,8 @@ const ServicesPage: React.FC = () => {
   const getServices = ()=>{
     serviciosObject.getServicios(state.sucursal ? { local_id: state.sucursal.id } : false).then((response:any)=>{
       setServices(response.map((item:any)=>{
-        const { precioServicio } = item;
-        return { id: item.id, nombre: item.nombre, tiempo: item.tiempo || 0, precio: precioServicio?.length ? precioServicio[0].precio : 0 }
+        const { precio_servicios } = item;
+        return { id: item.id, nombre: item.nombre, tiempo: item.tiempo || 0, precio: precio_servicios?.length ? precio_servicios[0].precio : 0 }
       }));
     }).catch((e:any)=>{})
   }
