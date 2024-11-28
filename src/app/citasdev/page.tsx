@@ -94,7 +94,7 @@ const CalendarApp = () => {
   const [ empleados, setEmpleados] = useState([]);
   const [state, dispatchState] = React.useContext(AppContext);
   const getData = async (filter:any) => {
-    const _servicios = await servicioObject.getServicios();
+    const _servicios = await servicioObject.getServicios(filter);
     setServicios(_servicios);
     const empleados = await empleadoObject.getEmpleados(filter);
     setEmpleados(empleados.filter((item:any)=>item.usuario).map((item:any)=>{

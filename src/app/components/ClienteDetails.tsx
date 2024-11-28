@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import ClientService from '../services/ClientService';
+import Link from 'next/link';
 
 interface Cliente {
   id: number;
@@ -144,14 +145,12 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
 
         {/* Botón de Agendar (deshabilitado) */}
         <div className="flex flex-col items-center">
-          <button
-            className="flex items-center bg-gray-300 text-gray-500 px-4 py-2 rounded cursor-not-allowed text-sm md:text-base"
-            disabled
-          >
-            <Image src="/img/calendara.svg" alt="Agendar" width={20} height={20} />
-            <span className="ml-2 poppins text-black">Agendar</span>
-          </button>
-          <span className="mt-1 text-xs md:text-sm text-gray-500">(Próximamente)</span>
+          <Link key={"agendar-link"} href={`/citasdev?u=${cliente.id}`} className="flex items-center border border-gray-400 bg-white rounded px-4 py-2 cursor-pointer" >
+            
+              <Image src="/img/calendara.svg" alt="Agendar" width={20} height={20} />
+              <span className="ml-2 poppins text-black">Agendar</span>
+           
+          </Link>
         </div>
 
       </div>

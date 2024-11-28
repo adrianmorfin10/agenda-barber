@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { format } from "date-fns";
 import ClientesList from "../components/Clienteslist"; 
 import ClientService from "../services/ClientService";
@@ -8,7 +8,7 @@ import moment from "moment";
 import { AppContext } from "../components/AppContext";
 import Image from 'next/image';
 import Cliente from "../interfaces/cliente";
-
+import { useSearchParams } from 'next/navigation'
 
 const clientService = new ClientService();
 
@@ -62,7 +62,9 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [clientes, setClientes] = useState<Cliente[]>([]);
+
   const [ state, dispatchState ]= React.useContext(AppContext);
+
 
   const handleInputChange = (e:any) => {
     const { name, value } = e.target;
@@ -103,7 +105,13 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
     }).catch(error => {
       console.error("Error al obtener los clientes", error);
     });
+
+  
   }, [state.sucursal]);
+
+  
+  
+ 
 
   React.useEffect(() => {
     setNewEvent({
@@ -112,6 +120,20 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
     });
   }, [slot]);
 
+  const getCliente = (userId:any)=>{
+    
+    clientService.getClient(userId).then(client=>{
+      const cliente = {
+        id: client.id,
+        nombre: client.usuario.nombre,
+        apellido: client.usuario.apellido_paterno + " " + client.usuario.apellido_materno,
+        telefono: client.usuario.telefono
+      }
+      setSelectedClient(cliente);
+      console.log("entro aqui");
+      setNewEvent((prev) => ({ ...prev, client: `${cliente.nombre} ${cliente.apellido}` }));
+    })
+  }
 
   const handleClose = () => {
     setIsClosing(true); // Activar la animación de salida
@@ -174,6 +196,11 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
     setIsClientListOpen(false); // Cierra la lista de clientes al seleccionar uno
   };
 
+  const searchParams = useSearchParams();
+  const u = searchParams.get('u');
+
+  if(u)
+    useMemo(()=>{getCliente(u)}, []);
   if (!isOpen) return null;
 
   return (
