@@ -70,4 +70,4 @@ const MainComponent: React.FC<MainComponentProps> = ({ children }) => {
     );
 };
 
-export default withPageAuthRequired(MainComponent);
+export default MainComponent;
