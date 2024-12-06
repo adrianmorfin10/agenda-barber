@@ -43,11 +43,11 @@ interface Empleado {
 const Comisiones: React.FC = () => {
 
   const [empleados, setEmpleados] = useState<Empleado[]>([]);
-  const [comisiones, setComisiones] = useState([]);
+  const [comisiones, setComisiones] = useState<any[]>([]);
   const [vmComisiones,  setVmComisiones ] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEmpleado, setSelectedEmpleado] = useState<any>('todos');
-  const [activeTree, setActiveTree] = useState<"productos" | "servicios" | "membresias" | null>(null);
+  const [activeTree, setActiveTree] = useState<"producto" | "servicio" | "membresia" | null>(null);
   const [membresias, setMembresias] = useState([]);
   const [productos, setProductos] = useState([]);
   const [servicios, setServicios] = useState([]);
@@ -60,46 +60,50 @@ const Comisiones: React.FC = () => {
   }, [state.sucursal]);
 
   React.useEffect(()=>{
-    if(selectedEmpleado?.id && typeComision)
-      comisionObject.getComisiones(typeComision, selectedEmpleado?.id).then(response=>{
+    console.log("type comission", selectedEmpleado?.id , activeTree)
+    if(selectedEmpleado?.id && activeTree)
+      comisionObject.getComisiones(activeTree, selectedEmpleado?.id).then(response=>{
         setComisiones(response);
       }).catch(error=>{})
-  },[selectedEmpleado, typeComision])
+  },[selectedEmpleado, activeTree])
 
   const getComisionsAndMap = (_comisions:any, list:any, type:any)=>{
     const comisions = (_comisions || []).filter((item:any)=>item.tipo === type);
     return list.map((item:any)=>{
-      let comision = null;
+      let comision:any = {};
       switch (type) {
-        case 'productos':
-          comision = comisions.find((c:any)=>c.comisionProducto.id === item.id);
+        case 'producto':
+          comision = comisions.find((c:any)=>c.comisionProducto?.producto?.id === item.id) || {};
+          comision['producto_id'] = item.id;
           break;
-        case 'servicios':
-          comision = comisions.find((c:any)=>c.comisionServicio.id === item.id);
+        case 'servicio':
+          comision = comisions.find((c:any)=>c.comisionServicio?.servicio?.id === item.id) || {};
+          comision['servicio_id'] = item.id;
           break;
-        case 'membresias':
-          comision = comisions.find((c:any)=>c.comisionMembresia.id === item.id);
+        case 'membresia':
+          comision = comisions.find((c:any)=>c.comisionMembresia?.membresia?.id === item.id) || {};
+          comision['membresia_id'] = item.id;
           break;
       }
-      return ({ ...comision, nombre: item.nombre, comision: comision?.porciento || 0 })
+      return ({ ...comision, nombre: item.nombre, comision: comision?.porciento || 0, barbero_id: selectedEmpleado.id, tipo: activeTree })
     })
   }
   React.useEffect(()=>{
     let list:any[] = [];
     switch (activeTree) {
-      case 'productos':
+      case 'producto':
         list = productos;
         break;
-      case 'servicios':
+      case 'servicio':
         list = servicios;
         break;
-      case 'membresias':
+      case 'membresia':
         list = membresias;
         break;
     }
     const comisionesFiltred = getComisionsAndMap(comisiones, list, activeTree);
     setVmComisiones(comisionesFiltred);
-  },[activeTree]);
+  },[comisiones, activeTree]);
 
   const getData = async (filter:any) => {
     const _servicios = await servicioObject.getServicios(filter);
@@ -109,7 +113,7 @@ const Comisiones: React.FC = () => {
       return {
         id: item.id,
         nombre: item.usuario.nombre,
-        apellido: item.usuario.apellido_paterno || item.usuario.apellido_materno
+        apellido: item.usuario.apellido_paterno || item.usuario.apellido_materno,
       }
     }));
     const _membresias = await membresiaObject.getMembresias(filter);
@@ -141,8 +145,28 @@ const Comisiones: React.FC = () => {
     
     const newComisiones = vmComisiones.map((item:any)=>({ ...item, comision:  generalComision }));
     setVmComisiones(newComisiones);
+
     setIsModalOpen(true); // Abrir modal
   };
+
+  const guardarComision = (index:number)=>{
+
+    const comisionToSend = { ...vmComisiones[index], saving: true };
+
+    const newVmComisiones = [ ...vmComisiones ];
+    newVmComisiones[index] = comisionToSend;
+    setVmComisiones(newVmComisiones);
+    
+
+    comisionObject.saveComision({ ...comisionToSend, barbero_id: selectedEmpleado?.id }).then(response=>{
+      const newVmComisiones = [ ...vmComisiones ];
+      newVmComisiones[index].saving = false;
+      setVmComisiones(newVmComisiones)
+      setIsModalOpen(true);
+    }).catch(e=>{
+
+    })
+  }
 
   const cerrarModal = () => {
     setIsModalOpen(false); // Cerrar modal
@@ -160,6 +184,7 @@ const Comisiones: React.FC = () => {
           setSelectedEmpleado={setSelectedEmpleado}
           activeTree={activeTree}
           setActiveTree={(activeTree)=>{
+            console.log('activeTree', activeTree)
             setActiveTree(activeTree);
             setGeneralComision(0);
           }}
@@ -170,6 +195,8 @@ const Comisiones: React.FC = () => {
               <h2 className="text-xl font-bold mb-4 text-black">
                 Comisiones de {selectedEmpleado.nombre} - {activeTree.charAt(0).toUpperCase() + activeTree.slice(1)}
               </h2>
+              {
+                /*
               <div className="mb-4">
                 <label className="block font-semibold mb-2 text-black">Comisión General</label>
                 <div className="flex items-center gap-2">
@@ -189,10 +216,11 @@ const Comisiones: React.FC = () => {
                     Guardar
                   </button>
                 </div>
-              </div>
+              </div> */
+              }
               <ul>
                 {(vmComisiones || []).map((item:any, index:number) => (
-                  <li key={item.id} className="mb-2">
+                  <li key={`${item.id}-${index}`} className="mb-2">
                     <div className="flex items-center gap-2">
                       <span className="flex-1 text-black">{item.nombre}</span>
                       <input
@@ -207,12 +235,16 @@ const Comisiones: React.FC = () => {
                         }}
                         className="border rounded p-2 w-24 text-black"
                       />
-                      <button
-                        onClick={guardarComisiones}
-                        className="bg-black text-white px-4 py-2 rounded"
-                      >
-                        Guardar
-                      </button>
+                      { 
+                        !item.saving ?
+                        <button
+                          onClick={(e:any)=>guardarComision(index)}
+                          className="bg-black text-white px-4 py-2 rounded"
+                        >
+                          Guardar
+                        </button> : 
+                        <span className="text-black  px-4 py-2 ">Guardando</span>
+                      }
                     </div>
                   </li>
                 ))}

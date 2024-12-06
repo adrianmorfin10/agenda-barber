@@ -68,10 +68,10 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
 
   const handleInputChange = (e:any) => {
     const { name, value } = e.target;
-    setNewEvent((prev) => ({ ...prev, [name]: value }));
+    setNewEvent({ ...newEvent, [name]: value });
 
     // Limpiar errores al escribir
-    setErrors((prev) => ({ ...prev, [name]: "", timeError: "" }));
+    setErrors({ ...errors, [name]: "", timeError: "" });
   };
   const handleChangeEmployee = (e:any): void => {
     const { value, name } = e.target;
@@ -199,8 +199,10 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
   const searchParams = useSearchParams();
   const u = searchParams.get('u');
 
-  if(u)
-    useMemo(()=>{getCliente(u)}, []);
+  useMemo(()=>{
+    if(u)
+      getCliente(u);
+  }, [u]);
   if (!isOpen) return null;
 
   return (

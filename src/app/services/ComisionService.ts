@@ -12,6 +12,11 @@ class ComisionService extends HttpService {
         return response.data;
     }
 
+    saveComision(data:any){
+        console.log("data", data)
+        return axios.post(`${this.baseUrl}/comision/save`, data);
+    }
+
     
 }
 export default ComisionService;

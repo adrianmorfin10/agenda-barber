@@ -33,8 +33,7 @@ const SelectorArbol: React.FC<SelectorArbolProps> = ({
         }
         onChange={(e) => {
           const selectedValue = e.target.value;
-         
-          const selected:Empleado = empleados.find(item=>item.id.toString() === selectedValue.toString());
+          const selected:any = empleados.find(item=>item.id.toString() === selectedValue.toString());
           setSelectedEmpleado(selected);
         }}
         className="w-full border border-gray-300 rounded p-2 text-black"
@@ -49,7 +48,7 @@ const SelectorArbol: React.FC<SelectorArbolProps> = ({
 
       <h2 className="font-semibold text-lg mt-5 mb-3">Seleccionar Categoría</h2>
       <ul>
-        {["productos", "servicios", "membresias"].map((tree) => (
+        {["producto", "servicio", "membresia"].map((tree) => (
           <li
             key={tree}
             className={`cursor-pointer p-2 rounded ${
