@@ -55,7 +55,12 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
       <div className="flex items-center justify-between mb-4">
         {isClientListOpen && (
           <button onClick={() => setIsClientListOpen(false)} className="text-gray-500 flex items-center">
-            <Image src="/img/back.svg" alt="Volver" className="h-5 w-5 inline mr-2" />
+            <Image 
+            width={24}
+            height={24}
+            src="/img/back.svg" 
+            alt="Volver" 
+            className="h-5 w-5 inline mr-2" />
             <span className="text-xl font-semibold">Selección de Cliente</span>
           </button>
         )}
@@ -71,7 +76,13 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="bg-black text-white rounded-full h-[40px] w-[70px] flex items-center justify-center mr-3">
-                  <Image src="/img/userw.svg" alt="Cliente" className="h-5 w-5" />
+                  <Image 
+                  width={20} // Set appropriate width
+                  height={20} // Set appropriate height
+                  src="/img/userw.svg" 
+                  alt="Cliente" 
+                  className="h-5 w-5" 
+                  />
                 </div>
                 <span className="text-gray-500 font-light text-[16px]">
                   {selectedClient
@@ -79,7 +90,13 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
                     : "Seleccione un cliente (opcional)"}
                 </span>
               </div>
-              <Image src="/img/add.svg" alt="Agregar cliente" className="h-5 w-5 cursor-pointer" />
+              <Image 
+              width={20} // Set appropriate width
+              height={20} // Set appropriate height
+              src="/img/add.svg" 
+              alt="Agregar cliente" 
+              className="h-5 w-5 cursor-pointer" 
+              />
             </div>
           </div>
         </div>
