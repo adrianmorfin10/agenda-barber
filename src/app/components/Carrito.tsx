@@ -3,6 +3,11 @@
 import React, { useState } from "react";
 import ClientesList from "./Clienteslist";
 import Image from "next/image";
+import Cliente from '../interfaces/cliente';
+
+import ClientService from "../services/ClientService";
+const clientService = new ClientService();
+import { AppContext } from './AppContext';
 
 interface CartItem {
   id: number;
@@ -11,23 +16,6 @@ interface CartItem {
   cantidad: number;
 }
 
-interface Cliente {
-  id: number;
-  nombre: string;
-  apellido: string;
-  telefono: string;
-  instagram: string;
-  citas: number;
-  inasistencias: number;
-  cancelaciones: number;
-  ultimaVisita: string;
-  descuento: string;
-  ingresosTotales: string;
-  membresia: string;
-  tipo: string;
-  serviciosDisponibles: number;
-  proximoPago: string;
-}
 
 interface CarritoProps {
   items: CartItem[];
@@ -38,7 +26,17 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
   const [isClientListOpen, setIsClientListOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [discount, setDiscount] = useState<number>(0);
-
+  const [clientes, setClientes] = React.useState<Cliente[]>([]);
+  const [ state, dispatchState ]= React.useContext(AppContext);
+  React.useEffect(() => {
+ 
+    getClients(state.sucursal ? { local_id: state.sucursal.id } : false ).then(data => {
+      setClientes(data);
+    }).catch(error => {
+      console.error("Error al obtener los clientes", error);
+    });
+  
+  }, [state.sucursal]);
   const subtotal = items.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
 
   const handleToggleClientList = () => {
@@ -50,6 +48,30 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
     setIsClientListOpen(false);
   };
 
+  const getClients = async (filter:any): Promise<any[]> => {
+  
+    const clientsData = await clientService.getClients(filter);
+    const clients:Cliente[] = clientsData.map((client: any) => ({
+      id: client.id,
+      nombre: client.usuario.nombre,
+      apellido: client.usuario.apellido_paterno + " " + client.usuario.apellido_materno,
+      telefono: client.usuario.telefono,
+      instagram: client.instagram,
+      citas: client.citas || 0,
+      inasistencias: client.inasistencias || 0,
+      cancelaciones: client.cancelaciones || 0,
+      ultimaVisita: client.ultima_visita || "Sin fecha",
+      descuento: client.descuento || "Sin descuento",
+      ingresosTotales: client.ingresos_totales || "Sin ingresos",
+      membresia: client.is_member ? "Activa" : "Inactiva",
+      tipo: client.usuario.tipo || "Sin tipo",
+      serviciosDisponibles: client.servicios_disponibles || 0,
+      proximoPago: client.proximo_pago || "Sin proximo pago"
+    }));
+    return clients;
+  }
+
+  console.log("clientes", clientes);
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
@@ -90,7 +112,7 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
 
       {isClientListOpen ? (
         <ClientesList
-          clientes={[] /* Clientes de ejemplo para probar */}
+          clientes={clientes}
           onSelectCliente={handleSelectCliente}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
