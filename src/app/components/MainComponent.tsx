@@ -48,14 +48,14 @@ const MainComponent: React.FC<MainComponentProps> = ({ children }) => {
 
     
     // Simulación de carga al montar (esto es opcional)
-    useEffect(() => {
-        setIsLoading(true);
-        const timer = setTimeout(() => setIsLoading(false), 2000); // Carga simulada de 2 segundos
-        return () => clearTimeout(timer);
-    }, []);
+    // useEffect(() => {
+    //     setIsLoading(true);
+    //     const timer = setTimeout(() => setIsLoading(false), 2000); 
+    //     return () => clearTimeout(timer);
+    // }, []);
 
-    if (userLoading) return <div>Loading...</div>;
-    if (error) return <div>{error.message}</div>;
+    // if (userLoading) return <div>Loading...</div>;
+    // if (error) return <div>{error.message}</div>;
     // Estado de loading
     return (
         <AppContext.Provider value={store}>

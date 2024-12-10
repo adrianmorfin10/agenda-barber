@@ -119,7 +119,7 @@ const CalendarApp = () => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
     solicitudObject.createSolicitud({
-      cliente_id: parseInt(newEvent.client.id),
+      cliente_id: newEvent.client?.id ? parseInt(newEvent.client.id) : null,
       local_id: localId,
       servicio_id: parseInt(newEvent.service),
       fecha: newEvent.date,

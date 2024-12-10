@@ -3,7 +3,10 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import ClientService from '../services/ClientService';
+import {Empleado} from '../interfaces/empleado';
+import EmpleadoService from '../services/EmpleadoService';
 import { AppContext } from "../components/AppContext";
+const empleadoServiceObject = new EmpleadoService();
 
 interface AddUserModalProps {
   isModalOpen: boolean;
@@ -13,6 +16,7 @@ interface AddUserModalProps {
 
 const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen, onCreateSuccess }) => {
   const [state, dispatchState] = React.useContext(AppContext);
+  const [empleados, setEmpleados] = useState<Empleado[]>([]);
   const [nuevoCliente, setNuevoCliente] = useState({
     nombre: '',
     apellido: '',
@@ -20,9 +24,43 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     email: '',
     instagram: '',
     descuento: 0,
+    creado_por: 0,
     membresia: false,
     foto: null as File | null,
   });
+  React.useEffect(()=>{
+    getEmpleados();
+  }, [state.sucursal])
+  const getEmpleados = ()=>{
+    empleadoServiceObject.getEmpleados(state.sucursal ? { local_id: state.sucursal.id } : false).then(response=>{
+      const _empleados = response.map((item:any)=>{
+        const { reservacions } = item;
+        const canceladas = reservacions.filter((item:any)=>item.state === "cancel");
+        const insistidas = reservacions.filter((item:any)=>item.state === "inasistsida");
+        return {
+          id: item.id,
+          nombre: item.usuario.nombre,
+          apellido: item.usuario.apellido_paterno,
+          telefono: item.usuario.telefono,
+
+          email: item.usuario.email,
+          instagram: '',
+          citas: reservacions?.length || 0,
+          inasistencias: insistidas?.length || 0,
+          cancelaciones: canceladas?.length || 0,
+          ultimaVisita: reservacions.length ? new Date(reservacions[0].fecha).toLocaleString() : '',
+          //falta guardar el costo de la reservacion para calcular esto
+          ingresosTotales: 0,
+          tipo: 'Black',
+          diasTrabajo: item.working_days || [],
+          servicios: item.working_days || [],
+          //Especificar q es proximo pago
+          proximoPago: '',
+      }
+      })
+      setEmpleados(_empleados);
+    }).catch(e=>{})
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -40,6 +78,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
         email: '',
         instagram: '',
         descuento: 0,
+        creado_por: 0,
         membresia: false,
         foto: null,
       });
@@ -132,6 +171,19 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
       className="border p-2 mb-4 w-full rounded-lg text-black placeholder-gray"
       maxLength={50}
     />
+    <select
+      name="employee"
+      value={nuevoCliente.creado_por}
+      onChange={(e)=>{ setNuevoCliente({ ...nuevoCliente, creado_por: parseInt(e.target.value) })}}
+      className={`border p-2 mb-4 w-full rounded-lg text-black placeholder-gray`}
+    >
+      <option value="">Selecciona un empleado</option>
+      {empleados.map((emp:Empleado) => (
+        <option key={emp.id} value={emp.id}>
+          {`${emp.nombre} ${emp.apellido} `} 
+        </option>
+      ))}
+    </select>
 
     {/* Contenedor de Descuento y Membresía */}
     <div className="flex flex-col md:flex-row gap-5 justify-between items-center mb-4">
