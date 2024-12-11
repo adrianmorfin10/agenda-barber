@@ -6,7 +6,7 @@ import ListaDeElementos from '../components/ListaDeElementos';
 import Carrito from '../components/Carrito';
 
 // Define SectionType en VentasPage para mantener compatibilidad con ListaDeElementos
-type SectionType = "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías";
+type SectionType =  "Por Cobrar" | "Productos" | "Membresías";
 
 // Define el tipo de los elementos en el carrito
 interface CartItemType {
@@ -17,7 +17,7 @@ interface CartItemType {
 }
 
 const VentasPage: React.FC = () => {
-  const [selectedSection, setSelectedSection] = useState<SectionType>("Venta Rápida"); // Selección predeterminada
+  const [selectedSection, setSelectedSection] = useState<SectionType>("Productos"); // Selección predeterminada
   const [cartItems, setCartItems] = useState<CartItemType[]>([]); // Elementos en el carrito
 
   const handleAddToCart = (item: Omit<CartItemType, 'cantidad'>) => {
@@ -34,6 +34,8 @@ const VentasPage: React.FC = () => {
       }
     });
   };
+
+  
 
   return (
     <div className="flex min-h-screen bg-gray-100 text-black">
