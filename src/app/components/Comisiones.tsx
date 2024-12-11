@@ -46,7 +46,7 @@ const Comisiones: React.FC = () => {
   const [comisiones, setComisiones] = useState<any[]>([]);
   const [vmComisiones,  setVmComisiones ] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedEmpleado, setSelectedEmpleado] = useState<any>('todos');
+  const [selectedEmpleado, setSelectedEmpleado] = useState<any>('Seleccionar');
   const [activeTree, setActiveTree] = useState<"producto" | "servicio" | "membresia" | null>(null);
   const [membresias, setMembresias] = useState([]);
   const [productos, setProductos] = useState([]);
@@ -89,6 +89,9 @@ const Comisiones: React.FC = () => {
     })
   }
   React.useEffect(()=>{
+    if(!selectedEmpleado?.id)
+      return;
+
     let list:any[] = [];
     switch (activeTree) {
       case 'producto':
@@ -101,6 +104,7 @@ const Comisiones: React.FC = () => {
         list = membresias;
         break;
     }
+    
     const comisionesFiltred = getComisionsAndMap(comisiones, list, activeTree);
     setVmComisiones(comisionesFiltred);
   },[comisiones, activeTree]);
@@ -134,7 +138,7 @@ const Comisiones: React.FC = () => {
     itemId: number,
     nuevaComision: number
   ) => {
-    if (!selectedEmpleado || selectedEmpleado === "todos") return;
+    if (!selectedEmpleado || selectedEmpleado === "Seleccionar") return;
 
     const empleadoId = selectedEmpleado.id;
 
@@ -190,7 +194,7 @@ const Comisiones: React.FC = () => {
           }}
         />
         <div className="flex-1 p-4 text-black">
-          {selectedEmpleado && selectedEmpleado !== "todos" && activeTree && (
+          {selectedEmpleado && selectedEmpleado !== "Seleccionar" && activeTree && (
             <div>
               <h2 className="text-xl font-bold mb-4 text-black">
                 Comisiones de {selectedEmpleado.nombre} - {activeTree.charAt(0).toUpperCase() + activeTree.slice(1)}

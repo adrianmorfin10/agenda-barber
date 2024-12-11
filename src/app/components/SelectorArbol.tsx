@@ -8,7 +8,7 @@ interface Empleado {
 
 interface SelectorArbolProps {
   empleados: Empleado[];
-  selectedEmpleado: "todos" | Empleado | null;
+  selectedEmpleado: "Seleccionar" | Empleado | null;
   setSelectedEmpleado: (empleado: any) => void;
   activeTree: string | null;
   setActiveTree: (tree: any) => void;
@@ -24,11 +24,11 @@ const SelectorArbol: React.FC<SelectorArbolProps> = ({
 
   return (
     <div className="p-4 bg-gray-50 border-r border-gray-300 w-64 text-black">
-      <h2 className="font-semibold text-lg mb-3">Seleccionar Empleado</h2>
+      <h2 className="font-semibold text-lg mb-3">Empleado</h2>
       <select
         value={
-          selectedEmpleado === "todos" || selectedEmpleado === null
-            ? "todos"
+          selectedEmpleado === "Seleccionar" || selectedEmpleado === null || !selectedEmpleado?.id
+            ? "Seleccionar"
             : selectedEmpleado.id.toString()
         }
         onChange={(e) => {
@@ -38,7 +38,7 @@ const SelectorArbol: React.FC<SelectorArbolProps> = ({
         }}
         className="w-full border border-gray-300 rounded p-2 text-black"
       >
-        <option value="todos">Todos</option>
+        <option value="Seleccionar">Seleccionar</option>
         {empleados.map((empleado) => (
           <option key={empleado.id} value={empleado.id}>
             {empleado.nombre} {empleado.apellido}
