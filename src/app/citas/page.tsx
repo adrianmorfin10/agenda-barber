@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import  {  dateFnsLocalizer } from "react-big-calendar";
 
 import format from "date-fns/format";
@@ -296,5 +296,12 @@ const CalendarApp = () => {
     </div>
   );
 };
+const Page = () => {
+  return (
+      <Suspense>
+          <CalendarApp />
+      </Suspense>
+  )
+}
 
-export default CalendarApp;
+export default Page

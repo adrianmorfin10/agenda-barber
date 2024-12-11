@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import  {  dateFnsLocalizer } from "react-big-calendar";
 
 import format from "date-fns/format";
@@ -14,8 +14,8 @@ import {addDays} from "date-fns/addDays";
 import {subDays} from "date-fns/subDays";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { setHours, setMinutes, isToday, addMinutes } from "date-fns";
-import "./styles.css"; // Aquí se manejará el CSS
-import EventModal from "./EventModal"; // Importando el componente desde otro archivo
+import "../citas/styles.css"; // Aquí se manejará el CSS
+import EventModal from "../citas/EventModal"; // Importando el componente desde otro archivo
 import EmpleadoService from "../services/EmpleadoService";
 import ServicioService from "../services/ServicioService";
 import SolicitudService from "../services/SolicitudService";
@@ -175,6 +175,7 @@ const CalendarApp = () => {
   const daysOfWeek = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
   console.log("eventos", events)
   return (
+    
     <div className="flex flex-col h-full bg-white">
       {/* Barra de navegación de días */}
       <div className="w-full bg-white border-b border-[#DADADA]flex items-center justify-between">
@@ -297,4 +298,12 @@ const CalendarApp = () => {
   );
 };
 
-export default CalendarApp;
+const Page = () => {
+  return (
+      <Suspense>
+          <CalendarApp />
+      </Suspense>
+  )
+}
+
+export default Page
