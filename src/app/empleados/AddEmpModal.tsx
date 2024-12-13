@@ -39,10 +39,10 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
   });
 
   React.useEffect(()=>{
-    serviciosObject.getServicios().then(data=>{
+    serviciosObject.getServicios(state.sucursal ? { local_id: state.sucursal.id } : false).then(data=>{
       setServicios(data);
     }).catch(e=>{});
-  },[])
+  },[state.sucursal])
 
   const onSubmitForm = (e:any)=>{
     e.preventDefault();

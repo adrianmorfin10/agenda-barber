@@ -41,13 +41,19 @@ const Clientes = () => {
     setSelectedCliente(cliente);
   };
 
-  const updateClientInList = (updatedCliente: Cliente) => {
-    setClientes((prevClientes) =>
-      prevClientes.map((cliente) =>
-        cliente.id === updatedCliente.id ? updatedCliente : cliente
-      )
-    );
-    setSelectedCliente(updatedCliente); // Actualiza también el cliente seleccionado
+  const updateClientInList = (updatedCliente: Cliente|null) => {
+    if(updatedCliente){
+      setClientes((prevClientes) =>
+        prevClientes.map((cliente) =>
+          cliente.id === updatedCliente.id ? updatedCliente : cliente
+        )
+      );
+      setSelectedCliente(updatedCliente);
+    }else{
+      setSelectedCliente(null);
+      getClients(state.sucursal ? { local_id: state.sucursal.id } : false).then(setClientes);
+    }
+     // Actualiza también el cliente seleccionado
   };
 
   React.useEffect(() => {
