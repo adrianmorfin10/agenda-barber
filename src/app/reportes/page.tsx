@@ -4,7 +4,7 @@
 
 import React from 'react';
 import RepNavBar from '../components/RepNavBar'; // Importa el componente RepNavBar
-import Reportes from './reportes'; // Asegúrate de que la ruta sea correcta
+import Reportes from './Reportes'; // Asegúrate de que la ruta sea correcta
 
 const Page: React.FC = () => {
   return (
