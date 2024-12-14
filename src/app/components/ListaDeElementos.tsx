@@ -40,6 +40,12 @@ const ListaDeElementos = forwardRef<any, ListaDeElementosProps>( ({ section, onA
  
   const [ state, dispatchState ]= React.useContext(AppContext);
 
+  React.useEffect(() => {
+    if(state.sucursal)
+      getData(state.sucursal ? { local_id: state.sucursal.id } : false).finally(()=>{})
+  
+  }, [state.sucursal]);
+
   const getData = async (filter:any) =>{
     const newItems = { ...items };
     //Productos
@@ -70,12 +76,6 @@ const ListaDeElementos = forwardRef<any, ListaDeElementosProps>( ({ section, onA
     setItems(newItems);
   }
 
-  React.useEffect(() => {
-    if(state.sucursal)
-      getData(state.sucursal ? { local_id: state.sucursal.id } : false).finally(()=>{})
-  
-  }, [state.sucursal]);
-
   useImperativeHandle(ref, () => ({
     refreshData: () => {
       getData(state.sucursal ? { local_id: state.sucursal.id } : false).finally(() => {});
@@ -100,5 +100,7 @@ const ListaDeElementos = forwardRef<any, ListaDeElementosProps>( ({ section, onA
     </div>
   );
 });
+
+ListaDeElementos.displayName = "ListaDeElementos";
 
 export default ListaDeElementos;
