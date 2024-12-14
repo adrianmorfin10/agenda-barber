@@ -19,7 +19,8 @@ class VentaService extends HttpService {
 
     async checkout(carrito:any){
 
-        console.log(carrito);
+        const response = await axios.post(`${this.baseUrl}/venta/create`, carrito);
+        return response.data;
          
     }
     

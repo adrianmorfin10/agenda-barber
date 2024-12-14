@@ -35,6 +35,9 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
   const [state, dispatchState] = React.useContext(AppContext);
 
   React.useEffect(() => {
+    if(!state.sucursal?.id)
+      return;
+
     getClients(state.sucursal ? { local_id: state.sucursal.id } : false ).then(data => {
       setClientes(data);
     }).catch(error => {
@@ -69,7 +72,32 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
 
   const getEmpleados = () => {
     empleadoServiceObject.getEmpleados(state.sucursal ? { local_id: state.sucursal.id } : false).then(response => {
-      setEmpleados(response);
+        const _empleados = response.map((item:any)=>{
+          const { reservacions } = item;
+          const canceladas = reservacions.filter((item:any)=>item.state === "cancel");
+          const insistidas = reservacions.filter((item:any)=>item.state === "inasistsida");
+          return {
+            id: item.id,
+            nombre: item.usuario.nombre,
+            apellido: item.usuario.apellido_paterno,
+            telefono: item.usuario.telefono,
+
+            email: item.usuario.email,
+            instagram: '',
+            citas: reservacions?.length || 0,
+            inasistencias: insistidas?.length || 0,
+            cancelaciones: canceladas?.length || 0,
+            ultimaVisita: reservacions.length ? new Date(reservacions[0].fecha).toLocaleString() : '',
+            //falta guardar el costo de la reservacion para calcular esto
+            ingresosTotales: 0,
+            tipo: 'Black',
+            diasTrabajo: item.working_days || [],
+            servicios: item.working_days || [],
+            //Especificar q es proximo pago
+            proximoPago: '',
+        }
+      })
+      setEmpleados(_empleados);
     }).catch(error => {
       console.error("Error al obtener los empleados", error);
     });
@@ -94,8 +122,10 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
 
   const checkOut = async () =>{
 
+    if(!selectedEmployee)
+      return alert("Seleccione un empleado")
     try{
-      const checkOutData = { ventas: items, descuento: discount, client: selectedClient?.id };
+      const checkOutData = { ventas: items, descuento: discount, client: selectedClient?.id || false, empleado_id: selectedEmployee, local_id: state.sucursal.id  };
       await ventaObject.checkout(checkOutData);
       onCheckOutSuccess();
     }catch(e){
@@ -151,7 +181,7 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
             >
               <option value="">Selecciona un empleado</option>
               {empleados.map((emp: any) => (
-                <option key={emp.id} value={emp.id}>
+                <option key={`emp-${emp.id}`} value={emp.id}>
                   {`${emp.nombre} ${emp.apellido}`}
                 </option>
               ))}

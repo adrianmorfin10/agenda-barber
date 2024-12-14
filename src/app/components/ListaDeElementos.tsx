@@ -46,13 +46,13 @@ const ListaDeElementos = forwardRef<any, ListaDeElementosProps>( ({ section, onA
     const resposonseProducts = await productoObject.getProductos(filter);
     const productos = resposonseProducts.map((item: any)=>{
       const { precio_productos, id, nombre, } = item;
-      return { id, nombre, precio: precio_productos.length ? precio_productos[0].precio : 0, type: "producto"   }
+      return { producto_id: id, nombre, precio: precio_productos.length ? precio_productos[0].precio : 0, type: "producto"   }
     });
     newItems["Productos"] = productos;
     const responseServicio = await servicioObject.getServicios(filter);
     const servicios = responseServicio.map((item: any)=>{
       const { precio_servicios, id, nombre, } = item;
-      return { id, nombre, precio: precio_servicios.length ? precio_servicios[0].precio : 0, type: "servicio"   }
+      return { id, servicio_id: id, nombre, precio: precio_servicios.length ? precio_servicios[0].precio : 0, type: "servicio"   }
     });
     newItems["Venta Rápida"] = servicios;
     const porCobrarResponse = await ventaObject.getCitasPorCobrarByLocal(filter.local_id);
@@ -60,12 +60,12 @@ const ListaDeElementos = forwardRef<any, ListaDeElementosProps>( ({ section, onA
       const { id, cliente } = item;
       const { precio_servicios } = item.servicio;
       const nombre = `${item.servicio.nombre} - ${cliente.usuario?.nombre} ${cliente.usuario?.apellido_paterno}`;
-      return { id, nombre, precio: precio_servicios.length ? precio_servicios[0].precio : 0, type: "reservacion_por_cobrar"   }
+      return { id, cita_id: id, nombre, precio: precio_servicios.length ? precio_servicios[0].precio : 0, type: "reservacion_por_cobrar"   }
     });
     const membresiasPorCobrar = await ventaObject.getMembresiasPorCobrarByLocal(filter.local_id);
     newItems["Membresías"] = membresiasPorCobrar.map((item:any)=>{
       const { id, nombre } = item;
-      return { id, nombre, precio:  10, type: "membresia"  };
+      return { id, membresia_id: id, nombre, precio:  10, type: "membresia"  };
     });
     setItems(newItems);
   }

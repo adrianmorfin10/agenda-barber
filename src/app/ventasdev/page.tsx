@@ -41,6 +41,7 @@ const VentasPage: React.FC = () => {
     if (listaDeElementosRef.current) {
       listaDeElementosRef.current.refreshData(); // Llamar a la función interna
     }
+    alert("Su venta se registro correctamente")
 
   }
 
