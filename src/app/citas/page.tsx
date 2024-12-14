@@ -109,7 +109,7 @@ const CalendarApp = () => {
         workDays: item.working_days || [ 1, 2, 3, 4, 5]
       }
     }));
-    const eventos = await solicitudObject.getSolicitudes();
+    const eventos = await solicitudObject.getSolicitudes(filter);
     setEvents(eventos.map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
   }
   React.useEffect(() => {
