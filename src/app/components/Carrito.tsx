@@ -9,7 +9,8 @@ import ClientService from "../services/ClientService";
 import VentaService from "../services/VentaService";
 const clientService = new ClientService();
 const ventaObject = new VentaService();
-
+import EmpleadoService from "../services/EmpleadoService";
+const empleadoServiceObject = new EmpleadoService();
 
 interface CartItem {
   id: number;
@@ -17,7 +18,6 @@ interface CartItem {
   precio: number;
   cantidad: number;
 }
-
 
 interface CarritoProps {
   items: CartItem[],
@@ -30,31 +30,24 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [discount, setDiscount] = useState<number>(0);
   const [clientes, setClientes] = React.useState<Cliente[]>([]);
-  const [ state, dispatchState ]= React.useContext(AppContext);
+  const [empleados, setEmpleados] = React.useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<number | "">(""); // Cambiado a string vacío para manejar mejor el estado inicial
+  const [state, dispatchState] = React.useContext(AppContext);
+
   React.useEffect(() => {
- 
     getClients(state.sucursal ? { local_id: state.sucursal.id } : false ).then(data => {
       setClientes(data);
     }).catch(error => {
       console.error("Error al obtener los clientes", error);
     });
-  
+
+    // Obtener empleados cuando se cambie la sucursal
+    getEmpleados();
   }, [state.sucursal]);
-  const subtotal = items.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-
-  const handleToggleClientList = () => {
-    setIsClientListOpen((prev) => !prev);
-  };
-
-  const handleSelectCliente = (cliente: Cliente) => {
-    setSelectedClient(cliente);
-    setIsClientListOpen(false);
-  };
 
   const getClients = async (filter:any): Promise<any[]> => {
-  
     const clientsData = await clientService.getClients(filter);
-    const clients:Cliente[] = clientsData.map((client: any) => ({
+    const clients: Cliente[] = clientsData.map((client: any) => ({
       id: client.id,
       nombre: client.usuario.nombre,
       apellido: client.usuario.apellido_paterno + " " + client.usuario.apellido_materno,
@@ -72,7 +65,32 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
       proximoPago: client.proximo_pago || "Sin proximo pago"
     }));
     return clients;
-  }
+  };
+
+  const getEmpleados = () => {
+    empleadoServiceObject.getEmpleados(state.sucursal ? { local_id: state.sucursal.id } : false).then(response => {
+      setEmpleados(response);
+    }).catch(error => {
+      console.error("Error al obtener los empleados", error);
+    });
+  };
+
+  const subtotal = items.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+
+  const handleToggleClientList = () => {
+    setIsClientListOpen((prev) => !prev);
+  };
+
+  const handleSelectCliente = (cliente: Cliente) => {
+    setSelectedClient(cliente);
+    setIsClientListOpen(false);
+  };
+
+  const handleSelectEmployee = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = e.target.value;
+    // Convertir el valor seleccionado a número o dejarlo vacío
+    setSelectedEmployee(selectedValue === "" ? "" : Number(selectedValue));
+  };
 
   const checkOut = async () =>{
 
@@ -103,13 +121,14 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
       </div>
 
       {!isClientListOpen && (
-        <div className="mb-4 px-4">
-          <div
-            className="border-dashed border border-gray-400 p-4 rounded-lg cursor-pointer"
-            onClick={handleToggleClientList}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
+        <>
+          {/* Selector de Cliente */}
+          <div className="mb-4 px-4">
+            <div
+              className="border-dashed border border-gray-400 p-4 rounded-lg cursor-pointer"
+              onClick={handleToggleClientList}
+            >
+              <div className="flex items-center justify-between">
                 <div className="bg-black text-white rounded-full h-[40px] w-[70px] flex items-center justify-center mr-3">
                   <Image src="/img/userw.svg" alt="Cliente" width={20} height={20} />
                 </div>
@@ -119,10 +138,26 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
                     : "Seleccione un cliente (opcional)"}
                 </span>
               </div>
-              <Image src="/img/add.svg" alt="Agregar cliente" width={20} height={20} />
             </div>
           </div>
-        </div>
+
+          {/* Selector de Empleado */}
+          <div className="mb-4 px-4">
+            <label className="block text-sm font-semibold text-black">Selecciona empleado que generó la venta</label>
+            <select
+              className="border p-2 w-full rounded-lg text-black"
+              value={selectedEmployee}
+              onChange={handleSelectEmployee}
+            >
+              <option value="">Selecciona un empleado</option>
+              {empleados.map((emp: any) => (
+                <option key={emp.id} value={emp.id}>
+                  {`${emp.nombre} ${emp.apellido}`}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
       )}
 
       {isClientListOpen ? (

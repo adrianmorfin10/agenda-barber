@@ -89,7 +89,7 @@ const ListaDeElementos = forwardRef<any, ListaDeElementosProps>( ({ section, onA
         {(items[section] || []).map((item) => (
           <li
             key={item.id}
-            onClick={() => onAddToCart(item)}
+            onClick={() => onAddToCart(item)}  // Aquí se agrega el producto al carrito
             className="p-3 bg-white rounded cursor-pointer hover:bg-gray-100 flex justify-between shadow"
           >
             <span>{item.nombre}</span>
