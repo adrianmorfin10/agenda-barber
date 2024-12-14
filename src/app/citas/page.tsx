@@ -89,7 +89,7 @@ const CalendarApp = () => {
   const [events, setEvents] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
-  const [ localId, setLocal ] = useState(6);
+  const [ localId, setLocal ] = useState(0);
   const [ servicios, setServicios ] = useState([]);
   const [ empleados, setEmpleados] = useState([]);
   const [state, dispatchState] = React.useContext(AppContext);
@@ -113,7 +113,10 @@ const CalendarApp = () => {
     setEvents(eventos.map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
   }
   React.useEffect(() => {
-    getData(state.sucursal ? { local_id: state.sucursal.id } : false).then();
+    if(state.sucursal){
+      setLocal(state.sucursal.id )
+      getData(state.sucursal ? { local_id: state.sucursal.id } : false).then();
+    }
   }, [state.sucursal]);
   const handleCreateEvent = (newEvent:any) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);

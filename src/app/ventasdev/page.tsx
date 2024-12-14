@@ -6,7 +6,7 @@ import ListaDeElementos from '../components/ListaDeElementos';
 import Carrito from '../components/Carrito';
 
 // Define SectionType en VentasPage para mantener compatibilidad con ListaDeElementos
-type SectionType =  "Por Cobrar" | "Productos" | "Membresías";
+type SectionType =  "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías";
 
 // Define el tipo de los elementos en el carrito
 interface CartItemType {

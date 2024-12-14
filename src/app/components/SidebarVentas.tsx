@@ -4,7 +4,7 @@ import React from 'react';
 import ClientService from '../services/ClientService';
 
 
-type SectionType = "Por Cobrar" | "Productos" | "Membresías";
+type SectionType = "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías";
 
 interface SidebarVentasProps {
   selectedSection: SectionType | null;
@@ -13,7 +13,7 @@ interface SidebarVentasProps {
 
 
 const SidebarVentas: React.FC<SidebarVentasProps> = ({ selectedSection, setSelectedSection }) => {
-  const sections: SectionType[] = ["Por Cobrar", "Productos", "Membresías"];
+  const sections: SectionType[] = ["Venta Rápida", "Por Cobrar", "Productos", "Membresías"];
   
  
   return (
