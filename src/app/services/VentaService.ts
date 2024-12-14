@@ -18,6 +18,8 @@ class VentaService extends HttpService {
     }
 
     async checkout(carrito:any){
+
+        console.log(carrito);
          
     }
     

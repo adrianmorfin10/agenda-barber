@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useImperativeHandle, forwardRef } from 'react';
 import { AppContext } from './AppContext';
 import ProductoService from '../services/ProductoService';
 import ServicioService from '../services/ServicioService';
@@ -21,7 +21,7 @@ interface ListaDeElementosProps {
   onAddToCart: (item: Item) => void;
 }
 
-const ListaDeElementos: React.FC<ListaDeElementosProps> = ({ section, onAddToCart }) => {
+const ListaDeElementos = forwardRef<any, ListaDeElementosProps>( ({ section, onAddToCart }, ref) => {
   const [ items, setItems] = React.useState<Record<SectionType, Item[]>>({
     "Venta Rápida": [],
     "Por Cobrar": [
@@ -76,6 +76,12 @@ const ListaDeElementos: React.FC<ListaDeElementosProps> = ({ section, onAddToCar
   
   }, [state.sucursal]);
 
+  useImperativeHandle(ref, () => ({
+    refreshData: () => {
+      getData(state.sucursal ? { local_id: state.sucursal.id } : false).finally(() => {});
+    }
+  }));
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">{section}</h2>
@@ -93,6 +99,6 @@ const ListaDeElementos: React.FC<ListaDeElementosProps> = ({ section, onAddToCar
       </ul>
     </div>
   );
-};
+});
 
 export default ListaDeElementos;

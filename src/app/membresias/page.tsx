@@ -17,6 +17,8 @@ const MembershipsPage = () => {
   const [state, dispatchState] = React.useContext(AppContext);
 
   React.useEffect(()=>{
+    if(!state.sucursal?.id)
+      return
     getMembreships();
     serviciosObject.getServicios(state.sucursal ? { local_id: state.sucursal.id } : false).then(services=>{
       setServices(services);

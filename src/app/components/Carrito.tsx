@@ -4,10 +4,12 @@ import React, { useState } from "react";
 import ClientesList from "./Clienteslist";
 import Image from "next/image";
 import Cliente from '../interfaces/cliente';
-
-import ClientService from "../services/ClientService";
-const clientService = new ClientService();
 import { AppContext } from './AppContext';
+import ClientService from "../services/ClientService";
+import VentaService from "../services/VentaService";
+const clientService = new ClientService();
+const ventaObject = new VentaService();
+
 
 interface CartItem {
   id: number;
@@ -18,10 +20,11 @@ interface CartItem {
 
 
 interface CarritoProps {
-  items: CartItem[];
+  items: CartItem[],
+  onCheckOutSuccess: ()=>void
 }
 
-const Carrito: React.FC<CarritoProps> = ({ items }) => {
+const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
   const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
   const [isClientListOpen, setIsClientListOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -71,7 +74,19 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
     return clients;
   }
 
-  console.log("clientes", clientes);
+  const checkOut = async () =>{
+
+    try{
+      const checkOutData = { ventas: items, descuento: discount, client: selectedClient?.id };
+      await ventaObject.checkout(checkOutData);
+      onCheckOutSuccess();
+    }catch(e){
+
+    }
+
+  }
+
+ 
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
@@ -163,7 +178,7 @@ const Carrito: React.FC<CarritoProps> = ({ items }) => {
           <div className="mt-6 border-t pt-4">
             <h3 className="text-lg font-semibold">Subtotal: ${subtotal.toFixed(2)}</h3>
             <h3 className="text-lg font-semibold">Total: ${(subtotal - discount).toFixed(2)}</h3>
-            <button className="mt-4 w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800">
+            <button className="mt-4 w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800" onClick={checkOut}>
               Proceder a Pago
             </button>
           </div>
