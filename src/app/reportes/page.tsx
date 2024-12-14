@@ -1,32 +1,21 @@
+// src/app/page.tsx
+
 'use client';
 
 import React from 'react';
-import Reportess from './Reportes'; // Asegúrate de que la ruta sea correcta
+import RepNavBar from '../components/RepNavBar'; // Importa el componente RepNavBar
+import Reportes from './reportes'; // Asegúrate de que la ruta sea correcta
 
 const Page: React.FC = () => {
-  const handleDateChange = (date: Date) => {
-    console.log('Fecha seleccionada:', date);
-  };
-
   return (
-    <main className="min-h-screen bg-gray-100">
-      <Reportess onDateChange={handleDateChange} />
+    <main className="min-h-screen bg-white p-4">
+      {/* Barra de navegación */}
+      <RepNavBar /> {/* Aquí se usa el componente RepNavBar */}
+
+      {/* Contenido de la página */}
+      <Reportes />
     </main>
   );
 };
 
 export default Page;
-
-
-//  import React from "react";
-//  import UnderConstruction from "../components/UnderConstruction";
-
-// const Page = () => {
-//   return (
-//    <div className="flex flex-col items-center justify-center h-screen bg-white">
-//       <UnderConstruction />
-//      </div>
-//   );
-//  };
-//  export default Page;
-
