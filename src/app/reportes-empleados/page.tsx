@@ -6,20 +6,60 @@ import React, { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title, BarElement, CategoryScale, LinearScale } from 'chart.js';
 import RepNavBar from '../components/RepNavBar'; // Importamos el componente RepNavBar
+import { AppContext } from '../components/AppContext';
+import EmpleadoService from '../services/EmpleadoService';
+import ReporteService from '../services/ReporteService';
+const employeeService = new EmpleadoService();
+const reporteObject = new ReporteService();
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title, BarElement, CategoryScale, LinearScale);
-
+const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 const ReportesEmpleados: React.FC = () => {
-  const [selectedEmployee, setSelectedEmployee] = useState('');
+  const [state, dispatchState] = React.useContext(AppContext);
+  const [selectedEmployee, setSelectedEmployee] = useState<number | ''>('');
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth()); // Mes actual por defecto
+  const [employees, setEmployees ] = useState<any[]>([]);
   const [employeeData, setEmployeeData] = useState({
-    totalCitas: 50,
-    citasPorSemana: [10, 15, 12, 13, 8], // Datos de ejemplo para las citas semanales
+    totalCitas: 0,
+    citasPorSemana: [0, 0, 0, 0 ], // Datos de ejemplo para las citas semanales
     semanas: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'], // Nombre de las semanas
   });
+  React.useEffect(()=>{
+
+    if(!state.sucursal?.id)
+      return;
+    
+    employeeService.getEmpleados({ local_id: state.sucursal?.id}).then((employeesData:any[])=>{
+      const _employees = employeesData.map((employee: any) => ({
+        id: employee.id,
+        nombre: employee.usuario.nombre
+      }));
+      console.log("setEmployees", _employees)
+      setEmployees(_employees);
+      if(_employees.length)
+        setSelectedEmployee(_employees[0].id)
+    });
+    
+  }, [state.sucursal]);
+
+  React.useEffect(()=>{
+    if(!state.sucursal?.id || !selectedEmployee)
+      return;
+    getData(state.sucursal?.id, selectedMonth + 1, selectedEmployee).finally();
+  }, [state.sucursal, selectedMonth, selectedEmployee ]);
+
+  const getData = async (local_id: any, month:number | null, employee_id: number | null) =>{
+    const data = await reporteObject.reporteEmpleado(local_id, month, employee_id);
+    
+    const dataList = [0, 0, 0, 0 ];
+    data.citas.forEach((item:any, index:number)=>{
+      dataList[index] = item.total_citas
+    })
+    setEmployeeData({ ...employeeData, totalCitas: data.total_citas, citasPorSemana: dataList })
+  }
 
   const handleEmployeeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedEmployee(event.target.value);
+    setSelectedEmployee(parseInt(event.target.value));
   };
 
   const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -27,7 +67,7 @@ const ReportesEmpleados: React.FC = () => {
   };
 
   const data = {
-    labels: employeeData.semanas.map((semana) => `${semana} de ${['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'][selectedMonth]}`),
+    labels: employeeData.semanas.map((semana) => `${semana} de ${meses[selectedMonth]}`),
     datasets: [
       {
         label: 'Citas Semanales',
@@ -46,7 +86,7 @@ const ReportesEmpleados: React.FC = () => {
       },
       title: {
         display: true,
-        text: `Citas por Empleado - ${['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'][selectedMonth]}`,
+        text: `Citas por Empleado - ${meses[selectedMonth]}`,
       },
     },
     scales: {
@@ -62,7 +102,7 @@ const ReportesEmpleados: React.FC = () => {
       },
     },
   };
-
+  console.log("employees", employees)
   return (
     <div className="p-4 bg-white h-full">
       <RepNavBar /> {/* Barra de navegación fuera del contenedor */}
@@ -83,10 +123,9 @@ const ReportesEmpleados: React.FC = () => {
               onChange={handleEmployeeChange}
               className="border border-gray-300 p-2 rounded"
             >
-              <option value="" disabled>Selecciona un empleado</option>
-              <option value="empleado1">Empleado 1</option>
-              <option value="empleado2">Empleado 2</option>
-              <option value="empleado3">Empleado 3</option>
+              {
+                employees.map((item:any)=>(<option value={item.id} key={`empleado-${item.id}`}>{ item.nombre }</option>))
+              }
             </select>
           </div>
 
@@ -101,7 +140,7 @@ const ReportesEmpleados: React.FC = () => {
               onChange={handleMonthChange}
               className="border border-gray-300 p-2 rounded"
             >
-              {['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'].map((month, index) => (
+              {meses.map((month, index) => (
                 <option key={index} value={index}>
                   {month}
                 </option>
