@@ -7,8 +7,8 @@ class SolicitudService extends HttpService {
         super();
     }
 
-    async getSolicitudes() {
-        const response = await axios.get(`${this.baseUrl}/reservacion`);
+    async getSolicitudes(filter: any = false) {
+        const response = await axios.get(`${this.baseUrl}/reservacion${filter ? `?l=${filter.local_id}` : '' }`);
         return response.data;
     }
 

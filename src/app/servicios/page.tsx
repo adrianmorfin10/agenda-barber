@@ -5,7 +5,9 @@ import SubserviceBar from '../components/SubProductBar';
 import ServiceList from './ServiceList';
 import AddserviceModal from './AddServiceModal';
 import { useRouter } from 'next/navigation'; // Importar useRouter
-
+import { AppContext } from '../components/AppContext';
+import ServicioService from '../services/ServicioService';
+const serviciosObject = new ServicioService();
 interface Servicio {
   id: number; // Asegúrate de que el tipo sea número
   nombre: string;
@@ -15,16 +17,22 @@ interface Servicio {
 
 const ServicesPage: React.FC = () => {
   const router = useRouter(); // Inicializar el router
-  const [services, setServices] = useState<Servicio[]>([
-    { id: 1, nombre: 'Corte de Cabello', tiempo: '30 min', precio: 20 },
-    { id: 2, nombre: 'Borde de Barba', tiempo: '15 min', precio: 15 },
-    { id: 3, nombre: 'Colorimetría', tiempo: '45 min', precio: 50 },
-  ]);
+  const [services, setServices] = useState<Servicio[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleAddservice = (newService: Servicio) => {
-    setServices([...services, newService]);
-    setIsModalOpen(false); // Cierra el modal después de agregar el servicio
+  const [state, dispatchState] = React.useContext(AppContext);
+  React.useEffect(()=>{
+    getServices();
+  },[state.sucursal])
+  const getServices = ()=>{
+    serviciosObject.getServicios(state.sucursal ? { local_id: state.sucursal.id } : false).then((response:any)=>{
+      setServices(response.map((item:any)=>{
+        const { precio_servicios } = item;
+        return { id: item.id, nombre: item.nombre, tiempo: item.tiempo || 0, precio: precio_servicios?.length ? precio_servicios[0].precio : 0 }
+      }));
+    }).catch((e:any)=>{})
+  }
+  const handleAddservice = () => {
+    getServices();
   };
 
   const handleSelectService = (id: number) => {

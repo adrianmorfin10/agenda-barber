@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import ClientService from '../services/ClientService';
+import Link from 'next/link';
+import WarningModal from './WarningModal';
 
 interface Cliente {
   id: number;
@@ -25,7 +27,7 @@ interface Cliente {
 interface ClienteDetailsProps {
   cliente: Cliente | null;
   onBack: () => void;
-  onUpdate: (updatedCliente: Cliente) => void; // Callback para actualizar la información del cliente
+  onUpdate: (updatedCliente: Cliente|null) => void; // Callback para actualizar la información del cliente
 }
 
 const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpdate }) => {
@@ -33,7 +35,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
   const [editedNombre, setEditedNombre] = useState(cliente?.nombre || '');
   const [editedApellido, setEditedApellido] = useState(cliente?.apellido || '');
   const [editedTelefono, setEditedTelefono] = useState(cliente?.telefono || '');
-
+  const [openWarning, setOpenWarning] = useState(false);
   useEffect(() => {
     if (cliente) {
       setEditedNombre(cliente.nombre);
@@ -70,6 +72,17 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
       console.error('Error al actualizar el cliente:', error);
     }
   };
+
+  const handleDelete = async ()=>{
+    try {
+      const response = await clientService.deleteClient(cliente.id.toString());
+      onUpdate(null);
+      setOpenWarning(false);
+      setIsEditing(false); // Salir del modo de edición
+    } catch (error) {
+      console.error('Error al actualizar el cliente:', error);
+    }
+  }
 
   const handleCancelClick = () => {
     setIsEditing(false);
@@ -144,14 +157,12 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
 
         {/* Botón de Agendar (deshabilitado) */}
         <div className="flex flex-col items-center">
-          <button
-            className="flex items-center bg-gray-300 text-gray-500 px-4 py-2 rounded cursor-not-allowed text-sm md:text-base"
-            disabled
-          >
-            <Image src="/img/calendara.svg" alt="Agendar" width={20} height={20} />
-            <span className="ml-2 poppins text-black">Agendar</span>
-          </button>
-          <span className="mt-1 text-xs md:text-sm text-gray-500">(Próximamente)</span>
+          <Link key={"agendar-link"} href={`/citasdev?u=${cliente.id}`} className="flex items-center border border-gray-400 bg-white rounded px-4 py-2 cursor-pointer" >
+            
+              <Image src="/img/calendara.svg" alt="Agendar" width={20} height={20} />
+              <span className="ml-2 poppins text-black">Agendar</span>
+           
+          </Link>
         </div>
 
       </div>
@@ -164,6 +175,12 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
             className="bg-black text-white px-4 py-2 rounded text-sm md:text-base w-full"
           >
             Guardar
+          </button>
+          <button
+            onClick={()=>{ setOpenWarning(true) }}
+            className="border border-red-400 text-red-400 px-4 py-2 rounded text-sm md:text-base w-full"
+          >
+            Borrar
           </button>
           <button
             onClick={handleCancelClick}
@@ -221,6 +238,13 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
         </div>
       </div>
       */}
+      <WarningModal
+        isOpen={openWarning}
+        onConfirm={()=>{ handleDelete(); }}
+        onClose={()=>{ setOpenWarning(false) }}
+        title='Warning'
+        content='Al confirmar esta accion no podra revertir los cambios.'
+      />
     </div>
   );
 };

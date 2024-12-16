@@ -1,6 +1,8 @@
 "use client";
 
 import React from 'react';
+import ClientService from '../services/ClientService';
+
 
 type SectionType = "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías";
 
@@ -9,9 +11,11 @@ interface SidebarVentasProps {
   setSelectedSection: (section: SectionType) => void;
 }
 
+
 const SidebarVentas: React.FC<SidebarVentasProps> = ({ selectedSection, setSelectedSection }) => {
   const sections: SectionType[] = ["Venta Rápida", "Por Cobrar", "Productos", "Membresías"];
-
+  
+ 
   return (
     <div className="w-64 p-4 bg-gray-50 border-r border-gray-200">
       <h2 className="text-lg font-bold mb-4">Ventas</h2>

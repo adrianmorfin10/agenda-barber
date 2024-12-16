@@ -2,18 +2,14 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import ProductoService from '../services/ProductoService';
+import { AppContext } from '../components/AppContext';
+const productoObject = new ProductoService();
 
 interface AddProductModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
-  onAddProduct: (newProduct: {
-    id: number;
-    nombre: string;
-    marca: string;
-    stock: number;
-    precio: number;
-    foto: string; // Cambiado a string para la URL de la imagen
-  }) => void;
+  onAddProduct: () => void;
 }
 
 const AddProductModal: React.FC<AddProductModalProps> = ({ isModalOpen, setIsModalOpen, onAddProduct }) => {
@@ -24,7 +20,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isModalOpen, setIsMod
     precio: 0,
     foto: '', // Cambiado a string para la URL de la imagen
   });
-
+  const [state, dispatchState] = React.useContext(AppContext);
   const [imageLoaded, setImageLoaded] = useState(false); // Estado para controlar si la imagen se cargó
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,23 +42,25 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isModalOpen, setIsMod
 
   const handleAddProduct = () => {
     const newProduct = {
-      id: Date.now(), // O un método adecuado para asignar IDs
       nombre: nuevoProducto.nombre,
       marca: nuevoProducto.marca,
       stock: nuevoProducto.stock,
       precio: nuevoProducto.precio,
-      foto: nuevoProducto.foto,
+      local_id: state.sucursal.id 
     };
-    onAddProduct(newProduct);
-    setNuevoProducto({
-      nombre: '',
-      marca: '',
-      stock: 0,
-      precio: 0,
-      foto: '',
-    });
-    setIsModalOpen(false);
-    setImageLoaded(false); // Reinicia el estado de carga de imagen
+    productoObject.createProducto(newProduct).then(()=>{
+      onAddProduct();
+      setNuevoProducto({
+        nombre: '',
+        marca: '',
+        stock: 0,
+        precio: 0,
+        foto: '',
+      });
+      setIsModalOpen(false);
+      setImageLoaded(false); 
+    }).catch(e=>{})
+    // Reinicia el estado de carga de imagen
   };
 
   const handleImageUploadClick = () => {

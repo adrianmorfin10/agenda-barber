@@ -21,7 +21,7 @@
 
 "@auth0/nextjs-auth0@^3.5.0":
   version "3.5.0"
-  resolved "https://registry.npmjs.org/@auth0/nextjs-auth0/-/nextjs-auth0-3.5.0.tgz"
+  resolved "https://registry.yarnpkg.com/@auth0/nextjs-auth0/-/nextjs-auth0-3.5.0.tgz#f596d641cba7a96b924481fda384e7feb811bb26"
   integrity sha512-uFZEE2QQf1zU+jRK2fwqxRQt+WSqDPYF2tnr7d6BEa7b6L6tpPJ3evzoImbWSY1a7gFdvD7RD/Rvrsx7B5CKVg==
   dependencies:
     "@panva/hkdf" "^1.0.2"

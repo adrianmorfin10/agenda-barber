@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import SidebarVentas from '../components/SidebarVentas';
 import ListaDeElementos from '../components/ListaDeElementos';
 import Carrito from '../components/Carrito';
 
 // Define SectionType en VentasPage para mantener compatibilidad con ListaDeElementos
-type SectionType = "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías";
+type SectionType =  "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías";
 
 // Define el tipo de los elementos en el carrito
 interface CartItemType {
@@ -17,8 +17,9 @@ interface CartItemType {
 }
 
 const VentasPage: React.FC = () => {
-  const [selectedSection, setSelectedSection] = useState<SectionType>("Venta Rápida"); // Selección predeterminada
+  const [selectedSection, setSelectedSection] = useState<SectionType>("Productos"); // Selección predeterminada
   const [cartItems, setCartItems] = useState<CartItemType[]>([]); // Elementos en el carrito
+  const listaDeElementosRef = useRef<any>(null); 
 
   const handleAddToCart = (item: Omit<CartItemType, 'cantidad'>) => {
     setCartItems((prevItems) => {
@@ -35,6 +36,15 @@ const VentasPage: React.FC = () => {
     });
   };
 
+  const onCheckOutSuccess = ()=>{
+    setCartItems([]);
+    if (listaDeElementosRef.current) {
+      listaDeElementosRef.current.refreshData(); // Llamar a la función interna
+    }
+    alert("Su venta se registro correctamente")
+
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-100 text-black">
       {/* Sidebar con los títulos de las secciones */}
@@ -46,7 +56,7 @@ const VentasPage: React.FC = () => {
       {/* Columna central que muestra los elementos de la sección seleccionada */}
       <div className="flex-1 p-6 bg-gray-50">
         {selectedSection ? (
-          <ListaDeElementos section={selectedSection} onAddToCart={handleAddToCart} />
+          <ListaDeElementos ref={listaDeElementosRef} section={selectedSection} onAddToCart={handleAddToCart} />
         ) : (
           <p className="text-lg text-gray-500">Seleccione una sección para ver los elementos.</p>
         )}
@@ -55,7 +65,7 @@ const VentasPage: React.FC = () => {
       {/* Componente de Carrito con diseño responsive */}
       <div className="hidden lg:block w-[450px] p-6 bg-white shadow-lg">
         <h1 className="text-2xl font-bold mb-4">Detalle de Venta</h1>
-        <Carrito items={cartItems} />
+        <Carrito items={cartItems} onCheckOutSuccess={onCheckOutSuccess} />
       </div>
 
       {/* Carrito móvil (ventana emergente en la parte inferior de la pantalla) */}

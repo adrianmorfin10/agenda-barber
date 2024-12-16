@@ -4,7 +4,9 @@ import React, { useState } from 'react';
 import AddProductModal from './AddProductModal';
 import Link from 'next/link'; // Asegúrate de importar Link
 import Image from 'next/image'; // Importa el componente Image para cargar el ícono
-
+import ProductoService from '../services/ProductoService';
+import { AppContext } from '../components/AppContext';
+const productoObject = new ProductoService();
 interface Product {
   id: number; // o string, según lo que estés usando como identificador
   nombre: string;
@@ -16,17 +18,23 @@ interface Product {
 
 const ProductList: React.FC = () => {
   // Agrega algunos productos de ejemplo
-  const initialProducts: Product[] = [
-    { id: 1, nombre: "Producto A", marca: "Marca A", stock: 10, precio: 100, foto: "url_a_la_imagen_A" },
-    { id: 2, nombre: "Producto B", marca: "Marca B", stock: 5, precio: 200, foto: "url_a_la_imagen_B" },
-    { id: 3, nombre: "Producto C", marca: "Marca C", stock: 0, precio: 150, foto: "url_a_la_imagen_C" },
-  ];
-
-  const [products, setProducts] = useState<Product[]>(initialProducts); // Estado para los productos
+  const [products, setProducts] = useState<Product[]>([]); // Estado para los productos
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleAddProduct = (newProduct: Product) => {
-    setProducts((prevProducts) => [...prevProducts, newProduct]); // Agregar el nuevo producto
+  const [state, dispatchState] = React.useContext(AppContext);
+  const getProductos = ()=>{
+    productoObject.getProductos(state.sucursal ? { local_id: state.sucursal.id } : false).then(response=>{
+      const productos = response.map((item: any)=>{
+        const { precio_productos, id, nombre, marca, stock } = item;
+        return { id, nombre, marca, stock, precio: precio_productos.length ? precio_productos[0].precio : 0  }
+      });
+      setProducts(productos)
+    })
+  }
+  React.useEffect(()=>{
+    getProductos();
+  },[state.sucursal])
+  const handleAddProduct = () => {
+    getProductos();// Agregar el nuevo producto
   };
 
   return (

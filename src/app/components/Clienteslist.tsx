@@ -38,8 +38,7 @@ const ClientesList: React.FC<ClientesListProps> = ({
   reloadClients
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  console.log("clientes", clientes);
-  const filteredClientes = clientes;
+
   // .filter(cliente =>
   //   `${cliente.nombre} ${cliente.apellido}`.toLowerCase().includes(searchTerm.toLowerCase())
   // );
@@ -71,7 +70,7 @@ const ClientesList: React.FC<ClientesListProps> = ({
 
       {/* Lista de usuarios filtrados */}
       <div className="overflow-y-auto max-h-[450px]">
-        {filteredClientes.map(cliente => (
+        {(clientes || []).map(cliente => (
           <div
             key={cliente.id}
             className="flex items-center mb-4 cursor-pointer p-2 rounded-lg hover:bg-gray-100"

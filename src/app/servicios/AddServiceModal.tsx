@@ -2,16 +2,13 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-
+import ServicioService from '../services/ServicioService';
+import { AppContext } from '../components/AppContext';
+const serviciosObject = new ServicioService();
 interface AddserviceModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
-  onAddservice: (newservice: {
-    id: number;
-    nombre: string;
-    tiempo: string; // Cambiado de "marca" a "tiempo"
-    precio: number;
-  }) => void;
+  onAddservice: () => void;
 }
 
 const AddserviceModal: React.FC<AddserviceModalProps> = ({ isModalOpen, setIsModalOpen, onAddservice }) => {
@@ -20,7 +17,7 @@ const AddserviceModal: React.FC<AddserviceModalProps> = ({ isModalOpen, setIsMod
     tiempo: '', // Añadido campo de tiempo
     precio: 0,
   });
-
+  const [state, dispatchState] = React.useContext(AppContext);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNuevoserviceo({ ...nuevoserviceo, [name]: value });
@@ -28,18 +25,23 @@ const AddserviceModal: React.FC<AddserviceModalProps> = ({ isModalOpen, setIsMod
 
   const handleAddservice = () => {
     const newservice = {
-      id: Date.now(),
       nombre: nuevoserviceo.nombre,
       tiempo: nuevoserviceo.tiempo, // Añadido aquí
       precio: nuevoserviceo.precio,
+      local_id: state.sucursal.id
     };
-    onAddservice(newservice);
-    setNuevoserviceo({
-      nombre: '',
-      tiempo: '', // Restablecer campo de tiempo
-      precio: 0,
-    });
-    setIsModalOpen(false);
+    serviciosObject.createService(newservice).then((response:any)=>{
+      onAddservice();
+      setNuevoserviceo({
+        nombre: '',
+        tiempo: '', // Restablecer campo de tiempo
+        precio: 0,
+      });
+      setIsModalOpen(false);
+    }).catch((e:any)=>{
+
+    })
+    
   };
 
   if (!isModalOpen) return null;

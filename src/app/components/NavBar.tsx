@@ -19,14 +19,10 @@ interface Sucursal {
 const NavBar: React.FC = () => {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<Sucursal | any>({
-    id: 1,
-    nombre: "Sucursal 1",
-    direccion: "Calle Falsa 123",
-    encargado: "Carlos Perez"
-  });
+  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<Sucursal | any>(null);
   const [sucursales, setSucursales] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [appState, dispatchState] = useAppContext();
 
   const handleSucursalSelect = (sucursal: Sucursal) => {
@@ -59,17 +55,19 @@ const NavBar: React.FC = () => {
   };
 
   React.useEffect(() => {
+    setLoading(true);
     localServiceObject.getLocales()
       .then((locales) => {
         const selected = locales.find(item => item.seleccionado);
-        dispatchState({ key: "sucursal", value: selected });
         setSucursales(locales);
         setSucursalSeleccionada(selected);
+        dispatchState({ key: "sucursal", value: selected });
+        setLoading(false);
       })
       .catch((e) => {
         console.error("Error fetching branches on load:", e);
       });
-  }, [dispatchState]);
+  }, []);
 
   const navItems = [
     { path: '/citas', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },
@@ -101,11 +99,15 @@ const NavBar: React.FC = () => {
             </Link>
           ))}
         </div>
-        <div className="mt-auto flex items-center text-white cursor-pointer" onClick={() => setIsModalOpen(true)}>
+        <div className="mt-auto flex items-center text-white cursor-pointer" onClick={() =>{ setIsModalOpen(true); }}>
           <div className="bg-[#1c1c1c] rounded-full p-2 mr-2">
             <Image src="/img/local.svg" alt="Sucursal" width={20} height={20} />
           </div>
-          <span>{sucursalSeleccionada?.nombre || 'Seleccione la sucursal'}</span>
+          {
+            !loading && sucursalSeleccionada?
+            <span>{sucursalSeleccionada?.nombre || 'Seleccione la sucursal'}</span> :
+            <span>{'Cargando ...'}</span>
+          }
         </div>
       </div>
 
