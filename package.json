@@ -32,7 +32,9 @@
     "react-big-calendar": "^1.15.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
-    "react-hook-form": "^7.53.0"
+    "react-hook-form": "^7.53.0",
+    "react-image-crop": "^11.0.7",
+    "react-modal": "^3.16.3"
   },
   "devDependencies": {
     "@types/date-fns": "^2.5.3",
@@ -41,6 +43,7 @@
     "@types/node": "^20",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
+    "@types/react-modal": "^3.16.3",
     "eslint": "^8",
     "eslint-config-next": "14.2.15",
     "postcss": "^8",
