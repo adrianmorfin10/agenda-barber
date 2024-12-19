@@ -19,6 +19,7 @@ interface AddUserModalProps {
 const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen, onCreateSuccess }) => {
   const [state, dispatchState] = React.useContext(AppContext);
   const [empleados, setEmpleados] = useState<Empleado[]>([]);
+  const [file, setFile] = useState<File | null>(null);
   const [nuevoCliente, setNuevoCliente] = useState({
     nombre: '',
     apellido: '',
@@ -73,9 +74,29 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     setNuevoCliente({ ...nuevoCliente, [name]: value });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    setFile(selectedFile);
+  };
+
   const handleAddCliente = () => {
     const clientService = new ClientService();
-    clientService.createClient({ ...nuevoCliente, local_id: parseInt(state?.sucursal.id) })
+    const formData = new FormData();
+    formData.append('nombre', nuevoCliente.nombre);
+    formData.append('apellido', nuevoCliente.apellido);
+    formData.append('telefono', nuevoCliente.telefono);
+    formData.append('email', nuevoCliente.email);
+    formData.append('instagram', nuevoCliente.instagram);
+    formData.append('descuento', nuevoCliente.descuento.toString());
+    formData.append('membresia', nuevoCliente.membresia.toString());
+    formData.append('creado_por', nuevoCliente.creado_por.toString());
+    formData.append('local_id', state?.sucursal.id.toString());
+    if (file) {
+      formData.append('foto', file);
+    }
+    
+
+    clientService.createClient(formData)
       .then((response) => {
         setNuevoCliente({
           nombre: '',
@@ -88,6 +109,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
           creado_por: 0,
           foto: null,
         });
+        setFile(null);
         setSuccessModalOpen(true);
         if (typeof onCreateSuccess === "function") onCreateSuccess();
         setIsModalOpen(false);
@@ -123,6 +145,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
           </div>
           {/* Campos del formulario */}
           <div className="mb-4">
+            
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
+            />
             <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">Nombre:</label>
             <input
               type="text"

@@ -69,7 +69,7 @@ const ClientesList: React.FC<ClientesListProps> = ({
       <AddUserModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onCreateSuccess={reloadClients} />
 
       {/* Lista de usuarios filtrados */}
-      <div className="overflow-y-auto max-h-[450px]">
+      <div className="overflow-y-auto ">
         {(clientes || []).map(cliente => (
           <div
             key={cliente.id}

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import ClientService from '../services/ClientService';
 import Link from 'next/link';
 import WarningModal from './WarningModal';
+import HttpService from '../services/HttpService';
 
 interface Cliente {
   id: number;
@@ -22,6 +23,7 @@ interface Cliente {
   tipo: string;
   serviciosDisponibles: number;
   proximoPago: string;
+  avatar: string | null;
 }
 
 interface ClienteDetailsProps {
@@ -30,6 +32,7 @@ interface ClienteDetailsProps {
   onUpdate: (updatedCliente: Cliente|null) => void; // Callback para actualizar la información del cliente
 }
 
+const httpService = new HttpService();
 const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedNombre, setEditedNombre] = useState(cliente?.nombre || '');
@@ -117,9 +120,14 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
         </div>
 
         <div className="flex flex-col items-center mb-4 md:mb-0">
-          <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px] text-sm md:text-base">
-            {cliente.nombre.charAt(0)}{cliente.apellido.charAt(0)}
-          </div>
+          {
+            !cliente.avatar ?
+            <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px] text-sm md:text-base">
+              {cliente.nombre.charAt(0)}{cliente.apellido.charAt(0)}
+            </div> :
+            <img src={`${httpService.baseUrl}/file/${cliente.avatar}`} className='rounded-full ' />
+          }
+          
           {isEditing ? (
             <>
               <label className="block text-sm text-gray-500 mt-2">Nombre:</label>

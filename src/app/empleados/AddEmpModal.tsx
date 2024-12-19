@@ -19,16 +19,17 @@ interface Empleado {
   apellido: string;
   telefono: string;
   email: string;
-  instagram?: string;
+  instagram: string;
   diasTrabajo: number[];
   servicios: number[];
   local_id?: number;
+  foto?: any
 }
 
 const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, onAddEmpleado }) => {
   const [ servicios, setServicios ] = useState([]);
-  const [state, dispatchState] = React.useContext(AppContext);
-  const [nuevoEmpleado, setNuevoEmpleado] = useState<Omit<Empleado, 'id'>>({
+  const [file, setFile] = useState<File | null>(null);
+  const [nuevoEmpleado, setNuevoEmpleado] = useState<Empleado>({
     nombre: '',
     apellido: '',
     telefono: '',
@@ -37,7 +38,7 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
     diasTrabajo: [],
     servicios: [],
   });
-
+  const [state, dispatchState] = React.useContext(AppContext);
   React.useEffect(()=>{
     serviciosObject.getServicios(state.sucursal ? { local_id: state.sucursal.id } : false).then(data=>{
       setServicios(data);
@@ -72,8 +73,28 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null; // Obtener el archivo seleccionado
+    setNuevoEmpleado({ ...nuevoEmpleado, foto: file });
+  };
+
   const handleAddEmpleado = () => {
   
+    const formData = new FormData();
+    formData.append('nombre', nuevoEmpleado.nombre);
+    formData.append('apellido', nuevoEmpleado.apellido);
+    formData.append('telefono', nuevoEmpleado.telefono);
+    formData.append('email', nuevoEmpleado.email);
+    formData.append('instagram', nuevoEmpleado.instagram);
+    nuevoEmpleado.diasTrabajo.forEach((item:any)=>{
+      formData.append('diasTrabajo[]', item);
+    })
+    nuevoEmpleado.servicios.forEach((item:any)=>{
+      formData.append('servicios[]', item);
+    })
+    if (file) {
+      formData.append('foto', file);
+    }
     empleadoObject.createEmpleado({ ...nuevoEmpleado, local_id: state.sucursal.id }).then(data=>{
       setIsModalOpen(false);
       setNuevoEmpleado({
@@ -109,6 +130,15 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
               />
               <h2 className="text-lg font-semibold ml-2 text-[#0C101E]">Añadir Nuevo Empleado</h2>
             </div>
+
+            
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
+            />
 
             <input
               type="text"
