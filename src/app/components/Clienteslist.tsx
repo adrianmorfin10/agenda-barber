@@ -20,6 +20,7 @@ interface Cliente {
   tipo: string;
   serviciosDisponibles: number;
   proximoPago: string;
+  avatar: string | null;
 }
 
 interface ClientesListProps {

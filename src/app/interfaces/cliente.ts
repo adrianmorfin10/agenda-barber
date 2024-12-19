@@ -14,5 +14,6 @@ interface Cliente {
     tipo: string;
     serviciosDisponibles: number;
     proximoPago: string;
+    avatar: string | null
   }
   export default Cliente;
