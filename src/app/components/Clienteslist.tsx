@@ -38,6 +38,7 @@ const ClientesList: React.FC<ClientesListProps> = ({
   setSearchTerm,
   reloadClients
 }) => {
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // .filter(cliente =>

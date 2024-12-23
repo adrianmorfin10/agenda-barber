@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
+import React, { Suspense, use, useState } from "react";
 import  {  dateFnsLocalizer } from "react-big-calendar";
 
 import format from "date-fns/format";
@@ -22,6 +22,7 @@ import SolicitudService from "../services/SolicitudService";
 import moment from "moment";
 import Image from 'next/image';
 import { AppContext } from '../components/AppContext';
+import SurveyModal from "../components/SurveyModal";
 const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
@@ -92,6 +93,8 @@ const CalendarApp = () => {
   const [ localId, setLocal ] = useState(0);
   const [ servicios, setServicios ] = useState([]);
   const [ empleados, setEmpleados] = useState([]);
+  const [ selectedEvent, setSelectedEvent ] = useState<any>(null);
+  const [ openSurveyModal, setOpenSurveyModal ] = useState<boolean>(false);
   const [state, dispatchState] = React.useContext(AppContext);
   const getData = async (filter:any) => {
     const _servicios = await servicioObject.getServicios(filter);
@@ -171,12 +174,31 @@ const CalendarApp = () => {
     setCurrentMonth(subMonths(currentMonth, 1));
   };
 
+  const onUpdateEvent = async (event:any) => {
+
+    try {
+      await solicitudObject.updateSolicitud(event.id, event);
+      setSelectedEvent(event);
+      setIsModalOpen(false);
+      if(event.estado === "completada")
+        setOpenSurveyModal(true);
+      return getData(state.sucursal ? { local_id: state.sucursal.id } : false);
+    } catch (error) {
+      
+    }
+    
+  }
+  const onClickEvent = (event:any, e:any)=>{
+    e.stopPropagation();
+    setSelectedEvent(event);
+    setIsModalOpen(true);
+  }
   const currentHour = new Date();
   const isCurrentDay = isToday(selectedDay);
 
   // Nombres de los días de la semana en español
   const daysOfWeek = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
-  console.log("eventos", events)
+  
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Barra de navegación de días */}
@@ -265,7 +287,7 @@ const CalendarApp = () => {
                           const employeeColor = colors[index % colors.length];
                           return (
                             <div
-                              key={i}
+                              key={`event-${event.id}-${i}`}
                               className={`absolute left-0 ${employeeColor} text-xs p-1 rounded`}
                               style={{
                                 top: 0,
@@ -274,6 +296,7 @@ const CalendarApp = () => {
                                 margin: "4px 4px",
                                 left: index === 0 ? "40px" : "0",
                               }}
+                              onClick={(e) => onClickEvent(event, e)}
                             >
                               {event.title} ({ event.start_hour ? event.start_hour : ""} - { event.end_hour ? event.end_hour : ""})
                             </div>
@@ -292,9 +315,22 @@ const CalendarApp = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreateEvent={handleCreateEvent}
+        onUpdate={(event:any)=>onUpdateEvent(event)}
         slot={selectedSlot}
+        event={selectedEvent}
         employees={empleados}
         services={servicios}
+      />
+      <SurveyModal 
+        isOpen={openSurveyModal} 
+        onClose={()=>{ setOpenSurveyModal(false)}} 
+        onConfirm={(rating:number)=>{
+          if(!selectedEvent)
+            return
+          solicitudObject.updateSolicitud(selectedEvent?.id, { ...selectedEvent, calificacion: rating}).then(()=>{ 
+            setOpenSurveyModal(false)
+          })
+        }} 
       />
     </div>
   );

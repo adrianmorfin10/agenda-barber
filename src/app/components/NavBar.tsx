@@ -15,7 +15,23 @@ interface Sucursal {
   direccion: string;
   encargado: string;
 }
-
+ const navItemsByRol:any = {
+  'admin':[
+    { path: '/citas', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },
+    { path: '/ventas', label: 'Ventas', icon: '/img/bill.svg', inactiveIcon: '/img/bill-inactive.svg' },
+    { path: '/clientes', label: 'Clientes', icon: '/img/user.svg', inactiveIcon: '/img/user-inactive.svg' },
+    { path: '/productos', label: 'Productos', icon: '/img/product.svg', inactiveIcon: '/img/product-inactive.svg' },
+    { path: '/reportes', label: 'Reportes', icon: '/img/report.svg', inactiveIcon: '/img/report-inactive.svg' },
+    { path: '/empleados', label: 'Empleados', icon: '/img/emp.svg', inactiveIcon: '/img/emp-inactive.svg' },
+  ], 
+  'encargado':[
+    { path: '/citas', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },
+    { path: '/ventas', label: 'Ventas', icon: '/img/bill.svg', inactiveIcon: '/img/bill-inactive.svg' },
+    { path: '/clientes', label: 'Clientes', icon: '/img/user.svg', inactiveIcon: '/img/user-inactive.svg' },
+    { path: '/productos', label: 'Productos', icon: '/img/product.svg', inactiveIcon: '/img/product-inactive.svg' },
+    { path: '/empleados', label: 'Empleados', icon: '/img/emp.svg', inactiveIcon: '/img/emp-inactive.svg' },
+  ],
+ }
 const NavBar: React.FC = () => {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -58,7 +74,13 @@ const NavBar: React.FC = () => {
     setLoading(true);
     localServiceObject.getLocales()
       .then((locales) => {
-        const selected = locales.find(item => item.seleccionado);
+        let selected = null; 
+        if(appState.user.barberos.length){
+          selected = locales.find((local: any) => local.id === appState.user.barberos[0].local_id);
+        }else{
+          selected = locales.find((local: any) => local.seleccionado);
+        }
+        
         setSucursales(locales);
         setSucursalSeleccionada(selected);
         dispatchState({ key: "sucursal", value: selected });
@@ -69,14 +91,7 @@ const NavBar: React.FC = () => {
       });
   }, []);
 
-  const navItems = [
-    { path: '/citas', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },
-    { path: '/ventas', label: 'Ventas', icon: '/img/bill.svg', inactiveIcon: '/img/bill-inactive.svg' },
-    { path: '/clientes', label: 'Clientes', icon: '/img/user.svg', inactiveIcon: '/img/user-inactive.svg' },
-    { path: '/productos', label: 'Productos', icon: '/img/product.svg', inactiveIcon: '/img/product-inactive.svg' },
-    { path: '/reportes', label: 'Reportes', icon: '/img/report.svg', inactiveIcon: '/img/report-inactive.svg' },
-    { path: '/empleados', label: 'Empleados', icon: '/img/emp.svg', inactiveIcon: '/img/emp-inactive.svg' },
-  ];
+  const navItems = navItemsByRol[appState.user.rol];
 
   return (
     <div>
@@ -87,7 +102,7 @@ const NavBar: React.FC = () => {
         </div>
         <hr className="border-t border-[#1D1D1D] my-1" />
         <div className="flex flex-col space-y-4">
-          {navItems.map(item => (
+          {navItems.map((item:any) => (
             <Link key={item.path} href={item.path} className={`flex items-center space-x-2 p-2 transition hover:bg-[#1D1D1D] rounded-md ${pathname === item.path ? 'text-white' : 'text-[#7C7C7C]'}`}>
               <Image 
                 src={pathname === item.path ? item.icon : item.inactiveIcon} 
@@ -99,7 +114,7 @@ const NavBar: React.FC = () => {
             </Link>
           ))}
         </div>
-        <div className="mt-auto flex items-center text-white cursor-pointer" onClick={() =>{ setIsModalOpen(true); }}>
+        <div className="mt-auto flex items-center text-white cursor-pointer" onClick={() =>{ if(!appState.user.barberos.length) setIsModalOpen(true); }}>
           <div className="bg-[#1c1c1c] rounded-full p-2 mr-2">
             <Image src="/img/local.svg" alt="Sucursal" width={20} height={20} />
           </div>
@@ -113,11 +128,11 @@ const NavBar: React.FC = () => {
 
       {/* Mobile NavBar */}
       <div className="md:hidden fixed top-0 left-0 right-0 flex items-center justify-between p-4 bg-[#0C0C0C] z-50">
-        <button onClick={() => setMenuOpen(!menuOpen)}>
+        <button onClick={() =>{ if(!appState.user.barberos.length) setMenuOpen(!menuOpen) }}>
           <Image src={menuOpen ? '/img/close.svg' : '/img/menu.svg'} alt="Menu" width={30} height={30} />
         </button>
         <Image src="/img/logo-responsive.png" alt="Logo" width={30} height={30} />
-        <div className="flex items-center cursor-pointer" onClick={() => setIsModalOpen(true)}>
+        <div className="flex items-center cursor-pointer" onClick={() => { if(!appState.user.barberos.length) setIsModalOpen(true)}}>
           <div className="bg-[#1c1c1c] rounded-full p-2">
             <Image src="/img/local.svg" alt="Sucursal" width={20} height={20} />
           </div>
@@ -127,7 +142,7 @@ const NavBar: React.FC = () => {
       {/* Mobile Menu */}
 <div className={`md:hidden fixed inset-0 bg-[#0C0C0C] z-40 transition-transform transform ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
   <div className="p-5 mt-16"> {/* Added margin-top to ensure full visibility */}
-    {navItems.map(item => (
+    {navItems.map((item:any) => (
       <Link 
         key={item.path} 
         href={item.path} 

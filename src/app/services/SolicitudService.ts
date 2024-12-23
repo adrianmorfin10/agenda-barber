@@ -22,8 +22,9 @@ class SolicitudService extends HttpService {
         return response.data;
     }
 
-    async updateSolicitud(id: string, client: any) {
-        const response = await axios.post(`${this.baseUrl}/reservacion/${id}/update`, client);
+    async updateSolicitud(id: string | null, reservacion: any | null) {
+        if(!id || !reservacion) return;
+        const response = await axios.post(`${this.baseUrl}/reservacion/${id}/update`, reservacion);
         return response.data;
     }
     

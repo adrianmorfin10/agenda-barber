@@ -23,7 +23,8 @@ interface Empleado {
   diasTrabajo: number[];
   servicios: number[];
   local_id?: number;
-  foto?: any
+  foto?: any;
+  encargado: boolean;
 }
 
 const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, onAddEmpleado }) => {
@@ -37,6 +38,7 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
     instagram: '',
     diasTrabajo: [],
     servicios: [],
+    encargado: false
   });
   const [state, dispatchState] = React.useContext(AppContext);
   React.useEffect(()=>{
@@ -86,6 +88,8 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
     formData.append('telefono', nuevoEmpleado.telefono);
     formData.append('email', nuevoEmpleado.email);
     formData.append('instagram', nuevoEmpleado.instagram);
+    if(nuevoEmpleado.encargado)
+      formData.append('encargado', 'true');
     nuevoEmpleado.diasTrabajo.forEach((item:any)=>{
       formData.append('diasTrabajo[]', item);
     })
@@ -105,6 +109,7 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
         instagram: '',
         diasTrabajo: [],
         servicios: [],
+        encargado: false
       });
       onAddEmpleado();
 
@@ -130,8 +135,6 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
               />
               <h2 className="text-lg font-semibold ml-2 text-[#0C101E]">Añadir Nuevo Empleado</h2>
             </div>
-
-            
 
             <input
               type="file"
@@ -192,6 +195,25 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
               className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
               maxLength={50}
             />
+
+            {/* Sección de Membresía */}
+            {
+              state.user.rol === 'admin' && 
+              <div className="w-full">
+                <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">Encargado</label>
+                <div className="flex items-center px-2 py-2">
+                  <button
+                    className={`w-10 h-5 flex items-center rounded-full p-1 ${nuevoEmpleado.encargado ? 'bg-green-500' : 'bg-gray-300'}`}
+                    onClick={() => { setNuevoEmpleado({ ...nuevoEmpleado, encargado: !nuevoEmpleado.encargado })}}
+                  >
+                    <div
+                      className={`w-4 h-4 bg-white rounded-full shadow-md transform duration-300 ease-in-out ${nuevoEmpleado.encargado ? 'translate-x-5' : 'translate-x-0'}`}
+                    />
+                  </button>
+                </div>
+              </div>
+            }
+            
 
             {/* Selección de días de trabajo en horizontal */}
             <div className="flex flex-col mb-4">

@@ -92,6 +92,7 @@ const CalendarApp = () => {
   const [ localId, setLocal ] = useState(6);
   const [ servicios, setServicios ] = useState([]);
   const [ empleados, setEmpleados] = useState([]);
+  const [ selectedEvent, setSelectedEvent ] = useState(null);
   const [state, dispatchState] = React.useContext(AppContext);
   const getData = async (filter:any) => {
     const _servicios = await servicioObject.getServicios(filter);
@@ -146,6 +147,7 @@ const CalendarApp = () => {
   const handleHourClick = (hour:any) => {
     const roundedHour = roundToNearestHour(hour);
     setSelectedSlot({ start: roundedHour, end: addMinutes(roundedHour, 60), date: selectedDay });
+    setSelectedEvent(null);
     setIsModalOpen(true);
   };
   
@@ -230,7 +232,7 @@ const CalendarApp = () => {
                   const isWorkingDay = (emp.workDays || []).includes(getDay(selectedDay));
                   return (
                     <div
-                      key={hourIndex}
+                      key={`four-${hourIndex}`}
                       className={`border-b border-gray-200 p-2 relative ${
                         isWorkingDay ? "" : "bg-gray-100 text-gray-400"
                       }`}
@@ -263,7 +265,7 @@ const CalendarApp = () => {
                           const employeeColor = colors[index % colors.length];
                           return (
                             <div
-                              key={i}
+                              key={`event-${i}`}
                               className={`absolute left-0 ${employeeColor} text-xs p-1 rounded`}
                               style={{
                                 top: 0,
@@ -272,6 +274,7 @@ const CalendarApp = () => {
                                 margin: "4px 4px",
                                 left: index === 0 ? "40px" : "0",
                               }}
+                              
                             >
                               {event.title} ({ event.start_hour ? event.start_hour : ""} - { event.end_hour ? event.end_hour : ""})
                             </div>
@@ -286,14 +289,7 @@ const CalendarApp = () => {
         </div>
       </div>
 
-      <EventModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onCreateEvent={handleCreateEvent}
-        slot={selectedSlot}
-        employees={empleados}
-        services={servicios}
-      />
+      
     </div>
   );
 };

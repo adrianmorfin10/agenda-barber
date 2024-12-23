@@ -35,19 +35,11 @@ const getClients = async (filter:any): Promise<Cliente[]> => {
   return clients;
 }
 
-const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (value:any)=>void, slot:any, employees:any[], services:any[]}> = ({ isOpen, onClose, onCreateEvent, slot, employees, services }) => {
+
+const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (value:any)=>void, onUpdate: (event:any)=>void, slot:any, employees:any[], services:any[], event: any}> = ({ isOpen, onClose, onUpdate, onCreateEvent, slot, employees, services, event }) => {
 
 
-  const [newEvent, setNewEvent] = useState({
-    title: "",
-    startTime: slot?.start ? format(slot.start, "HH:mm") : "",
-    endTime: slot?.end ? format(slot.end, "HH:mm") : "",
-    employee: { name: "", id: 0 },
-    client: "",
-    date: slot?.date ? format(slot.date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-    service: "",
-    price: 0, // Inicialmente el precio es 0
-  });
+  const [newEvent, setNewEvent] = useState<any>(null);
 
   const [errors, setErrors] = useState({
     startTime: "",
@@ -65,7 +57,35 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
 
   const [ state, dispatchState ]= React.useContext(AppContext);
 
+  const defaultEvent = {
+    title: "",
+    startTime: slot?.start ? format(slot.start, "HH:mm") : "",
+    endTime: slot?.end ? format(slot.end, "HH:mm") : "",
+    employee: { name: "", id: 0 },
+    client: "",
+    date: slot?.date ? format(slot.date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+    service: "",
+    price: 0, // Inicialmente el precio es 0
+  };
 
+  React.useEffect(() => {
+    console.log("event effect", event);
+    if(event){
+      setNewEvent({
+        title:event.title,
+        startTime: event.start_hour,
+        endTime: event.end_hour,
+        employee: { name: "", id: event.barbero_id },
+        client: event.cliente.usuario.nombre,
+        date: format(event.fecha, "yyyy-MM-dd"),
+        service: event.servicio_id,
+        price: 0, // Inicialmente el precio es 0
+      });
+      setSelectedClient({ nombre: event.cliente.usuario.nombre, apellido: event.cliente.usuario.apellido_paterno + " " + event.cliente.usuario.apellido_materno  });
+    }else{
+      setNewEvent(defaultEvent);
+    }
+  },[event]);
   const handleInputChange = (e:any) => {
     const { name, value } = e.target;
     setNewEvent({ ...newEvent, [name]: value });
@@ -88,7 +108,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
     const price = Number(precio);
     const startTimeMoment = moment(`2020-12-12 ${startTime}`);
     const endTime = startTimeMoment.add(tiempo_servicio, 'minutes').format("hh:mm");
-    setNewEvent((prev) => ({
+    setNewEvent((prev:any) => ({
       ...prev,
       service: selectedService,
       price: price,
@@ -108,9 +128,6 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
 
   
   }, [state.sucursal]);
-
-  
-  
  
 
   React.useEffect(() => {
@@ -119,6 +136,8 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
       startTime: slot?.start ? format(slot.start, "HH:mm") : ""
     });
   }, [slot]);
+
+  console.log("newEvent", newEvent, event);
 
   const getCliente = (userId:any)=>{
     
@@ -131,7 +150,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
       }
       setSelectedClient(cliente);
       console.log("entro aqui");
-      setNewEvent((prev) => ({ ...prev, client: `${cliente.nombre} ${cliente.apellido}` }));
+      setNewEvent((prev:any) => ({ ...prev, client: `${cliente.nombre} ${cliente.apellido}` }));
     })
   }
 
@@ -185,6 +204,12 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
     onClose();
   };
 
+  const handleUpdate = () => {
+    if(!event) return;
+
+
+  }
+
   const handleToggleClientList = () => {
     setIsClientListOpen((prev) => !prev);
   };
@@ -192,7 +217,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
   const handleSelectCliente = (cliente:any) => {
     
     setSelectedClient(cliente);
-    setNewEvent((prev) => ({ ...prev, client: `${cliente.nombre} ${cliente.apellido}` }));
+    setNewEvent((prev:any) => ({ ...prev, client: `${cliente.nombre} ${cliente.apellido}` }));
     setIsClientListOpen(false); // Cierra la lista de clientes al seleccionar uno
   };
 
@@ -206,19 +231,19 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed top-0 right-0 h-full w-full max-w-xs sm:max-w-md bg-white shadow-xl z-50 flex flex-col ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
+    <div className={`fixed disabled top-0 right-0 h-full w-full max-w-xs sm:max-w-md bg-white shadow-xl z-50 flex flex-col ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
       {/* Header */}
-      <div className="p-4 mb-4">
+      <div className={`p-4 mb-4`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
-          <Image
-  src={isClientListOpen ? "/img/back.svg" : "/img/closemodal.svg"}
-  alt={isClientListOpen ? "Volver" : "Cerrar"}
-  width={24} // Specify appropriate width
-  height={24} // Specify appropriate height
-  className="h-6 w-6 cursor-pointer"
-  onClick={isClientListOpen ? () => setIsClientListOpen(false) : handleClose}
-/>
+            <Image
+              src={isClientListOpen ? "/img/back.svg" : "/img/closemodal.svg"}
+              alt={isClientListOpen ? "Volver" : "Cerrar"}
+              width={24} // Specify appropriate width
+              height={24} // Specify appropriate height
+              className="h-6 w-6 cursor-pointer"
+              onClick={isClientListOpen ? () => setIsClientListOpen(false) : handleClose}
+            />
             <h2 className="text-xl font-bold text-black">
               {isClientListOpen ? "Selección de Cliente" : "Cita nueva"}
             </h2>
@@ -227,31 +252,31 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
 
         {/* Cliente selector */}
         {!isClientListOpen && (
-          <div className="px-4 mb-4">
+          <div className={`px-4 mb-4 ${ event ? `pointer-events-none` :  `` }`}>
             <div className="border-dashed border border-gray-400 p-4 rounded-lg cursor-pointer" onClick={handleToggleClientList}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="bg-black text-white rounded-full h-[40px] w-[70px] flex items-center justify-center mr-3">
                   <Image 
-  src="/img/userw.svg" 
-  alt="Cliente" 
-  width={20} // Set appropriate width
-  height={20} // Set appropriate height
-  className="h-5 w-5" 
-/>
-</div>
-<span className="text-gray-500 font-light text-[16px]">
-  {selectedClient ? `${selectedClient.nombre} ${selectedClient.apellido}` : "Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
-</span>
-</div>
-<Image 
-  src="/img/add.svg" 
-  alt="Agregar cliente" 
-  width={20} // Set appropriate width
-  height={20} // Set appropriate height
-  className="h-5 w-5 cursor-pointer" 
-/>
-            </div>
+                    src="/img/userw.svg" 
+                    alt="Cliente" 
+                    width={20} // Set appropriate width
+                    height={20} // Set appropriate height
+                    className="h-5 w-5" 
+                  />
+                  </div>
+                  <span className="text-gray-500 font-light text-[16px]">
+                    {selectedClient ? `${selectedClient.nombre} ${selectedClient.apellido}` : "Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
+                  </span>
+                  </div>
+                  <Image 
+                    src="/img/add.svg" 
+                    alt="Agregar cliente" 
+                    width={20} // Set appropriate width
+                    height={20} // Set appropriate height
+                    className="h-5 w-5 cursor-pointer" 
+                  />
+                </div>
 
               
               </div>
@@ -273,12 +298,12 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
         ) : (
           <>
             {/* Contenido de Cita nueva cuando isClientListOpen es false */}
-            <div className="mb-4 px-4">
+            <div className={`mb-4 px-4 ${ event ? `pointer-events-none` :  `` }`}>
               <label className="block text-black text-sm font-medium mb-1">Fecha</label>
               <input
                 type="date"
                 name="date"
-                value={newEvent.date}
+                value={newEvent?.date}
                 onChange={handleInputChange}
                 className="border p-2 w-full rounded placeholder-gray-600 text-black focus:border-black"
                 placeholder="Selecciona una fecha"
@@ -286,11 +311,11 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
             </div>
 
             {/* Servicio */}
-            <div className="mb-4 px-4">
+            <div className={`mb-4 px-4 ${ event ? `pointer-events-none` :  `` }`}>
               <label className="block text-black text-sm font-medium mb-1">Seleccionar servicio</label>
               <select
                 name="service"
-                value={newEvent.service}
+                value={newEvent?.service}
                 onChange={handleServiceChange}
                 className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.service && "border-red-500"}`}
               >
@@ -304,13 +329,13 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
               {errors.service && <span className="text-red-500 text-xs">{errors.service}</span>}
             </div>
 
-            <div className="flex space-x-4 mb-4 px-4">
+            <div className={`flex space-x-4 mb-4 px-4 ${ event ? `pointer-events-none` :  `` }`}>
               <div className="w-1/2">
                 <label className="block text-black text-sm font-medium">Hora de inicio</label>
                 <input
                   type="time"
                   name="startTime"
-                  value={newEvent.startTime}
+                  value={newEvent?.startTime}
                   onChange={handleInputChange}
                   className={`border p-2 w-full rounded placeholder-gray-600 text-black focus:border-black ${errors.startTime && "border-red-500"}`}
                   placeholder="Hora de inicio"
@@ -323,7 +348,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
                 <input
                   type="time"
                   name="endTime"
-                  value={newEvent.endTime}
+                  value={newEvent?.endTime}
                   onChange={handleInputChange}
                   className={`border p-2 w-full rounded placeholder-gray-600 text-black focus:border-black ${errors.endTime && "border-red-500"}`}
                   placeholder="Hora de fin"
@@ -335,11 +360,11 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
             {errors.timeError && <p className="text-red-500 text-xs px-4">{errors.timeError}</p>}
 
             {/* Empleado */}
-            <div className="mb-4 px-4">
+            <div className={`mb-4 px-4 ${ event ? `pointer-events-none` :  `` }`}>
               <label className="block text-black text-sm font-medium mb-1">Empleado</label>
               <select
                 name="employee"
-                value={newEvent.employee?.id}
+                value={newEvent?.employee?.id}
                 onChange={handleChangeEmployee}
                 className={`border p-2 w-full rounded bg-white text-black placeholder-gray-600 pr-10 focus:border-black ${errors.employee && "border-red-500"}`}
               >
@@ -357,17 +382,17 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
 
       </div>
 
-      {!isClientListOpen && (
-        <div className="mt-auto px-4">
+      {!isClientListOpen && !event && (
+        <div className={`mt-auto px-4 ${ event ? `pointer-events-none` :  `` }`}>
           {/* Total y Pago */}
           <div className="flex justify-between items-center border-t border-gray-300 py-4">
             <div>
               <p className="text-gray-500 text-sm">Total</p>
-              <p className="text-black text-lg font-semibold">${newEvent.price.toFixed(2)}</p>
+              <p className="text-black text-lg font-semibold">${(newEvent?.price || 0).toFixed(2)}</p>
             </div>
             <div>
               <p className="text-gray-500 text-sm text-right">A pagar</p>
-              <p className="text-black text-lg font-semibold text-right">${newEvent.price.toFixed(2)}</p>
+              <p className="text-black text-lg font-semibold text-right">${(newEvent?.price || 0).toFixed(2)}</p>
             </div>
           </div>
 
@@ -384,6 +409,27 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
               className="bg-black text-white px-4 py-2 rounded-lg w-full font-semibold"
             >
               Guardar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!isClientListOpen && event && (
+        <div className={`mt-auto px-4`}>
+
+          {/* Botones */}
+          <div className="flex space-x-2 mb-4">
+            <button
+              onClick={()=>onUpdate({ ...(event || {}), estado: 'cancelada' })}
+              className="border border-black text-black px-4 py-2 rounded-lg w-full font-semibold"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={()=>onUpdate({ ...(event || {}), estado: 'completada' })}
+              className="bg-black text-white px-4 py-2 rounded-lg w-full font-semibold"
+            >
+              Completar
             </button>
           </div>
         </div>
