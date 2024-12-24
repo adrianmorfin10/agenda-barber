@@ -75,10 +75,12 @@ const NavBar: React.FC = () => {
     localServiceObject.getLocales()
       .then((locales) => {
         let selected = null; 
-        if(appState.user.barberos.length){
-          selected = locales.find((local: any) => local.id === appState.user.barberos[0].local_id);
-        }else{
+        if(appState.user.rol === "admin"){
           selected = locales.find((local: any) => local.seleccionado);
+          if(!selected && locales.length)
+            selected = locales[0];
+        }else{
+          selected = locales.find((local: any) => local.id === appState.user.barberos[0].local_id);
         }
         
         setSucursales(locales);
@@ -90,7 +92,7 @@ const NavBar: React.FC = () => {
         console.error("Error fetching branches on load:", e);
       });
   }, []);
-
+  console.log('appState', appState);
   const navItems = navItemsByRol[appState.user.rol];
 
   return (
@@ -114,7 +116,7 @@ const NavBar: React.FC = () => {
             </Link>
           ))}
         </div>
-        <div className="mt-auto flex items-center text-white cursor-pointer" onClick={() =>{ if(!appState.user.barberos.length) setIsModalOpen(true); }}>
+        <div className="mt-auto flex items-center text-white cursor-pointer" onClick={() =>{ if(appState.user.rol === "admin") setIsModalOpen(true); }}>
           <div className="bg-[#1c1c1c] rounded-full p-2 mr-2">
             <Image src="/img/local.svg" alt="Sucursal" width={20} height={20} />
           </div>
@@ -128,11 +130,11 @@ const NavBar: React.FC = () => {
 
       {/* Mobile NavBar */}
       <div className="md:hidden fixed top-0 left-0 right-0 flex items-center justify-between p-4 bg-[#0C0C0C] z-50">
-        <button onClick={() =>{ if(!appState.user.barberos.length) setMenuOpen(!menuOpen) }}>
+        <button onClick={() =>{ if(appState.user.rol === "admin") setMenuOpen(!menuOpen) }}>
           <Image src={menuOpen ? '/img/close.svg' : '/img/menu.svg'} alt="Menu" width={30} height={30} />
         </button>
         <Image src="/img/logo-responsive.png" alt="Logo" width={30} height={30} />
-        <div className="flex items-center cursor-pointer" onClick={() => { if(!appState.user.barberos.length) setIsModalOpen(true)}}>
+        <div className="flex items-center cursor-pointer" onClick={() => { if(appState.user.rol === "admin") setIsModalOpen(true)}}>
           <div className="bg-[#1c1c1c] rounded-full p-2">
             <Image src="/img/local.svg" alt="Sucursal" width={20} height={20} />
           </div>

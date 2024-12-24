@@ -13,7 +13,7 @@ export const addInterceptorToAxios = (headers: any) => {
 export const getRole = (user: any) => {
     if (!user) return 'admin';
     const { barberos, clientes, email } = user;
-    if (email === process.env.ADMIN_EMAIL)
+    if (email === process.env.NEXT_PUBLIC_ADMIN_EMAIL)
         return 'admin';
     if (barberos.length) {
         return 'encargado';
@@ -28,6 +28,10 @@ export const getHeaders = (user:any) => {
     if(!user) return {};
 
     const { barberos, clientes, email } = user;
+    
+    if(getRole(user) === "admin")
+        return {};
+
     let headers:any = { rol: getRole(user) };
    
     if(barberos.length){
