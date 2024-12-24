@@ -28,11 +28,11 @@ export const getHeaders = (user:any) => {
     if(!user) return {};
 
     const { barberos, clientes, email } = user;
-    
+
     if(getRole(user) === "admin")
         return {};
 
-    let headers:any = { rol: getRole(user) };
+    const headers:any = { rol: getRole(user) };
    
     if(barberos.length){
         headers['local_id'] = barberos[0].local_id;
