@@ -21,5 +21,10 @@ class EmpleadoService extends HttpService {
         return response.data;
     }
 
+    async updateEmpleado(empleado:any){
+        const response = await axios.post(`${this.baseUrl}/barbero/${empleado.id}/update`, empleado);
+        return response.data;
+    }
+
 }
 export default EmpleadoService;

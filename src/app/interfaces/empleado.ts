@@ -15,4 +15,5 @@ export interface Empleado {
     tipo: string;               // Tipo de empleado (ej. "Black")
     diasTrabajo: number[];      // Días de trabajo en formato [1,2,3,...]
     servicios: number[];        // Servicios que el empleado puede brindar
+    barbero_servicios: any[];  // Servicios que el empleado puede brindar
 }
