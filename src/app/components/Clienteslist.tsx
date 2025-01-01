@@ -16,7 +16,8 @@ interface Cliente {
   ultimaVisita: string;
   descuento: string;
   ingresosTotales: string;
-  membresia: string;
+  membresia: boolean;
+  membresia_id?: number;
   tipo: string;
   serviciosDisponibles: number;
   proximoPago: string;

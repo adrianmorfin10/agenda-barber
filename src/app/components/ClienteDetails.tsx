@@ -6,6 +6,9 @@ import ClientService from '../services/ClientService';
 import Link from 'next/link';
 import WarningModal from './WarningModal';
 import HttpService from '../services/HttpService';
+import MembresiaService from '../services/MembresiaService';
+import { AppContext } from './AppContext';
+const membresiaServiceObject = new MembresiaService();
 
 interface Cliente {
   id: number;
@@ -19,7 +22,8 @@ interface Cliente {
   ultimaVisita: string;
   descuento: string;
   ingresosTotales: string;
-  membresia: string;
+  membresia: boolean;
+  membresia_id?: number;
   tipo: string;
   serviciosDisponibles: number;
   proximoPago: string;
@@ -38,15 +42,30 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
   const [editedNombre, setEditedNombre] = useState(cliente?.nombre || '');
   const [editedApellido, setEditedApellido] = useState(cliente?.apellido || '');
   const [editedTelefono, setEditedTelefono] = useState(cliente?.telefono || '');
+  const [ membresia, setMembresia ] = useState(false);
   const [openWarning, setOpenWarning] = useState(false);
+  const [membresias, setMembresias] = useState([]);
+  const [membresiaId, setMembresiaId] = useState<number>(0);
+  const [state, dispatchState] = React.useContext(AppContext);
   useEffect(() => {
     if (cliente) {
+      console.log('Cliente seleccionado:', cliente);
       setEditedNombre(cliente.nombre);
       setEditedApellido(cliente.apellido);
       setEditedTelefono(cliente.telefono);
+      setMembresia(cliente.membresia);
+      setMembresiaId(cliente.membresia_id || 0);
     }
   }, [cliente]);
-
+  React.useEffect(()=>{
+    if(!state.sucursal) return;
+    getMembresias();
+  }, [state.sucursal])
+  const getMembresias = ()=>{
+    membresiaServiceObject.getMembresias(state.sucursal ? { local_id: state.sucursal.id } : false).then(response=>{
+      setMembresias(response);
+    }).catch(e=>{})
+  }
   if (!cliente) return null;
 
   const clientService = new ClientService();
@@ -57,16 +76,23 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
 
   const handleSaveClick = async () => {
     try {
-      const updatedCliente = {
+      let updatedCliente = {
         ...cliente,
         nombre: editedNombre,
         apellido: editedApellido,
         telefono: editedTelefono,
+        membresia: membresia,
+        membresia_id: membresiaId
       };
+      if(membresia){
+        updatedCliente.membresia_id = membresiaId;
+      }
       const response = await clientService.updateClient(cliente.id.toString(), {
         nombre: editedNombre,
         apellido: editedApellido,
         telefono: editedTelefono,
+        is_member: membresia,
+        membresia_id: membresiaId
       });
       console.log('Respuesta de la API:', response); // Verificar la respuesta de la API
       onUpdate(updatedCliente); // Actualizar los datos en el componente padre
@@ -153,6 +179,36 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
                 onChange={(e) => setEditedTelefono(e.target.value)}
                 className="border p-1 rounded mt-1 mb-2 text-black w-full text-sm md:text-base"
               />
+              <div className="w-full">
+                <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">Membresía</label>
+                <div className="flex items-center px-2 py-2">
+                  <button
+                    className={`w-10 h-5 flex items-center rounded-full p-1 ${membresia ? 'bg-green-500' : 'bg-gray-300'}`}
+                    onClick={() => setMembresia(!membresia)}
+                  >
+                    <div
+                      className={`w-4 h-4 bg-white rounded-full shadow-md transform duration-300 ease-in-out ${membresia ? 'translate-x-5' : 'translate-x-0'}`}
+                    />
+                  </button>
+                </div>
+              </div>
+              {
+                membresia && (
+                  <select
+                    name="membresia"
+                    value={membresiaId}
+                    onChange={(e)=>{ setMembresiaId(parseInt(e.target.value)) }}
+                    className={`border p-2 mb-4 w-full rounded-lg text-black placeholder-gray`}
+                  >
+                    <option value="0">Selecciona una membresía</option>
+                    {membresias.map((membresia:any) => (
+                      <option key={`membresia-client-detail-${membresia.id}`} value={membresia.id}>
+                        {`${membresia.nombre} `} 
+                      </option>
+                    ))}
+                  </select>
+                )
+              }
             </>
           ) : (
             <>

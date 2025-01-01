@@ -5,10 +5,14 @@ import Image from 'next/image';
 import ClientService from '../services/ClientService';
 import {Empleado} from '../interfaces/empleado';
 import EmpleadoService from '../services/EmpleadoService';
+import MembresiaService from '../services/MembresiaService';
 import { AppContext } from "../components/AppContext";
 import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
+import { get } from 'http';
+const clientService = new ClientService();
 const empleadoServiceObject = new EmpleadoService();
+const membresiaServiceObject = new MembresiaService();
 
 interface AddUserModalProps {
   isModalOpen: boolean;
@@ -20,6 +24,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
   const [state, dispatchState] = React.useContext(AppContext);
   const [empleados, setEmpleados] = useState<Empleado[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [membresias, setMembresias] = useState([]);
   const [nuevoCliente, setNuevoCliente] = useState({
     nombre: '',
     apellido: '',
@@ -30,9 +35,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     creado_por: 0,
     membresia: false,
     foto: null as File | null,
+    membresia_id: 0
   });
   React.useEffect(()=>{
     getEmpleados();
+    getMembresias();
   }, [state.sucursal])
   const getEmpleados = ()=>{
     empleadoServiceObject.getEmpleados(state.sucursal ? { local_id: state.sucursal.id } : false).then(response=>{
@@ -64,6 +71,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
       setEmpleados(_empleados);
     }).catch(e=>{})
   }
+  const getMembresias = ()=>{
+    membresiaServiceObject.getMembresias(state.sucursal ? { local_id: state.sucursal.id } : false).then(response=>{
+      setMembresias(response);
+    }).catch(e=>{})
+  }
 
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setErrorModalOpen] = useState(false);
@@ -80,7 +92,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
   };
 
   const handleAddCliente = () => {
-    const clientService = new ClientService();
+    
     const formData = new FormData();
     formData.append('nombre', nuevoCliente.nombre);
     formData.append('apellido', nuevoCliente.apellido);
@@ -89,6 +101,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     formData.append('instagram', nuevoCliente.instagram);
     formData.append('descuento', nuevoCliente.descuento.toString());
     formData.append('membresia', nuevoCliente.membresia.toString());
+    formData.append('membresia_id', nuevoCliente.membresia_id.toString());
     formData.append('creado_por', nuevoCliente.creado_por.toString());
     formData.append('local_id', state?.sucursal.id.toString());
     if (file) {
@@ -108,6 +121,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
           membresia: false,
           creado_por: 0,
           foto: null,
+          membresia_id: 0
         });
         setFile(null);
         setSuccessModalOpen(true);
@@ -278,8 +292,25 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
                 </button>
               </div>
             </div>
+           
           </div>
-
+          {
+            nuevoCliente.membresia && (
+              <select
+                name="membresia"
+                value={nuevoCliente.membresia_id}
+                onChange={(e)=>{ setNuevoCliente({ ...nuevoCliente, membresia_id: parseInt(e.target.value) })}}
+                className={`border p-2 mb-4 w-full rounded-lg text-black placeholder-gray`}
+              >
+                <option value="">Selecciona una membresía</option>
+                {membresias.map((membresia:any) => (
+                  <option key={`membresia-${membresia.id}`} value={membresia.id}>
+                    {`${membresia.nombre} `} 
+                  </option>
+                ))}
+              </select>
+            )
+          }
           {/* Botón Añadir Cliente */}
           <button
             className="bg-[#0C101E] text-white rounded-lg p-2 w-full hover:bg-[#000000] mt-auto"

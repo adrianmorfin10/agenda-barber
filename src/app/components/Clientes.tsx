@@ -9,7 +9,6 @@ import { AppContext } from './AppContext';
 
 const getClients = async (filter: any): Promise<Cliente[]> => {
   const clientService = new ClientService();
-  console.log("filter", filter);
   const clientsData = await clientService.getClients(filter);
   const clients: Cliente[] = clientsData.map((client: any) => ({
     id: client.id,
@@ -23,11 +22,12 @@ const getClients = async (filter: any): Promise<Cliente[]> => {
     ultimaVisita: client.ultima_visita || "Sin fecha",
     descuento: client.descuento || "Sin descuento",
     ingresosTotales: client.ingresos_totales || "Sin ingresos",
-    membresia: client.is_member ? "Activa" : "Inactiva",
+    membresia: client.is_member,
     tipo: client.usuario.tipo || "Sin tipo",
     serviciosDisponibles: client.servicios_disponibles || 0,
     proximoPago: client.proximo_pago || "Sin proximo pago",
-    avatar: client.usuario.avatar_url
+    avatar: client.usuario.avatar_url,
+    membresia_id: client.membresia_id
   }));
   return clients;
 }
