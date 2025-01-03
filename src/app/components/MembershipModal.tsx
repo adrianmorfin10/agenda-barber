@@ -7,26 +7,31 @@ interface MembershipModalProps {
   isOpen: boolean;
   services: any[];
   onClose: () => void;
-  onCreateMembership: (name: string, services: number[]) => void;
+  onCreateMembership: (name: string, price: number, services: { servicio_id: number, cantidad_reservaciones: number }[]) => void;
+}
+interface Service {
+  servicio_id: number;
+  cantidad_reservaciones: number;
 }
 
 const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCreateMembership, services }) => {
   const [membershipName, setMembershipName] = useState('');
-  const [selectedServices, setSelectedServices] = useState<number[]>([]);
+  const [membershipPrice, setMembershipPrice ] = useState(0);
+  const [selectedServices, setSelectedServices] = useState<Service[]>([]);
 
 
   const handleServiceToggle = (serviceId: number) => {
-    setSelectedServices((prev) =>
-      prev.includes(serviceId)
-        ? prev.filter((id) => id !== serviceId)
-        : [...prev, serviceId]
-    );
+    const _services = selectedServices.some((item) => item.servicio_id === serviceId)
+    ? selectedServices.filter((item) => item.servicio_id !== serviceId)
+    : [...selectedServices, { servicio_id: serviceId, cantidad_reservaciones: 1 }]
+    
+    setSelectedServices(_services);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    onCreateMembership(membershipName, selectedServices);
+    onCreateMembership(membershipName, membershipPrice, selectedServices);
 
   };
 
@@ -54,13 +59,22 @@ const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCr
               className="mt-1 p-2 border border-gray-300 rounded-md w-full"
               required
             />
+            <label htmlFor="precio" className="block text-sm font-medium">Precio de la Membresía</label>
+            <input
+              type="number"
+              id="precio"
+              value={membershipPrice}
+              onChange={(e) => setMembershipPrice(parseInt(e.target.value))}
+              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+              required
+            />
           </div>
 
           <div>
             <h3 className="text-lg font-medium">Selecciona Servicios</h3>
             <ul className="space-y-2">
               {services.map((service) => (
-                <li key={service.id}>
+                <li key={`membresia-modal-${service.id}`} className='flex'>
                   <label className="flex items-center border border-cacaca p-2 rounded-md">
                     <div
                       className="w-2 h-full mr-2"
@@ -68,12 +82,30 @@ const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCr
                     />
                     <input
                       type="checkbox"
-                      checked={selectedServices.includes(service.id)}
+                      checked={selectedServices.some(item=>item.servicio_id === service.id)}
                       onChange={() => handleServiceToggle(service.id)}
                       className="mr-2"
                     />
                     {service.nombre}
+                    {
+                      selectedServices.some(item=>item.servicio_id === service.id) && (
+                        <input
+                          type="number"
+                          id="cantidad_reservaciones"
+                          value={selectedServices.find(item=>item.servicio_id === service.id)?.cantidad_reservaciones}
+                          onChange={(e) => {
+                            setSelectedServices((prev) =>
+                              prev.map((item) =>
+                                item.servicio_id === service.id ? { servicio_id: service.id, cantidad_reservaciones: parseInt(e.target.value) } : item
+                              )
+                            );
+                          }}
+                          className="mt-1 p-2"
+                        />
+                      )
+                    }
                   </label>
+                  
                 </li>
               ))}
             </ul>
