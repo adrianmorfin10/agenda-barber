@@ -8,7 +8,14 @@ class SolicitudService extends HttpService {
     }
 
     async getSolicitudes(filter: any = false) {
-        const response = await axios.get(`${this.baseUrl}/reservacion${filter ? `?l=${filter.local_id}` : '' }`);
+        const keys = Object.keys(filter);
+        const response = await axios.get(`${this.baseUrl}/reservacion${ keys.length ? `?${keys.map((k:string)=>`${k}=${filter[k]}`).join('&')}` : '' }`);
+        return response.data;
+    }
+
+    async getSolicitudesCurrentMonth(filter: any = false) {
+        const keys = Object.keys(filter);
+        const response = await axios.get(`${this.baseUrl}/reservacion/current/month${ keys.length ? `?${keys.map((k:string)=>`${k}=${filter[k]}`).join('&')}` : '' }`);
         return response.data;
     }
 

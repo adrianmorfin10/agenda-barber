@@ -23,6 +23,7 @@ import moment from "moment";
 import Image from 'next/image';
 import { AppContext } from '../components/AppContext';
 import SurveyModal from "../components/SurveyModal";
+import { clientHasMembershipActive, getMembershipServices } from "../Utils";
 const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
@@ -90,11 +91,12 @@ const CalendarApp = () => {
   const [events, setEvents] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
-  const [ localId, setLocal ] = useState(0);
-  const [ servicios, setServicios ] = useState([]);
-  const [ empleados, setEmpleados] = useState([]);
-  const [ selectedEvent, setSelectedEvent ] = useState<any>(null);
-  const [ openSurveyModal, setOpenSurveyModal ] = useState<boolean>(false);
+  const [localId, setLocal] = useState(0);
+  const [servicios, setServicios] = useState([]);
+  const [empleados, setEmpleados] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [openSurveyModal, setOpenSurveyModal] = useState<boolean>(false);
+  const [reservaciones, setReservaciones] = useState([]);
   const [state, dispatchState] = React.useContext(AppContext);
   const getData = async (filter:any) => {
     const _servicios = await servicioObject.getServicios(filter);
@@ -109,11 +111,13 @@ const CalendarApp = () => {
           start: item.start_hour || "07:00",
           end: item.end_hour || "18:00"
         },
-        workDays: item.working_days || [ 1, 2, 3, 4, 5]
+        workDays: item.working_days || [ 1, 2, 3, 4, 5 ]
       }
     }));
     const eventos = await solicitudObject.getSolicitudes(filter);
-    setEvents(eventos.map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
+    const eventosDeEsteMes = await solicitudObject.getSolicitudesCurrentMonth(filter);
+    setReservaciones(eventosDeEsteMes);
+    setEvents(eventos.filter((item:any)=>item.estado === 'pendiente').map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
   }
   React.useEffect(() => {
     if(state.sucursal){
@@ -310,17 +314,20 @@ const CalendarApp = () => {
           </div>
         </div>
       </div>
-
-      <EventModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onCreateEvent={handleCreateEvent}
-        onUpdate={(event:any)=>onUpdateEvent(event)}
-        slot={selectedSlot}
-        event={selectedEvent}
-        employees={empleados}
-        services={servicios}
-      />
+      {
+        (state.user.rol !== "cliente" || clientHasMembershipActive(state.user?.clientes, servicios, reservaciones)) &&
+        <EventModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onCreateEvent={handleCreateEvent}
+          onUpdate={(event:any)=>onUpdateEvent(event)}
+          slot={selectedSlot}
+          event={selectedEvent}
+          employees={empleados}
+          services={state.user.rol === "cliente" ? getMembershipServices(state.user?.clientes[0], servicios, reservaciones)  : servicios}
+        />
+      }
+      
       <SurveyModal 
         isOpen={openSurveyModal} 
         onClose={()=>{ setOpenSurveyModal(false)}} 

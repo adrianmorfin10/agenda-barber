@@ -211,6 +211,7 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
   }
 
   const handleToggleClientList = () => {
+    if(state.user.rol === "cliente") return;
     setIsClientListOpen((prev) => !prev);
   };
 
@@ -225,9 +226,12 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
   const u = searchParams.get('u');
 
   useMemo(()=>{
-    if(u)
-      getCliente(u);
-  }, [u]);
+
+    if(u || state?.user?.rol === "cliente")
+      getCliente(u || state.user.clientes[0].id);
+
+  }, [u, state.user]);
+
   if (!isOpen) return null;
 
   return (
@@ -269,13 +273,17 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
                     {selectedClient ? `${selectedClient.nombre} ${selectedClient.apellido}` : "Seleccione un cliente o déjelo en blanco si no tiene cita previa"}
                   </span>
                   </div>
-                  <Image 
-                    src="/img/add.svg" 
-                    alt="Agregar cliente" 
-                    width={20} // Set appropriate width
-                    height={20} // Set appropriate height
-                    className="h-5 w-5 cursor-pointer" 
-                  />
+                  {
+                    state.user?.rol && state.user?.rol !== "cliente" &&
+                    <Image 
+                      src="/img/add.svg" 
+                      alt="Agregar cliente" 
+                      width={20} // Set appropriate width
+                      height={20} // Set appropriate height
+                      className="h-5 w-5 cursor-pointer" 
+                    />
+                  }
+                  
                 </div>
 
               

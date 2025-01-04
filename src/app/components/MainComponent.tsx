@@ -62,6 +62,7 @@ const MainComponent: React.FC<MainComponentProps> = ({ children }) => {
 
     if (userLoading || !user_data) return <LoadingSpinner />;
     if (error) return <div>{error.message}</div>;
+    if (!user) return <div>Debes iniciar sesión</div>;
     // Estado de loading
     return (
         <AppContext.Provider value={store}>

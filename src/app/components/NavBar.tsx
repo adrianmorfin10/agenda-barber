@@ -31,6 +31,9 @@ interface Sucursal {
     { path: '/productos', label: 'Productos', icon: '/img/product.svg', inactiveIcon: '/img/product-inactive.svg' },
     { path: '/empleados', label: 'Empleados', icon: '/img/emp.svg', inactiveIcon: '/img/emp-inactive.svg' },
   ],
+  'cliente':[
+    { path: '/citas', label: 'Citas', icon: '/img/calendar.svg', inactiveIcon: '/img/calendar-inactive.svg' },
+  ]
  }
 const NavBar: React.FC = () => {
   const pathname = usePathname();
@@ -79,8 +82,10 @@ const NavBar: React.FC = () => {
           selected = locales.find((local: any) => local.seleccionado);
           if(!selected && locales.length)
             selected = locales[0];
-        }else{
+        }else if(appState.user.rol === "encargado"){
           selected = locales.find((local: any) => local.id === appState.user.barberos[0].local_id);
+        }else{
+          selected = locales.find((local: any) => local.id === appState.user.clientes[0].local_id);
         }
         
         setSucursales(locales);
