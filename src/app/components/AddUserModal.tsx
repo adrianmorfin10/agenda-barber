@@ -93,6 +93,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
   };
 
   const handleAddCliente = () => {
+    if (!nuevoCliente.creado_por) { // Validación de empleado seleccionado
+      setErrorMessage('Debe seleccionar un empleado.');
+      setErrorModalOpen(true);
+      return;
+    }
+  
     const clientService = new ClientService();
     const formData = new FormData();
     formData.append('nombre', nuevoCliente.nombre);
@@ -107,8 +113,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     if (file) {
       formData.append('foto', file);
     }
-    
-
+  
     clientService.createClient(formData)
       .then((response) => {
         setNuevoCliente({
@@ -134,9 +139,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
         console.error('Error al añadir cliente:', error);
       });
   };
+
+  
   const handleImageUploadClick = () => {
     document.getElementById('fileInput')?.click(); // Simula un clic en el input de archivo
   };
+
+  
   const handleDescuentoChange = (increment: boolean) => {
     setNuevoCliente((prev) => ({
       ...prev,
@@ -245,19 +254,20 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
             maxLength={50}
             required
           />
-          <select
-            name="employee"
-            value={nuevoCliente.creado_por}
-            onChange={(e)=>{ setNuevoCliente({ ...nuevoCliente, creado_por: parseInt(e.target.value) })}}
-            className={`border p-2 mb-4 w-full rounded-lg text-black placeholder-gray`}
-          >
-            <option value="">Selecciona un empleado</option>
-            {empleados.map((emp:Empleado) => (
-              <option key={emp.id} value={emp.id}>
-                {`${emp.nombre} ${emp.apellido} `} 
-              </option>
-            ))}
-          </select>
+         <select
+  name="creado_por"
+  value={nuevoCliente.creado_por}
+  onChange={(e) => setNuevoCliente({ ...nuevoCliente, creado_por: parseInt(e.target.value) })}
+  className="border p-2 mb-2 w-full rounded-lg text-black placeholder-gray"
+  required
+>
+  <option value="">Seleccione un empleado</option>
+  {empleados.map((empleado) => (
+    <option key={empleado.id} value={empleado.id}>
+      {empleado.nombre} {empleado.apellido}
+    </option>
+  ))}
+</select>
           <input
             type="email"
             name="email"
