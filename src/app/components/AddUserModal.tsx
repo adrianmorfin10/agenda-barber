@@ -29,6 +29,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     descuento: 0,
     creado_por: 0,
     membresia: false,
+    avatar: false,
     foto: null as File | null,
   });
   React.useEffect(()=>{
@@ -76,6 +77,18 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
+    if(selectedFile){
+      var reader = new FileReader(); //Leemos el contenido
+    
+      reader.onload = function(e) { //Al cargar el contenido lo pasamos como atributo de la imagen de arriba
+        const imgElement = document.getElementById('image_preview') as HTMLImageElement;
+        if (imgElement) {
+          imgElement.src = e.target?.result as string;
+        }
+      }
+      
+      reader.readAsDataURL(selectedFile);
+    }
     setFile(selectedFile);
   };
 
@@ -108,6 +121,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
           membresia: false,
           creado_por: 0,
           foto: null,
+          avatar: false,
         });
         setFile(null);
         setSuccessModalOpen(true);
@@ -120,7 +134,9 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
         console.error('Error al añadir cliente:', error);
       });
   };
-
+  const handleImageUploadClick = () => {
+    document.getElementById('fileInput')?.click(); // Simula un clic en el input de archivo
+  };
   const handleDescuentoChange = (increment: boolean) => {
     setNuevoCliente((prev) => ({
       ...prev,
@@ -145,35 +161,75 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
           </div>
           {/* Campos del formulario */}
           <div className="mb-4">
+            <div className='mb-4 flex'>
+              <div className="mr-4 flex-grow">
+                <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">Nombre:</label>
+                <input
+                  type="text"
+                  name="nombre"
+                  placeholder="Nombre"
+                  value={nuevoCliente.nombre}
+                  onChange={handleInputChange}
+                  className="border p-2 mb-2 rounded-lg text-black placeholder-gray w-full"
+                  maxLength={50}
+                  required
+                />
+                <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">Apellido:</label>
+                <input
+                  type="text"
+                  name="apellido"
+                  placeholder="Apellido"
+                  value={nuevoCliente.apellido}
+                  onChange={handleInputChange}
+                  className="border p-2 rounded-lg text-black placeholder-gray w-full"
+                  maxLength={50}
+                  required
+                />
+              </div>
+              <div className="flex flex-col items-center justify-center border border-dashed border-[#CACACA] p-2 rounded-[5px] w-36 h-[136px]">
+                {file ? 
+                (
+                  <>
+                    <img
+                      id="image_preview"
+                      src={''}
+                      alt="Vista previa de la imagen"
+                      width={50}
+                      height={50}
+                      className="mt-2"
+                    />
+                    <p
+                      className="text-xs text-blue-600 cursor-pointer mt-1"
+                      onClick={handleImageUploadClick} // Permite volver a cargar la imagen
+                    >
+                      Reemplazar imagen
+                    </p>
+                  </>
+                ) : (
+                  <div
+                    className="flex items-center justify-center w-full h-full cursor-pointer"
+                    onClick={handleImageUploadClick}
+                  >
+                    <Image
+                      src="/img/foto.svg" // Cambia esta ruta a la ubicación del icono de carga
+                      alt="Cargar Foto"
+                      width={50}
+                      height={50}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  id="fileInput"
+                  className="hidden"
+                />
+              </div>
+              
+            </div>
             
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
-            />
-            <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">Nombre:</label>
-            <input
-              type="text"
-              name="nombre"
-              placeholder="Nombre"
-              value={nuevoCliente.nombre}
-              onChange={handleInputChange}
-              className="border p-2 mb-2 rounded-lg text-black placeholder-gray w-full"
-              maxLength={50}
-              required
-            />
-            <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">Apellido:</label>
-            <input
-              type="text"
-              name="apellido"
-              placeholder="Apellido"
-              value={nuevoCliente.apellido}
-              onChange={handleInputChange}
-              className="border p-2 rounded-lg text-black placeholder-gray w-full"
-              maxLength={50}
-              required
-            />
           </div>
           {/* Resto del formulario */}
           <input
