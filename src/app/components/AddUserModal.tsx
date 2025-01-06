@@ -32,9 +32,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     avatar: false,
     foto: null as File | null,
   });
-  React.useEffect(()=>{
-    getEmpleados();
-  }, [state.sucursal])
   const getEmpleados = ()=>{
     empleadoServiceObject.getEmpleados(state.sucursal ? { local_id: state.sucursal.id } : false).then(response=>{
       const _empleados = response.map((item:any)=>{
@@ -66,6 +63,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     }).catch(e=>{})
   }
 
+  React.useEffect(()=>{
+    if(state.sucursal)
+      getEmpleados();
+  }, [state.sucursal])
+  
+
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -78,7 +81,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     if(selectedFile){
-      var reader = new FileReader(); //Leemos el contenido
+      const reader = new FileReader(); //Leemos el contenido
     
       reader.onload = function(e) { //Al cargar el contenido lo pasamos como atributo de la imagen de arriba
         const imgElement = document.getElementById('image_preview') as HTMLImageElement;
@@ -199,7 +202,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
                 {file ? 
                 (
                   <>
-                    <img
+                    <Image
                       id="image_preview"
                       src={''}
                       alt="Vista previa de la imagen"
