@@ -10,7 +10,8 @@ interface Cliente {
     ultimaVisita: string;
     descuento: string;
     ingresosTotales: string;
-    membresia: boolean;
+    isMember?: boolean;
+    membersia?: object;
     membresia_id?: number;
     tipo: string;
     serviciosDisponibles: number;

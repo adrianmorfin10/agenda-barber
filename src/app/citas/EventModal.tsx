@@ -9,6 +9,7 @@ import { AppContext } from "../components/AppContext";
 import Image from 'next/image';
 import Cliente from "../interfaces/cliente";
 import { useSearchParams } from 'next/navigation'
+import { on } from "events";
 
 const clientService = new ClientService();
 
@@ -27,7 +28,8 @@ const getClients = async (filter:any): Promise<Cliente[]> => {
     ultimaVisita: client.ultima_visita || "Sin fecha",
     descuento: client.descuento || "Sin descuento",
     ingresosTotales: client.ingresos_totales || "Sin ingresos",
-    membresia: client.is_member ? "Activa" : "Inactiva",
+    isMember: client.is_member,
+    membresia: client.membresia || null,
     tipo: client.usuario.tipo || "Sin tipo",
     serviciosDisponibles: client.servicios_disponibles || 0,
     proximoPago: client.proximo_pago || "Sin proximo pago"
@@ -36,8 +38,7 @@ const getClients = async (filter:any): Promise<Cliente[]> => {
 }
 
 
-const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (value:any)=>void, onUpdate: (event:any)=>void, slot:any, employees:any[], services:any[], event: any}> = ({ isOpen, onClose, onUpdate, onCreateEvent, slot, employees, services, event }) => {
-
+const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (value:any)=>void, onUpdate: (event:any)=>void, onChangeClient: (client:any)=>void, slot:any, employees:any[], services:any[], event: any}> = ({ isOpen, onClose, onUpdate, onChangeClient, onCreateEvent, slot, employees, services, event }) => {
 
   const [newEvent, setNewEvent] = useState<any>(null);
 
@@ -67,6 +68,10 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
     service: "",
     price: 0, // Inicialmente el precio es 0
   };
+
+  React.useEffect(() => {
+    onChangeClient(selectedClient);
+  }, [selectedClient]);
 
   React.useEffect(() => {
     console.log("event effect", event);

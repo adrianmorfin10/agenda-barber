@@ -50,7 +50,7 @@ export const clientHasMembershipActive = (clientes: any[], services: any[], rese
     const { is_member } = cliente;
     if(!is_member) return false;
     
-    return getMembershipServices(cliente, services, reservaciones).length > 0;
+    return getMembershipServices(cliente, services, reservaciones.filter(r=>r.cliente_id === cliente.id)).length > 0;
 }
 
 //obtener objeto membresia
@@ -70,4 +70,18 @@ export const getMembershipServices = (cliente: any, services: any[], reservacion
     });
     console.log('getMembershipServices', _services, reservetionsGroupedByService);
     return _services;
+}
+
+export const isPrepago = (cliente:any, service_id: number, reservaciones:any[]) => {
+    if(!cliente) return false;
+    const { membresia } = cliente;
+    if(!membresia) return false;
+    
+    const reservetionFileredByState = reservaciones.filter((reservacion:any)=>reservacion.estado === "completada" || reservacion.estado === "pendiente");
+    
+    const ms = membresia.membresia_servicios.find((ms:any)=>ms.servicio_id.toString() === service_id.toString());
+    const reservetionsGroupedByService = _.groupBy(reservetionFileredByState, 'servicio_id');
+    const reservetions = reservetionsGroupedByService[service_id.toString()] || [];
+    
+    return (reservetions.length < ms.cantidad_reservaciones);
 }

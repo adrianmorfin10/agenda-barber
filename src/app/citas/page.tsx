@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, use, useState } from "react";
+import React, { Suspense, use, useMemo, useState } from "react";
 import  {  dateFnsLocalizer } from "react-big-calendar";
 
 import format from "date-fns/format";
@@ -23,7 +23,8 @@ import moment from "moment";
 import Image from 'next/image';
 import { AppContext } from '../components/AppContext';
 import SurveyModal from "../components/SurveyModal";
-import { clientHasMembershipActive, getMembershipServices } from "../Utils";
+import { clientHasMembershipActive, getMembershipServices, isPrepago } from "../Utils";
+import { useSearchParams } from "next/navigation";
 const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
@@ -38,33 +39,6 @@ const localizer = dateFnsLocalizer({
   getDay,
   locales,
 });
-
-const employees = [
-  {
-    name: "Pedro López",
-    initials: "PL",
-    workingHours: { start: "07:00", end: "18:00" },
-    workDays: [1, 2, 3, 4, 5], // Lunes a Viernes
-  },
-  {
-    name: "Ana Chávez",
-    initials: "AC",
-    workingHours: { start: "08:00", end: "17:00" },
-    workDays: [1, 3, 5], // Lunes, Miércoles, Viernes
-  },
-  {
-    name: "Juan Martínez",
-    initials: "JM",
-    workingHours: { start: "09:00", end: "16:00" },
-    workDays: [2, 4], // Martes y Jueves
-  },
-  {
-    name: "Carlos Pérez",
-    initials: "CP",
-    workingHours: { start: "08:00", end: "16:00" },
-    workDays: [1, 2, 3, 4, 5], // Lunes a Viernes
-  },
-];
 
 // Redondear la hora al punto más cercano
 const roundToNearestHour = (date:any) => {
@@ -97,6 +71,7 @@ const CalendarApp = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [openSurveyModal, setOpenSurveyModal] = useState<boolean>(false);
   const [reservaciones, setReservaciones] = useState([]);
+  const [ selectedClient, setSelectedClient ] = useState<any>(null);
   const [state, dispatchState] = React.useContext(AppContext);
   const getData = async (filter:any) => {
     const _servicios = await servicioObject.getServicios(filter);
@@ -114,6 +89,8 @@ const CalendarApp = () => {
         workDays: item.working_days || [ 1, 2, 3, 4, 5 ]
       }
     }));
+    if(selectedClient)
+      filter['cliente_id'] = selectedClient.id;
     const eventos = await solicitudObject.getSolicitudes(filter);
     const eventosDeEsteMes = await solicitudObject.getSolicitudesCurrentMonth(filter);
     setReservaciones(eventosDeEsteMes);
@@ -128,7 +105,7 @@ const CalendarApp = () => {
   const handleCreateEvent = (newEvent:any) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
-    solicitudObject.createSolicitud({
+    const nuevaSolicitud = {
       cliente_id: parseInt(newEvent.client.id),
       local_id: localId,
       servicio_id: parseInt(newEvent.service),
@@ -137,8 +114,12 @@ const CalendarApp = () => {
       end_hour: newEvent.endTime,
       barbero_id: parseInt(newEvent.employee.id),
       precio: newEvent.price,
-      estado: "pendiente"
-    }).then(data=>{
+      estado: "pendiente",
+      prepago: isPrepago(newEvent.client, parseInt(newEvent.service), reservaciones.filter((reservacion:any)=>reservacion.cliente_id === newEvent.client.id)),
+      
+    }
+    
+    solicitudObject.createSolicitud(nuevaSolicitud).then(data=>{
       setIsModalOpen(false);
       return getData(state.sucursal ? { local_id: state.sucursal.id } : false);
     }).then(()=>{
@@ -149,6 +130,15 @@ const CalendarApp = () => {
      // Cerrar el modal después de crear el evento
   };
 
+  const onSelectedClient = async (client:any) => {
+    // const filter:any = state.sucursal ? { local_id: state.sucursal.id } : false;
+    // setSelectedClient(client);
+    // if(selectedClient)
+    //   filter['cliente_id'] = selectedClient.id;
+    // const eventosDeEsteMes = await solicitudObject.getSolicitudesCurrentMonth(filter);
+    // setReservaciones(eventosDeEsteMes);
+    
+  }
   const handleDayClick = (date:any) => {
     setSelectedDay(date);
   };
@@ -203,6 +193,16 @@ const CalendarApp = () => {
   // Nombres de los días de la semana en español
   const daysOfWeek = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
   
+  const searchParams = useSearchParams();
+  const u = searchParams.get('u');
+
+  useMemo(()=>{
+
+    if(u || state?.user?.rol === "cliente")
+      setSelectedClient({ id: u || state.user.clientes[0].id });
+
+  }, [u, state.user]);
+
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Barra de navegación de días */}
@@ -317,6 +317,7 @@ const CalendarApp = () => {
       {
         (state.user.rol !== "cliente" || clientHasMembershipActive(state.user?.clientes, servicios, reservaciones)) &&
         <EventModal
+          onChangeClient={onSelectedClient}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onCreateEvent={handleCreateEvent}
@@ -324,7 +325,7 @@ const CalendarApp = () => {
           slot={selectedSlot}
           event={selectedEvent}
           employees={empleados}
-          services={state.user.rol === "cliente" ? getMembershipServices(state.user?.clientes[0], servicios, reservaciones)  : servicios}
+          services={state.user.rol === "cliente" && state.user?.clientes?.length ? getMembershipServices(state.user?.clientes[0], servicios, reservaciones.filter((reservacion:any)=>reservacion.cliente_id === state.user?.clientes[0].id))  : servicios}
         />
       }
       
