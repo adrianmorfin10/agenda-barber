@@ -101,7 +101,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
     formData.append('instagram', nuevoCliente.instagram);
     formData.append('descuento', nuevoCliente.descuento.toString());
     formData.append('membresia', nuevoCliente.membresia.toString());
-    formData.append('membresia_id', nuevoCliente.membresia_id.toString());
     formData.append('creado_por', nuevoCliente.creado_por.toString());
     formData.append('local_id', state?.sucursal.id.toString());
     if (file) {
@@ -294,23 +293,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
             </div>
            
           </div>
-          {
-            nuevoCliente.membresia && (
-              <select
-                name="membresia"
-                value={nuevoCliente.membresia_id}
-                onChange={(e)=>{ setNuevoCliente({ ...nuevoCliente, membresia_id: parseInt(e.target.value) })}}
-                className={`border p-2 mb-4 w-full rounded-lg text-black placeholder-gray`}
-              >
-                <option value="">Selecciona una membresía</option>
-                {membresias.map((membresia:any) => (
-                  <option key={`membresia-${membresia.id}`} value={membresia.id}>
-                    {`${membresia.nombre} `} 
-                  </option>
-                ))}
-              </select>
-            )
-          }
+          
           {/* Botón Añadir Cliente */}
           <button
             className="bg-[#0C101E] text-white rounded-lg p-2 w-full hover:bg-[#000000] mt-auto"

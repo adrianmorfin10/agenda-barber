@@ -59,7 +59,9 @@ export const clientHasMembershipActive = (clientes: any[], services: any[], rese
 //Si tiene algun servicio donde la cantidad de reservaciones sea menor a la cantidad de reservaciones de la membresia agregar al objeto membresia
 export const getMembershipServices = (cliente: any, services: any[], reservacions:any[] ):any[] => {
     const _services:any[] = [];
-    const { membresia } = cliente;
+    const { cliente_membresia } = cliente;
+    if(!cliente_membresia) return _services;
+    const { membresia } = cliente_membresia.cliente_membresia.find((cm:any)=>cm.activo === true) || {};
     const reservetionFileredByState = reservacions.filter((reservacion:any)=>reservacion.estado === "completada" || reservacion.estado === "pendiente");
     const reservetionsGroupedByService = _.groupBy(reservetionFileredByState, 'servicio_id');
     membresia.membresia_servicios.forEach((ms:any)=>{
@@ -68,20 +70,25 @@ export const getMembershipServices = (cliente: any, services: any[], reservacion
             _services.push(services.find((service:any)=>service.id === ms.servicio_id));
         }
     });
-    console.log('getMembershipServices', _services, reservetionsGroupedByService);
+    
     return _services;
 }
 
 export const isPrepago = (cliente:any, service_id: number, reservaciones:any[]) => {
     if(!cliente) return false;
-    const { membresia } = cliente;
+    const { cliente_membresia } = cliente;
+    if(!cliente_membresia) return false;
+    const { membresia } = cliente_membresia.find((cm:any)=>cm.activo === true) || {};
+  
     if(!membresia) return false;
     
     const reservetionFileredByState = reservaciones.filter((reservacion:any)=>reservacion.estado === "completada" || reservacion.estado === "pendiente");
     
+   
     const ms = membresia.membresia_servicios.find((ms:any)=>ms.servicio_id.toString() === service_id.toString());
     const reservetionsGroupedByService = _.groupBy(reservetionFileredByState, 'servicio_id');
-    const reservetions = reservetionsGroupedByService[service_id.toString()] || [];
     
-    return (reservetions.length < ms.cantidad_reservaciones);
+    const reservetions = reservetionsGroupedByService[service_id.toString()] || [];
+ 
+    return (reservetions.length < ms.cantidad_reserv);
 }

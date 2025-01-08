@@ -27,6 +27,7 @@ const getClients = async (filter: any): Promise<Cliente[]> => {
     serviciosDisponibles: client.servicios_disponibles || 0,
     proximoPago: client.proximo_pago || "Sin proximo pago",
     avatar: client.usuario.avatar_url,
+    cliente_membresia: client.cliente_membresia,
     membresia_id: client.membresia_id
   }));
   return clients;

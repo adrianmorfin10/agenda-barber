@@ -45,20 +45,23 @@ const ClientesList: React.FC<ClientesListProps> = ({
   const [clientToList, setClientsToList ] = useState<Cliente[]>(clientes || []);
   const [search, setSearch] = useState('');
   React.useEffect(() => {
-    if(!search || search.length < 3) return;
-    let clientes = clientToList;
+    if(!search || search.length < 3){
+      setClientsToList(clientes);
+      return;
+    };
+   
    
     if(!idTime){
       idTime = setTimeout(() => {
         clearTimeout(idTime);
         idTime = false;
       }, 500);
-      setClientsToList(clientes.filter(cliente => {
+      setClientsToList(clientToList.filter(cliente => {
         return `${cliente.nombre} ${cliente.apellido}`.toLowerCase().includes(search.toLowerCase())
       }));
     }
       
-  }, [search])
+  }, [search, clientes]);
   // .filter(cliente =>
   //   `${cliente.nombre} ${cliente.apellido}`.toLowerCase().includes(searchTerm.toLowerCase())
   // );

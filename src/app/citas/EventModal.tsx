@@ -32,7 +32,8 @@ const getClients = async (filter:any): Promise<Cliente[]> => {
     membresia: client.membresia || null,
     tipo: client.usuario.tipo || "Sin tipo",
     serviciosDisponibles: client.servicios_disponibles || 0,
-    proximoPago: client.proximo_pago || "Sin proximo pago"
+    proximoPago: client.proximo_pago || "Sin proximo pago",
+    cliente_membresia: client.cliente_membresia
   }));
   return clients;
 }
