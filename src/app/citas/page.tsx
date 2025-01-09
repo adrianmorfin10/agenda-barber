@@ -118,7 +118,6 @@ const CalendarApp = () => {
       prepago: isPrepago(newEvent.client, parseInt(newEvent.service), reservaciones.filter((reservacion:any)=>reservacion.cliente_id === newEvent.client.id)),
       
     }
-    console.log("nuevaSolicitud", nuevaSolicitud)
     solicitudObject.createSolicitud(nuevaSolicitud).then(data=>{
       setIsModalOpen(false);
       return getData(state.sucursal ? { local_id: state.sucursal.id } : false);
