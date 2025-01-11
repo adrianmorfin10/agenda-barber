@@ -10,6 +10,7 @@ import Image from 'next/image';
 import Cliente from "../interfaces/cliente";
 import { useSearchParams } from 'next/navigation'
 import { on } from "events";
+import { hasMemberActive } from "../Utils";
 
 const clientService = new ClientService();
 
@@ -39,7 +40,7 @@ const getClients = async (filter:any): Promise<Cliente[]> => {
 }
 
 
-const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (value:any)=>void, onUpdate: (event:any)=>void, onChangeClient: (client:any)=>void, slot:any, employees:any[], services:any[], event: any}> = ({ isOpen, onClose, onUpdate, onChangeClient, onCreateEvent, slot, employees, services, event }) => {
+const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (value:any)=>void, onUpdate: (event:any)=>void, sendTokenConfirmation:(client_id:number, evento_id: number)=>void, onChangeClient: (client:any)=>void, slot:any, employees:any[], services:any[], event: any}> = ({ isOpen, onClose, onUpdate, onChangeClient, onCreateEvent, sendTokenConfirmation, slot, employees, services, event }) => {
 
   const [newEvent, setNewEvent] = useState<any>(null);
 
@@ -56,8 +57,9 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [clientes, setClientes] = useState<Cliente[]>([]);
-
-  const [ state, dispatchState ]= React.useContext(AppContext);
+  const [selectedEvent, setSelectedEvent ] = useState<any>(event);
+  const [state, dispatchState ]= React.useContext(AppContext);
+  
 
   const defaultEvent = {
     title: "",
@@ -74,8 +76,12 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
     onChangeClient(selectedClient);
   }, [selectedClient]);
 
+  React.useEffect(()=>{
+    setSelectedEvent(event);
+  },[event])
+
   React.useEffect(() => {
-    console.log("event effect", event);
+    const event = selectedEvent
     if(event){
       setNewEvent({
         title:event.title,
@@ -85,26 +91,30 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
         client: event.cliente.usuario.nombre,
         date: format(event.fecha, "yyyy-MM-dd"),
         service: event.servicio_id,
+        prepago: event.prepago,
         price: 0, // Inicialmente el precio es 0
       });
-      setSelectedClient({ nombre: event.cliente.usuario.nombre, apellido: event.cliente.usuario.apellido_paterno + " " + event.cliente.usuario.apellido_materno  });
+      console.log("event.cliente", event.cliente);
+      setSelectedClient({ nombre: event.cliente.usuario.nombre, apellido: event.cliente.usuario.apellido_paterno + " " + event.cliente.usuario.apellido_materno, ...event.cliente  });
     }else{
       setNewEvent(defaultEvent);
     }
-  },[event]);
+  },[selectedEvent]);
+
   const handleInputChange = (e:any) => {
     const { name, value } = e.target;
     setNewEvent({ ...newEvent, [name]: value });
-
     // Limpiar errores al escribir
     setErrors({ ...errors, [name]: "", timeError: "" });
   };
+
   const handleChangeEmployee = (e:any): void => {
     const { value, name } = e.target;
     const newEventTemp:any = { ...newEvent, employee: { name, id: value } };
     setNewEvent(newEventTemp);
     setErrors((prev:any) => ({ ...prev, employee: "", timeError: "" }));
   };
+
   const handleServiceChange = (e:any) => {
     const selectedService = e.target.value;
     const serviceDetails = services.find((service:any) => service.id === selectedService);
@@ -143,7 +153,6 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
     });
   }, [slot]);
 
-  console.log("newEvent", newEvent, event);
 
   const getCliente = (userId:any)=>{
     
@@ -155,13 +164,13 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
         telefono: client.usuario.telefono
       }
       setSelectedClient(cliente);
-      console.log("entro aqui");
       setNewEvent((prev:any) => ({ ...prev, client: `${cliente.nombre} ${cliente.apellido}` }));
     })
   }
 
   const handleClose = () => {
     setIsClosing(true); // Activar la animación de salida
+    
     setTimeout(() => {
       onClose(); // Cerrar el modal después de la animación
       setIsClosing(false); // Restablecer el estado
@@ -291,8 +300,11 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
                   }
                   
                 </div>
-
-              
+                {selectedClient && !hasMemberActive(selectedClient) && (
+                  <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                  <p>El usuario no tiene la suscripción activa</p>
+                  </div>
+                )}
               </div>
             </div>
           
@@ -433,15 +445,29 @@ const EventModal:React.FC<{isOpen:boolean, onClose: ()=>void, onCreateEvent: (va
 
           {/* Botones */}
           <div className="flex space-x-2 mb-4">
-            <button
-              onClick={()=>onUpdate({ ...(event || {}), estado: 'cancelada' })}
-              className="border border-black text-black px-4 py-2 rounded-lg w-full font-semibold"
-            >
-              Cancelar
-            </button>
+            {
+              !event.reservacion_confirmacion?.confirmacion &&
+              <button
+                onClick={()=>onUpdate({ ...(event || {}), estado: 'cancelada' })}
+                className=" text-black px-3 py-2 rounded-lg w-full font-semibold"
+              >
+                Cancelar
+              </button>
+            }
+            
+            {
+              event.prepago && selectedClient && !event.reservacion_confirmacion?.confirmacion &&
+              <button
+                onClick={()=>sendTokenConfirmation(selectedClient.id, event.id)}
+                className="border border-black text-black px-3 py-2 rounded-lg w-full font-semibold"
+              >
+                Enviar token
+              </button>
+            }
+
             <button
               onClick={()=>onUpdate({ ...(event || {}), estado: 'completada' })}
-              className="bg-black text-white px-4 py-2 rounded-lg w-full font-semibold"
+              className="bg-black text-white px-3 py-2 rounded-lg w-full font-semibold"
             >
               Completar
             </button>

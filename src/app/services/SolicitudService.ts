@@ -39,5 +39,14 @@ class SolicitudService extends HttpService {
         const response = await axios.post(`${this.baseUrl}/reservacion/${id}/delete`);
         return response.data;
     }
+
+    async generateAndSendToken(cliente_id: number, reservacion_id: number) {
+        const response = await axios.post(`${this.baseUrl}/reservacion/generate-send-confirmation-token`, { cliente_id, evento_id: reservacion_id });
+        return response.data;
+    }
+    async confirmarReservacion(evento_id: number) {
+        const response = await axios.post(`${this.baseUrl}/reservacion//confirm-reservation`, { evento_id });
+        return response.data;
+    }
 }
 export default SolicitudService;

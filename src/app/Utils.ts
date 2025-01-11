@@ -62,7 +62,7 @@ export const getMembershipServices = (cliente: any, services: any[], reservacion
     const _services:any[] = [];
     const { cliente_membresia } = cliente;
     if(!cliente_membresia) return _services;
-    const active_cliente_membresia = cliente_membresia.cliente_membresia.find((cm:any)=>cm.activo === true) || {};
+    const active_cliente_membresia = cliente_membresia.find((cm:any)=>cm.activo === true) || {};
     if(!active_cliente_membresia)
         return _services;
     const {  membresia, fecha_inicio, fecha_fin } = active_cliente_membresia;
@@ -107,4 +107,19 @@ export const isPrepago = (cliente:any, service_id: number, reservaciones:any[]) 
     const reservetions = reservetionsGroupedByService[service_id.toString()] || [];
  
     return (reservetions.length < ms.cantidad_reserv);
+}
+export const hasMemberActive = (cliente:any) =>{
+    console.log('hasMemberActive', cliente)
+    if(!cliente) return false;
+    const { cliente_membresia } = cliente;
+    if(!cliente_membresia) return false;
+    const active_cliente_membresia = cliente_membresia.find((cm:any)=>cm.activo === true) || {};
+    const {  membresia, fecha_inicio, fecha_fin } = active_cliente_membresia;
+    if(!membresia) return false;
+    const currentUTCDate = moment().utc().toDate();
+    const fechaFinDate = moment(fecha_fin).toDate();
+
+    if(currentUTCDate >= fechaFinDate)
+        return false;
+    return true
 }

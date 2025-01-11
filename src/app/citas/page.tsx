@@ -25,6 +25,8 @@ import { AppContext } from '../components/AppContext';
 import SurveyModal from "../components/SurveyModal";
 import { clientHasMembershipActive, getMembershipServices, isPrepago } from "../Utils";
 import { useSearchParams } from "next/navigation";
+import TokenConfirmationModal from "../components/TokenConfirmationModal";
+import Modal from "../components/Modal";
 const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
@@ -71,7 +73,9 @@ const CalendarApp = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [openSurveyModal, setOpenSurveyModal] = useState<boolean>(false);
   const [reservaciones, setReservaciones] = useState([]);
-  const [ selectedClient, setSelectedClient ] = useState<any>(null);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [tokenConfirmation, setTokenConfirmation] = useState<string | null>(null);
+  const [loadingToken, setLoadingToken] = useState<boolean>(false);
   const [state, dispatchState] = React.useContext(AppContext);
   const getData = async (filter:any) => {
     const _servicios = await servicioObject.getServicios(filter);
@@ -96,12 +100,14 @@ const CalendarApp = () => {
     setReservaciones(eventosDeEsteMes);
     setEvents(eventos.filter((item:any)=>item.estado === 'pendiente').map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
   }
+
   React.useEffect(() => {
-    if(state.sucursal){
-      setLocal(state.sucursal.id )
-      getData(state.sucursal ? { local_id: state.sucursal.id } : false).then();
-    }
+    if(!state.sucursal)
+      return;
+    setLocal(state.sucursal.id )
+    getData(state.sucursal ? { local_id: state.sucursal.id } : false).then();
   }, [state.sucursal]);
+
   const handleCreateEvent = (newEvent:any) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
@@ -185,6 +191,15 @@ const CalendarApp = () => {
     e.stopPropagation();
     setSelectedEvent(event);
     setIsModalOpen(true);
+  }
+  const sendTokenConfirmation = (client_id:number, evento_id: number)=>{
+    setLoadingToken(true);
+    solicitudObject.generateAndSendToken(client_id, evento_id).then((reponse:any)=>{
+      setLoadingToken(false);
+      setTokenConfirmation(reponse.token)
+    }).then((error:any)=>{
+      setLoadingToken(false);
+    })
   }
   const currentHour = new Date();
   const isCurrentDay = isToday(selectedDay);
@@ -314,12 +329,14 @@ const CalendarApp = () => {
         </div>
       </div>
       {
-        (state.user.rol !== "cliente" || clientHasMembershipActive(state.user?.clientes, servicios, reservaciones)) &&
+        ((state.user.rol === "cliente" && !clientHasMembershipActive(state.user?.clientes, servicios, reservaciones))) ?
+        <></> :
         <EventModal
           onChangeClient={onSelectedClient}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onCreateEvent={handleCreateEvent}
+          sendTokenConfirmation={sendTokenConfirmation}
           onUpdate={(event:any)=>onUpdateEvent(event)}
           slot={selectedSlot}
           event={selectedEvent}
@@ -338,6 +355,27 @@ const CalendarApp = () => {
             setOpenSurveyModal(false)
           })
         }} 
+      />
+      <TokenConfirmationModal 
+        isOpen={(typeof tokenConfirmation === "string")} 
+        token={tokenConfirmation}
+        onClose={()=>{ setTokenConfirmation(null)}} 
+        onConfirm={(confirm:boolean)=>{
+          setTokenConfirmation(null);
+          if(!confirm || !selectedEvent.id)
+            return;
+          solicitudObject.confirmarReservacion(selectedEvent.id).then(()=>{
+            alert('Cita confirmado correctamente');
+          }).catch(()=>{
+            alert('Ha ocurrido un error al confirmar la cita');
+          })
+        }} 
+      />
+      <Modal
+        isOpen={loadingToken}
+        title="Token"
+        content="Enviando token de confirmacion"
+        buttons={false}
       />
     </div>
   );

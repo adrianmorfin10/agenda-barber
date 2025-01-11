@@ -201,7 +201,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
 
         {/* Botón de Agendar (deshabilitado) */}
         <div className="flex flex-col items-center">
-          <Link key={"agendar-link"} href={`/citasdev?u=${cliente.id}`} className="flex items-center border border-gray-400 bg-white rounded px-4 py-2 cursor-pointer" >
+          <Link key={"agendar-link"} href={`/citas?u=${cliente.id}`} className="flex items-center border border-gray-400 bg-white rounded px-4 py-2 cursor-pointer" >
             
               <Image src="/img/calendara.svg" alt="Agendar" width={20} height={20} />
               <span className="ml-2 poppins text-black">Agendar</span>
