@@ -56,7 +56,7 @@ const MainComponent: React.FC<MainComponentProps> = ({ children }) => {
             userObject.getUserByUserProviderId(_user.sub).then((data) => {
                 const tmpData = { ...data, rol: getRole(data) };
                 addInterceptorToAxios(getHeaders(tmpData));
-                dispatch({ key: 'user', value : tmpData }); 
+                dispatch({ key: 'user', value : { ...tmpData, auth0_user_data: user } }); 
             });
     }, [user]);
 

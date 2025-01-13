@@ -108,6 +108,25 @@ const NavBar: React.FC = () => {
           <Image src="/img/logobarber.png" alt="Logo" width={130} height={40} />
         </div>
         <hr className="border-t border-[#1D1D1D] my-1" />
+        {
+          appState.user?.auth0_user_data &&
+          <>
+            <div className="flex items-center justify-between text-[#7C7C7C] cursor-pointer " >
+              <div className="flex items-center  cursor-pointer " >
+                <div className="bg-[#1c1c1c] rounded-full p-2 mr-2">
+                  <img className="rounded-full" src={appState.user.auth0_user_data.picture} alt="User picture" width={30} height={30} />
+                </div>
+                
+                <span>{appState.user.auth0_user_data.nickname}</span>
+              </div>
+              
+              <span>Salir</span>
+              
+            </div>
+            <hr className="border-t border-[#1D1D1D] my-1" />
+          </>
+        }
+        
         <div className="flex flex-col space-y-4">
           {navItems.map((item:any) => (
             <Link key={item.path} href={item.path} className={`flex items-center space-x-2 p-2 transition hover:bg-[#1D1D1D] rounded-md ${pathname === item.path ? 'text-white' : 'text-[#7C7C7C]'}`}>
