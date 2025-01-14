@@ -61,6 +61,10 @@ const NavBar: React.FC = () => {
       });
   };
 
+  const handleLogout = () => {
+    window.location.href = '/api/auth/logout';
+  };
+
   const handleAddSucursal = (nuevaSucursal: Sucursal) => {
     setSucursales([...sucursales, nuevaSucursal]);
     localServiceObject.getLocales()
@@ -120,7 +124,7 @@ const NavBar: React.FC = () => {
                 <span>{appState.user.auth0_user_data.nickname}</span>
               </div>
               
-              <span>Salir</span>
+              <span onClick={handleLogout} >Salir</span>
               
             </div>
             <hr className="border-t border-[#1D1D1D] my-1" />

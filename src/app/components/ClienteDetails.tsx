@@ -75,7 +75,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
 
   const handleSaveClick = async () => {
     try {
-      let updatedCliente = {
+      const updatedCliente = {
         ...cliente,
         nombre: editedNombre,
         apellido: editedApellido,

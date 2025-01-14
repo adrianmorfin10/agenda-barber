@@ -54,6 +54,7 @@ const MainComponent: React.FC<MainComponentProps> = ({ children }) => {
     useEffect(() => {
         if(user)
             userObject.getUserByUserProviderId(_user.sub).then((data) => {
+                console.log("data", data)
                 const tmpData = { ...data, rol: getRole(data) };
                 addInterceptorToAxios(getHeaders(tmpData));
                 dispatch({ key: 'user', value : { ...tmpData, auth0_user_data: user } }); 
