@@ -116,7 +116,12 @@ const NavBar: React.FC = () => {
           appState.user?.auth0_user_data &&
           <>
             <div className="flex items-center justify-between text-[#7C7C7C] cursor-pointer " >
-              <div className="flex items-center  cursor-pointer " >
+              <div className="flex items-center  cursor-pointer "
+               onClick={() => {
+                // Redirige a la página de perfil
+                window.location.href = "/perfil";
+              }} >
+                
                 <div className="bg-[#1c1c1c] rounded-full p-2 mr-2">
                   <img className="rounded-full" src={appState.user.auth0_user_data.picture} alt="User picture" width={30} height={30} />
                 </div>

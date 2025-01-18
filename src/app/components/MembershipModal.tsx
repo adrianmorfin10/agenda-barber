@@ -22,8 +22,8 @@ const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCr
 
   const handleServiceToggle = (serviceId: number) => {
     const _services = selectedServices.some((item) => item.servicio_id === serviceId)
-    ? selectedServices.filter((item) => item.servicio_id !== serviceId)
-    : [...selectedServices, { servicio_id: serviceId, cantidad_reservaciones: 1 }]
+      ? selectedServices.filter((item) => item.servicio_id !== serviceId)
+      : [...selectedServices, { servicio_id: serviceId, cantidad_reservaciones: 1 }]
     
     setSelectedServices(_services);
   };
@@ -75,7 +75,7 @@ const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCr
             <ul className="space-y-2">
               {services.map((service) => (
                 <li key={`membresia-modal-${service.id}`} className='flex'>
-                  <label className="flex items-center border border-cacaca p-2 rounded-md">
+                  <label className="flex items-center border border-cacaca p-2 rounded-md w-full">
                     <div
                       className="w-2 h-full mr-2"
                       style={{ backgroundColor: service.color }}
@@ -87,25 +87,32 @@ const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCr
                       className="mr-2"
                     />
                     {service.nombre}
-                    {
-                      selectedServices.some(item=>item.servicio_id === service.id) && (
-                        <input
-                          type="number"
-                          id="cantidad_reservaciones"
-                          value={selectedServices.find(item=>item.servicio_id === service.id)?.cantidad_reservaciones}
-                          onChange={(e) => {
-                            setSelectedServices((prev) =>
-                              prev.map((item) =>
-                                item.servicio_id === service.id ? { servicio_id: service.id, cantidad_reservaciones: parseInt(e.target.value) } : item
-                              )
-                            );
-                          }}
-                          className="mt-1 p-2"
-                        />
-                      )
-                    }
                   </label>
-                  
+                  {selectedServices.some(item => item.servicio_id === service.id) && (
+                    <div className="mt-2 w-full">
+                      <label
+                        htmlFor={`cantidad-${service.id}`}
+                        className="block text-sm font-medium mb-1"
+                      >
+                        Número de servicios
+                      </label>
+                      <input
+                        type="number"
+                        id={`cantidad-${service.id}`}
+                        value={selectedServices.find(item => item.servicio_id === service.id)?.cantidad_reservaciones}
+                        onChange={(e) => {
+                          setSelectedServices((prev) =>
+                            prev.map((item) =>
+                              item.servicio_id === service.id
+                                ? { servicio_id: service.id, cantidad_reservaciones: parseInt(e.target.value) }
+                                : item
+                            )
+                          );
+                        }}
+                        className="p-2 border border-gray-300 rounded-md w-full"
+                      />
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
