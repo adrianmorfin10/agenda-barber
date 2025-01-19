@@ -16,10 +16,13 @@ interface Cliente {
   ultimaVisita: string;
   descuento: string;
   ingresosTotales: string;
-  membresia: string;
+  isMember?: boolean;
+  membresia?: object;
+  membresia_id?: number;
   tipo: string;
   serviciosDisponibles: number;
   proximoPago: string;
+  avatar: string | null;
 }
 
 interface ClientesListProps {
@@ -29,7 +32,7 @@ interface ClientesListProps {
   setSearchTerm: (term: string) => void;
   reloadClients?: () => void
 }
-
+let idTime:any = false;
 const ClientesList: React.FC<ClientesListProps> = ({
   clientes =[],
   onSelectCliente,
@@ -37,12 +40,32 @@ const ClientesList: React.FC<ClientesListProps> = ({
   setSearchTerm,
   reloadClients
 }) => {
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [clientToList, setClientsToList ] = useState<Cliente[]>(clientes || []);
+  const [search, setSearch] = useState('');
+  React.useEffect(() => {
+    if(!search || search.length < 3){
+      setClientsToList(clientes);
+      return;
+    };
+   
+   
+    if(!idTime){
+      idTime = setTimeout(() => {
+        clearTimeout(idTime);
+        idTime = false;
+      }, 500);
+      setClientsToList(clientToList.filter(cliente => {
+        return `${cliente.nombre} ${cliente.apellido}`.toLowerCase().includes(search.toLowerCase())
+      }));
+    }
+      
+  }, [search, clientes]);
   // .filter(cliente =>
   //   `${cliente.nombre} ${cliente.apellido}`.toLowerCase().includes(searchTerm.toLowerCase())
   // );
-
+ 
   return (
     <div className="p-5 w-full md:max-w-[450px] overflow-y-auto">
       <h1 className="font-semibold text-2xl poppins mb-5 text-black">Usuarios</h1>
@@ -54,7 +77,10 @@ const ClientesList: React.FC<ClientesListProps> = ({
           type="text"
           placeholder="Buscar usuario"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => { 
+            setSearchTerm(e.target.value);
+            setSearch(e.target.value);
+          }}
           className="bg-transparent border-none outline-none p-2 ml-2 poppins text-sm text-black"
         />
       </div>
@@ -69,8 +95,8 @@ const ClientesList: React.FC<ClientesListProps> = ({
       <AddUserModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onCreateSuccess={reloadClients} />
 
       {/* Lista de usuarios filtrados */}
-      <div className="overflow-y-auto max-h-[450px]">
-        {(clientes || []).map(cliente => (
+      <div className="overflow-y-auto ">
+        {clientToList.map(cliente => (
           <div
             key={cliente.id}
             className="flex items-center mb-4 cursor-pointer p-2 rounded-lg hover:bg-gray-100"

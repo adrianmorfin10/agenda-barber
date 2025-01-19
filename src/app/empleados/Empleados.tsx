@@ -42,7 +42,8 @@ const Empleados = () => {
           ingresosTotales: 0,
           tipo: 'Black',
           diasTrabajo: item.working_days || [],
-          servicios: item.working_days || [],
+          servicios: item.barbero_servicios,
+          barbero_servicios: item.barbero_servicios,
           //Especificar q es proximo pago
           proximoPago: '',
       }
@@ -79,6 +80,7 @@ const Empleados = () => {
           <EmpleadoDetails
             empleado={selectedEmpleado}
             onBack={() => setSelectedEmpleado(null)}
+            onSave={()=>getEmpleados()}
           />
         </div>
       </div>

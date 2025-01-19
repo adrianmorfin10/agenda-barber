@@ -65,7 +65,8 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
       membresia: client.is_member ? "Activa" : "Inactiva",
       tipo: client.usuario.tipo || "Sin tipo",
       serviciosDisponibles: client.servicios_disponibles || 0,
-      proximoPago: client.proximo_pago || "Sin proximo pago"
+      proximoPago: client.proximo_pago || "Sin proximo pago",
+      cliente_membresia: client.cliente_membresia
     }));
     return clients;
   };

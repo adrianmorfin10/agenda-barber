@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
+import React, { Suspense, use, useMemo, useState } from "react";
 import  {  dateFnsLocalizer } from "react-big-calendar";
 
 import format from "date-fns/format";
@@ -22,6 +22,11 @@ import SolicitudService from "../services/SolicitudService";
 import moment from "moment";
 import Image from 'next/image';
 import { AppContext } from '../components/AppContext';
+import SurveyModal from "../components/SurveyModal";
+import { clientHasMembershipActive, getMembershipServices, isPrepago } from "../Utils";
+import { useSearchParams } from "next/navigation";
+import TokenConfirmationModal from "../components/TokenConfirmationModal";
+import Modal from "../components/Modal";
 const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
@@ -36,33 +41,6 @@ const localizer = dateFnsLocalizer({
   getDay,
   locales,
 });
-
-const employees = [
-  {
-    name: "Pedro López",
-    initials: "PL",
-    workingHours: { start: "07:00", end: "18:00" },
-    workDays: [1, 2, 3, 4, 5], // Lunes a Viernes
-  },
-  {
-    name: "Ana Chávez",
-    initials: "AC",
-    workingHours: { start: "08:00", end: "17:00" },
-    workDays: [1, 3, 5], // Lunes, Miércoles, Viernes
-  },
-  {
-    name: "Juan Martínez",
-    initials: "JM",
-    workingHours: { start: "09:00", end: "16:00" },
-    workDays: [2, 4], // Martes y Jueves
-  },
-  {
-    name: "Carlos Pérez",
-    initials: "CP",
-    workingHours: { start: "08:00", end: "16:00" },
-    workDays: [1, 2, 3, 4, 5], // Lunes a Viernes
-  },
-];
 
 // Redondear la hora al punto más cercano
 const roundToNearestHour = (date:any) => {
@@ -89,9 +67,15 @@ const CalendarApp = () => {
   const [events, setEvents] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
-  const [ localId, setLocal ] = useState(0);
-  const [ servicios, setServicios ] = useState([]);
-  const [ empleados, setEmpleados] = useState([]);
+  const [localId, setLocal] = useState(0);
+  const [servicios, setServicios] = useState([]);
+  const [empleados, setEmpleados] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [openSurveyModal, setOpenSurveyModal] = useState<boolean>(false);
+  const [reservaciones, setReservaciones] = useState([]);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [tokenConfirmation, setTokenConfirmation] = useState<string | null>(null);
+  const [loadingToken, setLoadingToken] = useState<boolean>(false);
   const [state, dispatchState] = React.useContext(AppContext);
   const getData = async (filter:any) => {
     const _servicios = await servicioObject.getServicios(filter);
@@ -106,22 +90,28 @@ const CalendarApp = () => {
           start: item.start_hour || "07:00",
           end: item.end_hour || "18:00"
         },
-        workDays: item.working_days || [ 1, 2, 3, 4, 5]
+        workDays: item.working_days || [ 1, 2, 3, 4, 5 ]
       }
     }));
+    if(selectedClient)
+      filter['cliente_id'] = selectedClient.id;
     const eventos = await solicitudObject.getSolicitudes(filter);
-    setEvents(eventos.map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
+    const eventosDeEsteMes = await solicitudObject.getSolicitudesCurrentMonth(filter);
+    setReservaciones(eventosDeEsteMes);
+    setEvents(eventos.filter((item:any)=>item.estado === 'pendiente').map((item:any)=>({ ...item, title: `${item.servicio?.nombre} - ${item.cliente?.usuario?.nombre} ${item.cliente?.usuario?.apellido_paterno}  ` })));
   }
+
   React.useEffect(() => {
-    if(state.sucursal){
-      setLocal(state.sucursal.id )
-      getData(state.sucursal ? { local_id: state.sucursal.id } : false).then();
-    }
+    if(!state.sucursal)
+      return;
+    setLocal(state.sucursal.id )
+    getData(state.sucursal ? { local_id: state.sucursal.id } : false).then();
   }, [state.sucursal]);
+
   const handleCreateEvent = (newEvent:any) => {
     const start = new Date(`${newEvent.date}T${newEvent.startTime}`);
     const end = new Date(`${newEvent.date}T${newEvent.endTime}`);
-    solicitudObject.createSolicitud({
+    const nuevaSolicitud = {
       cliente_id: parseInt(newEvent.client.id),
       local_id: localId,
       servicio_id: parseInt(newEvent.service),
@@ -130,8 +120,11 @@ const CalendarApp = () => {
       end_hour: newEvent.endTime,
       barbero_id: parseInt(newEvent.employee.id),
       precio: newEvent.price,
-      estado: "pendiente"
-    }).then(data=>{
+      estado: "pendiente",
+      prepago: isPrepago(newEvent.client, parseInt(newEvent.service), reservaciones.filter((reservacion:any)=>reservacion.cliente_id === newEvent.client.id)),
+      
+    }
+    solicitudObject.createSolicitud(nuevaSolicitud).then(data=>{
       setIsModalOpen(false);
       return getData(state.sucursal ? { local_id: state.sucursal.id } : false);
     }).then(()=>{
@@ -142,6 +135,15 @@ const CalendarApp = () => {
      // Cerrar el modal después de crear el evento
   };
 
+  const onSelectedClient = async (client:any) => {
+    // const filter:any = state.sucursal ? { local_id: state.sucursal.id } : false;
+    // setSelectedClient(client);
+    // if(selectedClient)
+    //   filter['cliente_id'] = selectedClient.id;
+    // const eventosDeEsteMes = await solicitudObject.getSolicitudesCurrentMonth(filter);
+    // setReservaciones(eventosDeEsteMes);
+    
+  }
   const handleDayClick = (date:any) => {
     setSelectedDay(date);
   };
@@ -171,12 +173,50 @@ const CalendarApp = () => {
     setCurrentMonth(subMonths(currentMonth, 1));
   };
 
+  const onUpdateEvent = async (event:any) => {
+
+    try {
+      await solicitudObject.updateSolicitud(event.id, event);
+      setSelectedEvent(event);
+      setIsModalOpen(false);
+      if(event.estado === "completada")
+        setOpenSurveyModal(true);
+      return getData(state.sucursal ? { local_id: state.sucursal.id } : false);
+    } catch (error) {
+      
+    }
+    
+  }
+  const onClickEvent = (event:any, e:any)=>{
+    e.stopPropagation();
+    setSelectedEvent(event);
+    setIsModalOpen(true);
+  }
+  const sendTokenConfirmation = (client_id:number, evento_id: number)=>{
+    setLoadingToken(true);
+    solicitudObject.generateAndSendToken(client_id, evento_id).then((reponse:any)=>{
+      setLoadingToken(false);
+      setTokenConfirmation(reponse.token)
+    }).then((error:any)=>{
+      setLoadingToken(false);
+    })
+  }
   const currentHour = new Date();
   const isCurrentDay = isToday(selectedDay);
 
   // Nombres de los días de la semana en español
   const daysOfWeek = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
-  console.log("eventos", events)
+  
+  const searchParams = useSearchParams();
+  const u = searchParams.get('u');
+
+  useMemo(()=>{
+
+    if(u || state?.user?.rol === "cliente")
+      setSelectedClient({ id: u || state.user.clientes[0].id });
+
+  }, [u, state.user]);
+
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Barra de navegación de días */}
@@ -265,7 +305,7 @@ const CalendarApp = () => {
                           const employeeColor = colors[index % colors.length];
                           return (
                             <div
-                              key={i}
+                              key={`event-${event.id}-${i}`}
                               className={`absolute left-0 ${employeeColor} text-xs p-1 rounded`}
                               style={{
                                 top: 0,
@@ -274,6 +314,7 @@ const CalendarApp = () => {
                                 margin: "4px 4px",
                                 left: index === 0 ? "40px" : "0",
                               }}
+                              onClick={(e) => onClickEvent(event, e)}
                             >
                               {event.title} ({ event.start_hour ? event.start_hour : ""} - { event.end_hour ? event.end_hour : ""})
                             </div>
@@ -287,14 +328,54 @@ const CalendarApp = () => {
           </div>
         </div>
       </div>
-
-      <EventModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onCreateEvent={handleCreateEvent}
-        slot={selectedSlot}
-        employees={empleados}
-        services={servicios}
+      {
+        ((state.user.rol === "cliente" && !clientHasMembershipActive(state.user?.clientes, servicios, reservaciones))) ?
+        <></> :
+        <EventModal
+          onChangeClient={onSelectedClient}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onCreateEvent={handleCreateEvent}
+          sendTokenConfirmation={sendTokenConfirmation}
+          onUpdate={(event:any)=>onUpdateEvent(event)}
+          slot={selectedSlot}
+          event={selectedEvent}
+          employees={empleados}
+          services={state.user.rol === "cliente" && state.user?.clientes?.length ? getMembershipServices(state.user?.clientes[0], servicios, reservaciones.filter((reservacion:any)=>reservacion.cliente_id === state.user?.clientes[0].id))  : servicios}
+        />
+      }
+      
+      <SurveyModal 
+        isOpen={openSurveyModal} 
+        onClose={()=>{ setOpenSurveyModal(false)}} 
+        onConfirm={(rating:number)=>{
+          if(!selectedEvent)
+            return
+          solicitudObject.updateSolicitud(selectedEvent?.id, { ...selectedEvent, calificacion: rating}).then(()=>{ 
+            setOpenSurveyModal(false)
+          })
+        }} 
+      />
+      <TokenConfirmationModal 
+        isOpen={(typeof tokenConfirmation === "string")} 
+        token={tokenConfirmation}
+        onClose={()=>{ setTokenConfirmation(null)}} 
+        onConfirm={(confirm:boolean)=>{
+          setTokenConfirmation(null);
+          if(!confirm || !selectedEvent.id)
+            return;
+          solicitudObject.confirmarReservacion(selectedEvent.id).then(()=>{
+            alert('Cita confirmado correctamente');
+          }).catch(()=>{
+            alert('Ha ocurrido un error al confirmar la cita');
+          })
+        }} 
+      />
+      <Modal
+        isOpen={loadingToken}
+        title="Token"
+        content="Enviando token de confirmacion"
+        buttons={false}
       />
     </div>
   );

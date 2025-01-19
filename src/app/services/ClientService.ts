@@ -17,8 +17,12 @@ class ClientService extends HttpService {
         return response.data;
     }
 
-    async createClient(client: any) {
-        const response = await axios.post(`${this.baseUrl}/clients/create`, client);
+    async createClient(clientData: FormData) {
+        const response = await axios.post(`${this.baseUrl}/clients/create`, clientData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         return response.data;
     }
 

@@ -30,8 +30,8 @@ const MembershipsPage = () => {
       setMemberships(membresias);
     }).catch(e=>{})
   }
-  const handleCreateMembership = (nombre: string, servicios: any) => {
-    membresíaObject.createMembresia({ nombre, servicios, local_id: state.sucursal.id }).then(()=>{
+  const handleCreateMembership = (nombre: string, precio:number, servicios: any) => {
+    membresíaObject.createMembresia({ nombre, precio, servicios, local_id: state.sucursal.id }).then(()=>{
       getMembreships();
       setIsModalOpen(false)
     }).catch(e=>{});
@@ -62,6 +62,7 @@ const MembershipsPage = () => {
         <thead>
           <tr>
             <th className="border-b-2 border-gray-300 p-2 text-left">Nombre</th>
+            <th className="border-b-2 border-gray-300 p-2 text-left">Precio</th>
             <th className="border-b-2 border-gray-300 p-2 text-left">Servicios</th>
           </tr>
         </thead>
@@ -69,6 +70,7 @@ const MembershipsPage = () => {
           {memberships.map((membership) => (
             <tr key={membership.id} className="hover:bg-gray-100 cursor-pointer border-b">
               <td className="border-b border-gray-200 p-2">{membership.nombre}</td>
+              <td className="border-b border-gray-200 p-2">{membership.precio}</td>
               <td className="border-b border-gray-200 p-2">{membership.membresia_servicios.map((item:any)=>item.servicio.nombre).join(", ")}</td>
             </tr>
           ))}

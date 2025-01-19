@@ -1,23 +1,30 @@
 "use client";
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import ServicioService from '../services/ServicioService';
-import { AppContext } from '../components/AppContext';
+import React, { useState } from "react";
+import Image from "next/image";
+import ServicioService from "../services/ServicioService";
+import { AppContext } from "../components/AppContext";
+
 const serviciosObject = new ServicioService();
+
 interface AddserviceModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
   onAddservice: () => void;
 }
 
-const AddserviceModal: React.FC<AddserviceModalProps> = ({ isModalOpen, setIsModalOpen, onAddservice }) => {
+const AddserviceModal: React.FC<AddserviceModalProps> = ({
+  isModalOpen,
+  setIsModalOpen,
+  onAddservice,
+}) => {
   const [nuevoserviceo, setNuevoserviceo] = useState({
-    nombre: '',
-    tiempo: '', // Añadido campo de tiempo
+    nombre: "",
+    tiempo: "", // Añadido campo de tiempo
     precio: 0,
   });
-  const [state, dispatchState] = React.useContext(AppContext);
+  const [state] = React.useContext(AppContext);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNuevoserviceo({ ...nuevoserviceo, [name]: value });
@@ -28,20 +35,22 @@ const AddserviceModal: React.FC<AddserviceModalProps> = ({ isModalOpen, setIsMod
       nombre: nuevoserviceo.nombre,
       tiempo: nuevoserviceo.tiempo, // Añadido aquí
       precio: nuevoserviceo.precio,
-      local_id: state.sucursal.id
+      local_id: state.sucursal.id,
     };
-    serviciosObject.createService(newservice).then((response:any)=>{
-      onAddservice();
-      setNuevoserviceo({
-        nombre: '',
-        tiempo: '', // Restablecer campo de tiempo
-        precio: 0,
+    serviciosObject
+      .createService(newservice)
+      .then((response: any) => {
+        onAddservice();
+        setNuevoserviceo({
+          nombre: "",
+          tiempo: "", // Restablecer campo de tiempo
+          precio: 0,
+        });
+        setIsModalOpen(false);
+      })
+      .catch((e: any) => {
+        console.error(e);
       });
-      setIsModalOpen(false);
-    }).catch((e:any)=>{
-
-    })
-    
   };
 
   if (!isModalOpen) return null;
@@ -58,7 +67,9 @@ const AddserviceModal: React.FC<AddserviceModalProps> = ({ isModalOpen, setIsMod
             className="cursor-pointer"
             onClick={() => setIsModalOpen(false)}
           />
-          <h2 className="text-lg font-semibold ml-2 text-[#0C101E]">Agregar servicio</h2>
+          <h2 className="text-lg font-semibold ml-2 text-[#0C101E]">
+            Agregar servicio
+          </h2>
         </div>
 
         <div className="mb-4">
@@ -78,12 +89,14 @@ const AddserviceModal: React.FC<AddserviceModalProps> = ({ isModalOpen, setIsMod
         <div className="mb-4">
           <label className="block text-sm text-gray mb-1">Tiempo del servicio</label>
           <input
-            type="text"
+            type="number" // Cambiado a número
             name="tiempo"
-            placeholder="Tiempo"
+            placeholder="Tiempo (en minutos)"
             value={nuevoserviceo.tiempo}
             onChange={handleInputChange}
             className="border p-2 mb-2 w-full rounded-[5px] text-black placeholder-gray"
+            min={1} // Tiempo mínimo permitido
+            max={999} // Tiempo máximo permitido
             required
           />
         </div>
@@ -95,12 +108,14 @@ const AddserviceModal: React.FC<AddserviceModalProps> = ({ isModalOpen, setIsMod
             name="precio"
             placeholder="Precio"
             value={nuevoserviceo.precio}
-            onChange={(e) => setNuevoserviceo({ ...nuevoserviceo, precio: Number(e.target.value) })}
+            onChange={(e) =>
+              setNuevoserviceo({ ...nuevoserviceo, precio: Number(e.target.value) })
+            }
             className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
             required
           />
         </div>
-        
+
         <button
           onClick={handleAddservice}
           className="bg-black text-white py-2 px-4 rounded-[5px] w-full"

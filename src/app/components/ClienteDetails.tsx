@@ -5,6 +5,10 @@ import Image from 'next/image';
 import ClientService from '../services/ClientService';
 import Link from 'next/link';
 import WarningModal from './WarningModal';
+import HttpService from '../services/HttpService';
+import MembresiaService from '../services/MembresiaService';
+import { AppContext } from './AppContext';
+const membresiaServiceObject = new MembresiaService();
 
 interface Cliente {
   id: number;
@@ -18,10 +22,12 @@ interface Cliente {
   ultimaVisita: string;
   descuento: string;
   ingresosTotales: string;
-  membresia: string;
+  is_member?: boolean;
+  membresia?: object;
   tipo: string;
   serviciosDisponibles: number;
   proximoPago: string;
+  avatar: string | null;
 }
 
 interface ClienteDetailsProps {
@@ -30,20 +36,35 @@ interface ClienteDetailsProps {
   onUpdate: (updatedCliente: Cliente|null) => void; // Callback para actualizar la información del cliente
 }
 
+const httpService = new HttpService();
 const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedNombre, setEditedNombre] = useState(cliente?.nombre || '');
   const [editedApellido, setEditedApellido] = useState(cliente?.apellido || '');
   const [editedTelefono, setEditedTelefono] = useState(cliente?.telefono || '');
+  const [ membresia, setMembresia ] = useState(false);
   const [openWarning, setOpenWarning] = useState(false);
+  const [membresias, setMembresias] = useState([]);
+  const [membresiaId, setMembresiaId] = useState<number>(0);
+  const [state, dispatchState] = React.useContext(AppContext);
   useEffect(() => {
     if (cliente) {
+      console.log('Cliente seleccionado:', cliente);
       setEditedNombre(cliente.nombre);
       setEditedApellido(cliente.apellido);
       setEditedTelefono(cliente.telefono);
+      setMembresia(cliente.is_member || false);
     }
   }, [cliente]);
-
+  React.useEffect(()=>{
+    if(!state.sucursal) return;
+    getMembresias();
+  }, [state.sucursal])
+  const getMembresias = ()=>{
+    membresiaServiceObject.getMembresias(state.sucursal ? { local_id: state.sucursal.id } : false).then(response=>{
+      setMembresias(response);
+    }).catch(e=>{})
+  }
   if (!cliente) return null;
 
   const clientService = new ClientService();
@@ -60,10 +81,11 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
         apellido: editedApellido,
         telefono: editedTelefono,
       };
+      
       const response = await clientService.updateClient(cliente.id.toString(), {
         nombre: editedNombre,
         apellido: editedApellido,
-        telefono: editedTelefono,
+        telefono: editedTelefono
       });
       console.log('Respuesta de la API:', response); // Verificar la respuesta de la API
       onUpdate(updatedCliente); // Actualizar los datos en el componente padre
@@ -117,9 +139,14 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
         </div>
 
         <div className="flex flex-col items-center mb-4 md:mb-0">
-          <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px] text-sm md:text-base">
-            {cliente.nombre.charAt(0)}{cliente.apellido.charAt(0)}
-          </div>
+          {
+            !cliente.avatar ?
+            <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px] text-sm md:text-base">
+              {cliente.nombre.charAt(0)}{cliente.apellido.charAt(0)}
+            </div> :
+            <img src={`${httpService.baseUrl}/file/${cliente.avatar}`} className='rounded-full ' />
+          }
+          
           {isEditing ? (
             <>
               <label className="block text-sm text-gray-500 mt-2">Nombre:</label>
@@ -145,6 +172,23 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
                 onChange={(e) => setEditedTelefono(e.target.value)}
                 className="border p-1 rounded mt-1 mb-2 text-black w-full text-sm md:text-base"
               />
+              {
+                membresia && (
+                  <select
+                    name="membresia"
+                    value={membresiaId}
+                    onChange={(e)=>{ setMembresiaId(parseInt(e.target.value)) }}
+                    className={`border p-2 mb-4 w-full rounded-lg text-black placeholder-gray`}
+                  >
+                    <option value="0">Selecciona una membresía</option>
+                    {membresias.map((membresia:any) => (
+                      <option key={`membresia-client-detail-${membresia.id}`} value={membresia.id}>
+                        {`${membresia.nombre} `} 
+                      </option>
+                    ))}
+                  </select>
+                )
+              }
             </>
           ) : (
             <>
@@ -157,7 +201,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
 
         {/* Botón de Agendar (deshabilitado) */}
         <div className="flex flex-col items-center">
-          <Link key={"agendar-link"} href={`/citasdev?u=${cliente.id}`} className="flex items-center border border-gray-400 bg-white rounded px-4 py-2 cursor-pointer" >
+          <Link key={"agendar-link"} href={`/citas?u=${cliente.id}`} className="flex items-center border border-gray-400 bg-white rounded px-4 py-2 cursor-pointer" >
             
               <Image src="/img/calendara.svg" alt="Agendar" width={20} height={20} />
               <span className="ml-2 poppins text-black">Agendar</span>

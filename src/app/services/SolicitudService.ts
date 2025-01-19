@@ -8,7 +8,14 @@ class SolicitudService extends HttpService {
     }
 
     async getSolicitudes(filter: any = false) {
-        const response = await axios.get(`${this.baseUrl}/reservacion${filter ? `?l=${filter.local_id}` : '' }`);
+        const keys = Object.keys(filter);
+        const response = await axios.get(`${this.baseUrl}/reservacion${ keys.length ? `?${keys.map((k:string)=>`${k}=${filter[k]}`).join('&')}` : '' }`);
+        return response.data;
+    }
+
+    async getSolicitudesCurrentMonth(filter: any = false) {
+        const keys = Object.keys(filter);
+        const response = await axios.get(`${this.baseUrl}/reservacion/current/month${ keys.length ? `?${keys.map((k:string)=>`${k}=${filter[k]}`).join('&')}` : '' }`);
         return response.data;
     }
 
@@ -22,13 +29,23 @@ class SolicitudService extends HttpService {
         return response.data;
     }
 
-    async updateSolicitud(id: string, client: any) {
-        const response = await axios.post(`${this.baseUrl}/reservacion/${id}/update`, client);
+    async updateSolicitud(id: string | null, reservacion: any | null) {
+        if(!id || !reservacion) return;
+        const response = await axios.post(`${this.baseUrl}/reservacion/${id}/update`, reservacion);
         return response.data;
     }
     
     async deleteSolicitud(id: string) {
         const response = await axios.post(`${this.baseUrl}/reservacion/${id}/delete`);
+        return response.data;
+    }
+
+    async generateAndSendToken(cliente_id: number, reservacion_id: number) {
+        const response = await axios.post(`${this.baseUrl}/reservacion/generate-send-confirmation-token`, { cliente_id, evento_id: reservacion_id });
+        return response.data;
+    }
+    async confirmarReservacion(evento_id: number) {
+        const response = await axios.post(`${this.baseUrl}/reservacion//confirm-reservation`, { evento_id });
         return response.data;
     }
 }

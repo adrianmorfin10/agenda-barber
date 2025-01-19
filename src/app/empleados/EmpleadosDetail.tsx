@@ -2,7 +2,9 @@
 
 import React from 'react';
 import Image from 'next/image';
-
+import SuccessModal from '../components/SuccessModal';
+import EmpleadoService from '../services/EmpleadoService';
+const empleadoObject = new EmpleadoService();
 interface Empleado {
   id: number;
   nombre: string;
@@ -14,12 +16,14 @@ interface Empleado {
   inasistencias: number;
   ingresosTotales: string;
   diasTrabajo: number[];
+  barbero_servicios: any[];
   servicios: number[]; // IDs de servicios que el barbero puede brindar
 }
 
 interface EmpleadoDetailsProps {
   empleado: Empleado | null;
   onBack: () => void;
+  onSave: () => void;
 }
 
 // Diccionario para mapear IDs a nombres de servicios
@@ -30,12 +34,36 @@ const servicioNombres: { [key: number]: string } = {
   // Agrega otros servicios si es necesario
 };
 
-const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack }) => {
+const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onSave }) => {
+  const [ selectEmpleado, setSelectEmpleado ] = React.useState<any>(empleado);
+  const [ successModal, setSuccessModal ] = React.useState<boolean>(false);
+  React.useEffect(()=>{
+    setSelectEmpleado(empleado);
+  },[empleado])
+
+  const toggleDiaTrabajo = (dia: number) => {
+    setSelectEmpleado({
+      ...selectEmpleado,
+      diasTrabajo: selectEmpleado.diasTrabajo.includes(dia)
+        ? selectEmpleado.diasTrabajo.filter((d:number) => d !== dia)
+        : [...selectEmpleado.diasTrabajo, dia]
+    });
+  };
+
   if (!empleado) return null;
 
-  const diasSemana = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
-  const diasTrabajo = empleado.diasTrabajo.map((dia) => diasSemana[dia - 1]).join(", ");
+  const handleSave = () => {
+    // Lógica para guardar los cambios en el empleado
+    empleadoObject.updateEmpleado({ ...selectEmpleado, working_days: selectEmpleado?.diasTrabajo }).then(response=>{ 
+      onSave();
+      setSuccessModal(true);
+    }).catch(e=>{});
+  }
 
+  const diasSemana = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
+  const diasTrabajo = (selectEmpleado?.diasTrabajo || []).sort((a: number, b: number) => a - b).map((dia:number) => diasSemana[dia - 1]).join(", ");
+  
+  console.log("empleado", empleado);
   return (
     <div className="flex flex-col justify-center p-5 w-full h-full bg-[#F8F8F8]">
       <div className="md:hidden flex items-center justify-between mb-4">
@@ -56,6 +84,33 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack }) =
           <span className="text-black">{empleado.nombre}</span>
           <span className="text-black">{empleado.telefono}</span>
           <span className="text-black">{empleado.instagram}</span>
+          <div className="flex flex-col mb-4">
+              <label className="font-semibold mb-2 text-black text-center">Días de Trabajo</label>
+              <div className="flex gap-2">
+                {["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"].map((dia, index) => (
+                  <div key={index} className="flex items-center mb-1">
+                    <input
+                      type="checkbox"
+                      checked={(selectEmpleado?.diasTrabajo || []).includes(index + 1)}
+                      onChange={() => toggleDiaTrabajo(index + 1)}
+                      className="mr-1"
+                    />
+                    <label className="text-black">{dia}</label>
+                  </div>
+                ))}
+              </div>
+          </div>
+            
+          <div className="flex space-x-4 mt-4">
+            <button
+              onClick={handleSave}
+              className="bg-black text-white px-4 py-2 rounded text-sm md:text-base w-full"
+            >
+              Guardar
+            </button>
+            
+          </div>
+      
         </div>
 
         <div className="flex items-center">
@@ -86,17 +141,23 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack }) =
         <div className="mb-4">
           <h3 className="text-black poppins font-semibold">Servicios que Realiza</h3>
           <div className="flex flex-wrap gap-2">
-            {empleado.servicios.map((servicioId, index) => (
+            {(empleado.barbero_servicios || []).filter((item:any)=>item.servicio).map((item, index) => (
               <div
-                key={index}
+                key={`barber-detail-servicio-${index}`}
                 className="px-4 py-2 border border-gray-400 rounded-[10px] text-black poppins text-sm"
               >
-                {servicioNombres[servicioId] || "Servicio Desconocido"}
+                {item.servicio.nombre}
               </div>
             ))}
           </div>
         </div>
       </div>
+      <SuccessModal
+        isOpen={successModal}
+        content="Empleado actualizado correctamente."
+        onClose={() => setSuccessModal(false)}
+        onConfirm={() => setSuccessModal(false)}
+      />
     </div>
   );
 };

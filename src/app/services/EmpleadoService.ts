@@ -13,7 +13,16 @@ class EmpleadoService extends HttpService {
     }
 
     async createEmpleado(empleado:any){
-        const response = await axios.post(`${this.baseUrl}/barbero/create`, empleado);
+        const response = await axios.post(`${this.baseUrl}/barbero/create`, empleado, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
+    }
+
+    async updateEmpleado(empleado:any){
+        const response = await axios.post(`${this.baseUrl}/barbero/${empleado.id}/update`, empleado);
         return response.data;
     }
 

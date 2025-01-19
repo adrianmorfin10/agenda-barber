@@ -10,9 +10,13 @@ interface Cliente {
     ultimaVisita: string;
     descuento: string;
     ingresosTotales: string;
-    membresia: string;
+    isMember?: boolean;
+    membersia?: object;
+    membresia_id?: number;
     tipo: string;
     serviciosDisponibles: number;
     proximoPago: string;
+    cliente_membresia?: object;
+    avatar: string | null
   }
   export default Cliente;

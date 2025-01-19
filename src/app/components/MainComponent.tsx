@@ -5,6 +5,10 @@ import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner'; // Asegúrate de tener este componente
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0/client';
+import UserService from '../services/UserService';
+import { addInterceptorToAxios, getHeaders, getRole } from '../Utils';
+
+const userObject = new UserService();
 // Estado inicial
 const initialState = {
     user: null,
@@ -27,7 +31,7 @@ interface Action {
 // Reducer con tipado
 export const reducer = (state: State = initialState, action: Action) => {
     const { key, value } = action;
-    console.log("action reducer", action)
+    
     return {
         ...state,
         [key]: value,
@@ -42,32 +46,33 @@ interface MainComponentProps {
 const MainComponent: React.FC<MainComponentProps> = ({ children }) => {
     
     const [state, dispatch] = useReducer(reducer, initialState);
-    const store = useMemo(() => [state, dispatch], [state]);
-    const [isLoading, setIsLoading] = useState(false);
     const { user, error, isLoading: userLoading } = useUser();
-
-    
+    const _user:any = user;
+    const { user: user_data } = state;
+    const store = useMemo(() => [state, dispatch], [state]);
     // Simulación de carga al montar (esto es opcional)
-    // useEffect(() => {
-    //     setIsLoading(true);
-    //     const timer = setTimeout(() => setIsLoading(false), 2000); 
-    //     return () => clearTimeout(timer);
-    // }, []);
+    useEffect(() => {
+        if(user)
+            userObject.getUserByUserProviderId(_user.sub).then((data) => {
+                console.log("data", data)
+                const tmpData = { ...data, rol: getRole(data) };
+                addInterceptorToAxios(getHeaders(tmpData));
+                dispatch({ key: 'user', value : { ...tmpData, auth0_user_data: user } }); 
+            });
+    }, [user]);
 
-    // if (userLoading) return <div>Loading...</div>;
-    // if (error) return <div>{error.message}</div>;
+    if (userLoading || !user_data) return <LoadingSpinner />;
+    if (error) return <div>{error.message}</div>;
+    if (!user) return <div>Debes iniciar sesión</div>;
     // Estado de loading
     return (
         <AppContext.Provider value={store}>
             <NavBar />
-            {isLoading ? (
-                <LoadingSpinner />
-            ) : (
-                // Margen superior aplicado solo en dispositivos pequeños
-                <main className="flex-grow min-h-screen mt-16 md:mt-0">{children}</main>
-            )}
+            
+            <main className="flex-grow min-h-screen mt-16 md:mt-0">{children}</main>
+           
         </AppContext.Provider>
     );
 };
 
-export default MainComponent;
+export default withPageAuthRequired(MainComponent);
