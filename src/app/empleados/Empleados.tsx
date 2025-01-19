@@ -19,6 +19,7 @@ const Empleados = () => {
   const [state, dispatchState] = React.useContext(AppContext);
   React.useEffect(()=>{
     getEmpleados();
+    setSelectedEmpleado(null);
   }, [state.sucursal])
   const getEmpleados = ()=>{
     empleadoServiceObject.getEmpleados(state.sucursal ? { local_id: state.sucursal.id } : false).then(response=>{
@@ -75,13 +76,16 @@ const Empleados = () => {
             onAddEmpleado={handleAddEmpleado}
           />
         </div>
-
+    
         <div className={`${selectedEmpleado ? 'block' : 'hidden'} md:block w-full md:w-2/3`}>
-          <EmpleadoDetails
-            empleado={selectedEmpleado}
-            onBack={() => setSelectedEmpleado(null)}
-            onSave={()=>getEmpleados()}
-          />
+          {
+            selectedEmpleado &&
+            <EmpleadoDetails
+              empleado={selectedEmpleado}
+              onBack={() => setSelectedEmpleado(null)}
+              onSave={()=>getEmpleados()}
+            />
+          }
         </div>
       </div>
     </div>

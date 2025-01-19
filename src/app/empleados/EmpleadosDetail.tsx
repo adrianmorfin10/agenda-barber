@@ -37,8 +37,11 @@ const servicioNombres: { [key: number]: string } = {
 const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onSave }) => {
   const [ selectEmpleado, setSelectEmpleado ] = React.useState<any>(empleado);
   const [ successModal, setSuccessModal ] = React.useState<boolean>(false);
+  const [ editEmpleado, setEditEmpleado ] = React.useState<any>(empleado);
+  const [ edit, setEdit ] = React.useState(false);
   React.useEffect(()=>{
     setSelectEmpleado(empleado);
+    setEditEmpleado(empleado)
   },[empleado])
 
   const toggleDiaTrabajo = (dia: number) => {
@@ -54,7 +57,8 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onS
 
   const handleSave = () => {
     // Lógica para guardar los cambios en el empleado
-    empleadoObject.updateEmpleado({ ...selectEmpleado, working_days: selectEmpleado?.diasTrabajo }).then(response=>{ 
+    empleadoObject.updateEmpleado({ ...selectEmpleado, ...editEmpleado, working_days: selectEmpleado?.diasTrabajo }).then(response=>{ 
+      setSelectEmpleado({ ...selectEmpleado, ...editEmpleado});
       onSave();
       setSuccessModal(true);
     }).catch(e=>{});
@@ -63,7 +67,7 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onS
   const diasSemana = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
   const diasTrabajo = (selectEmpleado?.diasTrabajo || []).sort((a: number, b: number) => a - b).map((dia:number) => diasSemana[dia - 1]).join(", ");
   
-  console.log("empleado", empleado);
+ 
   return (
     <div className="flex flex-col justify-center p-5 w-full h-full bg-[#F8F8F8]">
       <div className="md:hidden flex items-center justify-between mb-4">
@@ -74,42 +78,49 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onS
       <div className="flex justify-between items-center bg-white p-5 rounded-[5px] mb-4">
         <div className="flex items-center">
           <Image src="/img/edit.svg" alt="Editar" width={20} height={20} />
-          <span className="ml-2 poppins text-black">Editar</span>
+          { !edit ? <span className="ml-2 poppins text-black" onClick={()=>{ setEdit(true) }}>Editar</span> : <span className="ml-2 poppins text-black" onClick={()=>{ setEdit(false) }}>Cancelar</span> }
         </div>
 
         <div className="flex flex-col items-center">
           <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px]">
             {empleado.nombre.charAt(0)}{empleado.apellido.charAt(0)}
           </div>
-          <span className="text-black">{empleado.nombre}</span>
-          <span className="text-black">{empleado.telefono}</span>
+          <span className="text-black">{empleado.email}</span>
+          { !edit ? <span className="text-black">{empleado.nombre}</span> : <input  name="editNombre" className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray" value={editEmpleado.nombre} onChange={(e:any)=>{ setEditEmpleado({ ...editEmpleado, nombre: e.target.value })}} /> }
+          { !edit ? <span className="text-black">{empleado.telefono}</span> : <input  name="editTelefono" className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray" value={editEmpleado.telefono} onChange={(e:any)=>{ setEditEmpleado({ ...editEmpleado, telefono: e.target.value })}} /> }
           <span className="text-black">{empleado.instagram}</span>
-          <div className="flex flex-col mb-4">
-              <label className="font-semibold mb-2 text-black text-center">Días de Trabajo</label>
-              <div className="flex gap-2">
-                {["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"].map((dia, index) => (
-                  <div key={index} className="flex items-center mb-1">
-                    <input
-                      type="checkbox"
-                      checked={(selectEmpleado?.diasTrabajo || []).includes(index + 1)}
-                      onChange={() => toggleDiaTrabajo(index + 1)}
-                      className="mr-1"
-                    />
-                    <label className="text-black">{dia}</label>
+          {
+            edit &&
+            <>
+              <div className="flex flex-col mb-4">
+                  <label className="font-semibold mb-2 text-black text-center">Días de Trabajo</label>
+                  <div className="flex gap-2">
+                    {["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"].map((dia, index) => (
+                      <div key={index} className="flex items-center mb-1">
+                        <input
+                          type="checkbox"
+                          checked={(selectEmpleado?.diasTrabajo || []).includes(index + 1)}
+                          onChange={() => toggleDiaTrabajo(index + 1)}
+                          className="mr-1"
+                        />
+                        <label className="text-black">{dia}</label>
+                      </div>
+                    ))}
                   </div>
-                ))}
               </div>
-          </div>
             
-          <div className="flex space-x-4 mt-4">
-            <button
-              onClick={handleSave}
-              className="bg-black text-white px-4 py-2 rounded text-sm md:text-base w-full"
-            >
-              Guardar
-            </button>
-            
-          </div>
+              <div className="flex space-x-4 mt-4">
+                <button
+                  onClick={handleSave}
+                  className="bg-black text-white px-4 py-2 rounded text-sm md:text-base w-full"
+                >
+                  Guardar
+                </button>
+                
+              </div>
+            </>
+          }
+          
       
         </div>
 
