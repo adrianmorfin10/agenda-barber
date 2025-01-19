@@ -51,7 +51,6 @@ export const clientHasMembershipActive = (clientes: any[], services: any[], rese
     const cliente = clientes.length ? clientes[0] : {};
     const { is_member } = cliente;
     if(!is_member) return false;
-    
     return getMembershipServices(cliente, services, reservaciones.filter(r=>r.cliente_id === cliente.id)).length > 0;
 }
 
@@ -61,15 +60,24 @@ export const clientHasMembershipActive = (clientes: any[], services: any[], rese
 //Si tiene algun servicio donde la cantidad de reservaciones sea menor a la cantidad de reservaciones de la membresia agregar al objeto membresia
 export const getMembershipServices = (cliente: any, services: any[], reservacions:any[] ):any[] => {
     const _services:any[] = [];
+    
     const { cliente_membresia } = cliente;
     if(!cliente_membresia) return _services;
     const active_cliente_membresia = cliente_membresia.find((cm:any)=>cm.activo === true) || {};
     if(!active_cliente_membresia)
         return _services;
     const {  membresia, fecha_inicio, fecha_fin } = active_cliente_membresia;
-    const currentUTCDate = (new Date()).getUTCDate()
-    if((!fecha_fin) ||  currentUTCDate >= fecha_fin)
+    const currentUTCDate = moment().utc().toDate();
+    const endDate = moment(fecha_fin).utc().toDate();
+    const startDate = fecha_inicio ? moment(fecha_inicio).toDate() : false;
+    if((!startDate) ||  currentUTCDate >= endDate)
         return _services;
+    
+    if(!reservacions.length){
+        const membresia_service_ids = membresia.membresia_servicios.map((ms:any)=>parseInt(ms.servic))
+        return services.filter((s:any)=>membresia_service_ids.includes(parseInt(s.id)));
+    }
+    
     const reservetionFileredByState = reservacions.filter((reservacion:any)=>reservacion.estado === "completada" || reservacion.estado === "pendiente");
     const reservetionsGroupedByService = _.groupBy(reservetionFileredByState, 'servicio_id');
     membresia.membresia_servicios.forEach((ms:any)=>{
