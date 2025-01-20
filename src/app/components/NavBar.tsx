@@ -175,26 +175,49 @@ const NavBar: React.FC = () => {
       </div>
 
       {/* Mobile Menu */}
-<div className={`md:hidden fixed inset-0 bg-[#0C0C0C] z-40 transition-transform transform ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-  <div className="p-5 mt-16"> {/* Added margin-top to ensure full visibility */}
-    {navItems.map((item:any) => (
-      <Link 
-        key={item.path} 
-        href={item.path} 
-        className={`flex items-center space-x-4 p-3 transition hover:bg-[#1D1D1D] rounded-md ${pathname === item.path ? 'text-white' : 'text-[#7C7C7C]'}`} 
-        onClick={() => setMenuOpen(false)}
-      >
-        <Image 
-          src={pathname === item.path ? item.icon : item.inactiveIcon} 
-          alt={item.label} 
-          width={24} // Increased icon size
-          height={24} // Increased icon size
-        />
-        <span className="text-lg">{item.label}</span> {/* Increased font size */}
-      </Link>
-    ))}
-  </div>
-</div>
+      <div className={`md:hidden fixed inset-0 bg-[#0C0C0C] z-40 transition-transform transform ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-5 mt-16"> {/* Added margin-top to ensure full visibility */}
+          {
+            appState.user?.auth0_user_data &&
+            <>
+              <div className="flex items-center justify-between text-[#7C7C7C] cursor-pointer " >
+                <div className="flex items-center  cursor-pointer "
+                onClick={() => {
+                  // Redirige a la página de perfil
+                  window.location.href = "/perfil";
+                }} >
+                  
+                  <div className="bg-[#1c1c1c] rounded-full p-2 mr-2">
+                    <img className="rounded-full" src={appState.user.auth0_user_data.picture} alt="User picture" width={30} height={30} />
+                  </div>
+                  
+                  <span>{appState.user.auth0_user_data.nickname}</span>
+                </div>
+                
+                <span onClick={handleLogout} >Salir</span>
+                
+              </div>
+              <hr className="border-t border-[#1D1D1D] my-1" />
+            </>
+          }
+          {navItems.map((item:any) => (
+            <Link 
+              key={item.path} 
+              href={item.path} 
+              className={`flex items-center space-x-4 p-3 transition hover:bg-[#1D1D1D] rounded-md ${pathname === item.path ? 'text-white' : 'text-[#7C7C7C]'}`} 
+              onClick={() => setMenuOpen(false)}
+            >
+              <Image 
+                src={pathname === item.path ? item.icon : item.inactiveIcon} 
+                alt={item.label} 
+                width={24} // Increased icon size
+                height={24} // Increased icon size
+              />
+              <span className="text-lg">{item.label}</span> {/* Increased font size */}
+            </Link>
+          ))}
+        </div>
+      </div>
 
       {/* Modal de Selección de Sucursal */}
       {isModalOpen && (
