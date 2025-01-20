@@ -35,10 +35,12 @@ const servicioNombres: { [key: number]: string } = {
 };
 
 const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onSave }) => {
+  
   const [ selectEmpleado, setSelectEmpleado ] = React.useState<any>(empleado);
   const [ successModal, setSuccessModal ] = React.useState<boolean>(false);
   const [ editEmpleado, setEditEmpleado ] = React.useState<any>(empleado);
   const [ edit, setEdit ] = React.useState(false);
+
   React.useEffect(()=>{
     setSelectEmpleado(empleado);
     setEditEmpleado(empleado)
@@ -58,10 +60,10 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onS
   const handleSave = () => {
     // Lógica para guardar los cambios en el empleado
     empleadoObject.updateEmpleado({ ...selectEmpleado, ...editEmpleado, working_days: selectEmpleado?.diasTrabajo }).then(response=>{ 
-      setSelectEmpleado({ ...selectEmpleado, ...editEmpleado});
+      setSelectEmpleado({ ...selectEmpleado, ...editEmpleado });
       onSave();
       setSuccessModal(true);
-    }).catch(e=>{});
+    }).catch((e:any)=>{});
   }
 
   const diasSemana = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];

@@ -23,7 +23,8 @@ interface Cliente {
   descuento: string;
   ingresosTotales: string;
   is_member?: boolean;
-  membresia?: object;
+  membresia?: boolean;
+  email?: string;
   tipo: string;
   serviciosDisponibles: number;
   proximoPago: string;
@@ -42,7 +43,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
   const [editedNombre, setEditedNombre] = useState(cliente?.nombre || '');
   const [editedApellido, setEditedApellido] = useState(cliente?.apellido || '');
   const [editedTelefono, setEditedTelefono] = useState(cliente?.telefono || '');
-  const [ membresia, setMembresia ] = useState(false);
+  const [membresia, setMembresia ] = useState(false);
   const [openWarning, setOpenWarning] = useState(false);
   const [membresias, setMembresias] = useState([]);
   const [membresiaId, setMembresiaId] = useState<number>(0);
@@ -53,7 +54,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
       setEditedNombre(cliente.nombre);
       setEditedApellido(cliente.apellido);
       setEditedTelefono(cliente.telefono);
-      setMembresia(cliente.is_member || false);
+      setMembresia(cliente.membresia || false);
     }
   }, [cliente]);
   React.useEffect(()=>{
@@ -85,7 +86,8 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
       const response = await clientService.updateClient(cliente.id.toString(), {
         nombre: editedNombre,
         apellido: editedApellido,
-        telefono: editedTelefono
+        telefono: editedTelefono,
+        is_member: membresia
       });
       console.log('Respuesta de la API:', response); // Verificar la respuesta de la API
       onUpdate(updatedCliente); // Actualizar los datos en el componente padre
@@ -172,26 +174,24 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
                 onChange={(e) => setEditedTelefono(e.target.value)}
                 className="border p-1 rounded mt-1 mb-2 text-black w-full text-sm md:text-base"
               />
-              {
-                membresia && (
-                  <select
-                    name="membresia"
-                    value={membresiaId}
-                    onChange={(e)=>{ setMembresiaId(parseInt(e.target.value)) }}
-                    className={`border p-2 mb-4 w-full rounded-lg text-black placeholder-gray`}
+              {/* Sección de Membresía */}
+              <div className="w-full">
+                <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">¿Agregar Membresía?</label>
+                <div className="flex items-center px-2 py-2">
+                  <button
+                    className={`w-10 h-5 flex items-center rounded-full p-1 ${membresia ? 'bg-green-500' : 'bg-gray-300'}`}
+                    onClick={() =>{ setMembresia(!membresia) }}
                   >
-                    <option value="0">Selecciona una membresía</option>
-                    {membresias.map((membresia:any) => (
-                      <option key={`membresia-client-detail-${membresia.id}`} value={membresia.id}>
-                        {`${membresia.nombre} `} 
-                      </option>
-                    ))}
-                  </select>
-                )
-              }
+                    <div
+                      className={`w-4 h-4 bg-white rounded-full shadow-md transform duration-300 ease-in-out ${membresia ? 'translate-x-5' : 'translate-x-0'}`}
+                    />
+                  </button>
+                </div>
+              </div>
             </>
           ) : (
             <>
+              <span className="text-black text-sm md:text-base">{cliente.email}</span>
               <span className="text-black text-sm md:text-base">{cliente.nombre} {cliente.apellido}</span>
               <span className="text-black text-sm md:text-base">{cliente.telefono}</span>
               <span className="text-black text-sm md:text-base">{cliente.instagram}</span>

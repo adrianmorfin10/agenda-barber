@@ -26,7 +26,7 @@ export default function HomePage() {
       <div>
       <h1 className="text-2xl font-bold">Bienvenido a la Agenda Barber</h1>
       <p className="mt-4">Aquí puedes gestionar tus citas, ventas y más.</p>
-      {state.user.clientes && !hasMemberActive(state.user.clientes[0]) && (
+      {state.user.rol === "cliente" && state.user.clientes && !hasMemberActive(state.user.clientes[0]) && (
         <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
         <p>El usuario no tiene la suscripción activa</p>
         </div>
