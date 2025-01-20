@@ -18,5 +18,6 @@ interface Cliente {
     proximoPago: string;
     cliente_membresia?: object;
     avatar: string | null
+    email?: string;
   }
   export default Cliente;
