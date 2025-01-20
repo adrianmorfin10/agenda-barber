@@ -26,5 +26,10 @@ class EmpleadoService extends HttpService {
         return response.data;
     }
 
+    async deleteEmpleado(id:number){
+        const response = await axios.post(`${this.baseUrl}/barbero/${id}/delete`);
+        return response.data;
+    }
+
 }
 export default EmpleadoService;

@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import SuccessModal from '../components/SuccessModal';
 import EmpleadoService from '../services/EmpleadoService';
+import WarningModal from '../components/WarningModal';
 const empleadoObject = new EmpleadoService();
 interface Empleado {
   id: number;
@@ -40,6 +41,7 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onS
   const [ successModal, setSuccessModal ] = React.useState<boolean>(false);
   const [ editEmpleado, setEditEmpleado ] = React.useState<any>(empleado);
   const [ edit, setEdit ] = React.useState(false);
+  const [ openWarning, setOpenWarning ] = React.useState(false);
 
   React.useEffect(()=>{
     setSelectEmpleado(empleado);
@@ -64,6 +66,14 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onS
       onSave();
       setSuccessModal(true);
     }).catch((e:any)=>{});
+  }
+
+  const handleDelete = ()=>{
+    empleadoObject.deleteEmpleado(selectEmpleado.id).then((response:any)=>{
+      setOpenWarning(false);
+      setEdit(false);
+      onSave();
+    }).catch((error: any)=>{})
   }
 
   const diasSemana = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
@@ -118,8 +128,14 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onS
                 >
                   Guardar
                 </button>
-                
+                <button
+                  onClick={()=>{ setOpenWarning(true) }}
+                  className="border border-red-400 text-red-400 px-4 py-2 rounded text-sm md:text-base w-full"
+                >
+                  Borrar
+                </button>
               </div>
+              
             </>
           }
           
@@ -165,6 +181,13 @@ const EmpleadoDetails: React.FC<EmpleadoDetailsProps> = ({ empleado, onBack, onS
           </div>
         </div>
       </div>
+      <WarningModal
+        isOpen={openWarning}
+        onConfirm={()=>{ handleDelete(); }}
+        onClose={()=>{ setOpenWarning(false) }}
+        title='Warning'
+        content='Al confirmar esta accion no podra revertir los cambios.'
+      />
       <SuccessModal
         isOpen={successModal}
         content="Empleado actualizado correctamente."
