@@ -137,13 +137,6 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
             </div>
 
             <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
-            />
-
-            <input
               type="text"
               name="nombre"
               placeholder="Nombre"
@@ -186,15 +179,6 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
               maxLength={50}
               required
             />
-            <input
-              type="text"
-              name="instagram"
-              placeholder="Usuario de Instagram (opcional)"
-              value={nuevoEmpleado.instagram}
-              onChange={handleInputChange}
-              className="border p-2 mb-4 w-full rounded-[5px] text-black placeholder-gray"
-              maxLength={50}
-            />
 
             {/* Sección de Membresía */}
             {
@@ -233,21 +217,24 @@ const AddEmpModal: React.FC<AddEmpModalProps> = ({ isModalOpen, setIsModalOpen, 
               </div>
             </div>
 
-            {/* Selección de servicios */}
-            <div className="flex flex-col mb-4">
-              <label className="font-semibold mb-2 text-black">Servicios que Puede Brindar</label>
-              {servicios.map(({ id, nombre }) => (
-                <div key={id} className="flex items-center mb-1">
-                  <input
-                    type="checkbox"
-                    checked={nuevoEmpleado.servicios.includes(id)}
-                    onChange={() => toggleServicio(id)}
-                    className="mr-1"
-                  />
-                  <label className="text-black">{nombre}</label>
-                </div>
-              ))}
-            </div>
+           {/* Selección de servicios */}
+<div className="flex flex-col mb-4">
+  <label className="font-semibold mb-2 text-black">Servicios que Puede Brindar</label>
+  <div className="max-h-[200px] overflow-y-auto pr-2"> {/* Añadir clase para scroll */}
+    {servicios.map(({ id, nombre }) => (
+      <div key={id} className="flex items-center mb-1">
+        <input
+          type="checkbox"
+          checked={nuevoEmpleado.servicios.includes(id)}
+          onChange={() => toggleServicio(id)}
+          className="mr-1"
+        />
+        <label className="text-black">{nombre}</label>
+      </div>
+    ))}
+  </div>
+</div>
+
 
             <button
               onClick={handleAddEmpleado}

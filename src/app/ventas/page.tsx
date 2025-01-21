@@ -6,7 +6,7 @@ import ListaDeElementos from '../components/ListaDeElementos';
 import Carrito from '../components/Carrito';
 
 // Define SectionType en VentasPage para mantener compatibilidad con ListaDeElementos
-type SectionType =  "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías";
+type SectionType = "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías";
 
 // Define el tipo de los elementos en el carrito
 interface CartItemType {
@@ -19,7 +19,8 @@ interface CartItemType {
 const VentasPage: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState<SectionType>("Productos"); // Selección predeterminada
   const [cartItems, setCartItems] = useState<CartItemType[]>([]); // Elementos en el carrito
-  const listaDeElementosRef = useRef<any>(null); 
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false); // Estado para controlar la visibilidad del carrito modal
+  const listaDeElementosRef = useRef<any>(null);
 
   const handleAddToCart = (item: Omit<CartItemType, 'cantidad'>) => {
     setCartItems((prevItems) => {
@@ -36,14 +37,16 @@ const VentasPage: React.FC = () => {
     });
   };
 
-  const onCheckOutSuccess = ()=>{
+  const onCheckOutSuccess = () => {
     setCartItems([]);
     if (listaDeElementosRef.current) {
       listaDeElementosRef.current.refreshData(); // Llamar a la función interna
     }
-    alert("Su venta se registro correctamente")
-
+    alert("Su venta se registro correctamente");
   }
+
+  const openCart = () => setIsCartModalOpen(true); // Función para abrir el modal del carrito
+  const closeCart = () => setIsCartModalOpen(false); // Función para cerrar el modal del carrito
 
   return (
     <div className="flex min-h-screen bg-gray-100 text-black">
@@ -68,17 +71,36 @@ const VentasPage: React.FC = () => {
         <Carrito items={cartItems} onCheckOutSuccess={onCheckOutSuccess} />
       </div>
 
-      {/* Carrito móvil (ventana emergente en la parte inferior de la pantalla) */}
-      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-white border-t p-4 shadow-lg">
+      {/* Contenedor con el botón de "Ver Carrito / Ir a Pagar" */}
+      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-white p-4 shadow-md">
         <button
-          className="w-full bg-black text-white py-2 rounded-lg"
-          onClick={() => console.log("Abrir carrito completo")}
+          className="w-full bg-black text-white py-3 rounded-lg"
+          onClick={openCart} // Abre el carrito cuando se hace clic en el botón
         >
           Ver Carrito / Ir a Pagar
         </button>
       </div>
+
+      {/* Modal del carrito en pantallas pequeñas */}
+      {isCartModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end items-start z-50">
+          <div className="bg-white p-6 rounded-lg w-[90%] max-w-md h-full animate-slideInFromRight relative">
+            <h1 className="text-2xl font-bold mb-4">Detalle de Venta</h1>
+            <Carrito items={cartItems} onCheckOutSuccess={onCheckOutSuccess} />
+
+            {/* Ícono de cierre */}
+            <button
+              className="absolute top-2 right-2"
+              onClick={closeCart} // Cierra el carrito cuando se hace clic en el ícono
+            >
+              <img src="/img/closemodal.svg" alt="Cerrar" className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default VentasPage;
+
