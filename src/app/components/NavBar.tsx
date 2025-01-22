@@ -76,6 +76,7 @@ const NavBar: React.FC = () => {
       });
     setIsModalOpen(false);
   };
+  
 
   React.useEffect(() => {
     setLoading(true);
