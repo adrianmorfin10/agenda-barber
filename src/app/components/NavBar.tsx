@@ -179,7 +179,31 @@ const NavBar: React.FC = () => {
 
       {/* Mobile Menu */}
 <div className={`md:hidden fixed inset-0 bg-[#0C0C0C] z-40 transition-transform transform ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+  
   <div className="p-5 mt-16"> {/* Added margin-top to ensure full visibility */}
+  {
+    appState.user?.auth0_user_data &&
+    <>
+      <div className="flex items-center justify-between text-[#7C7C7C] cursor-pointer " >
+        <div className="flex items-center  cursor-pointer "
+          onClick={() => {
+          // Redirige a la página de perfil
+          window.location.href = "/perfil";
+        }} >
+          
+          <div className="bg-[#1c1c1c] rounded-full p-2 mr-2">
+            <img className="rounded-full" src={appState.user.auth0_user_data.picture} alt="User picture" width={30} height={30} />
+          </div>
+          
+          <span>{appState.user.auth0_user_data.nickname}</span>
+        </div>
+        
+        <span onClick={handleLogout} >Salir</span>
+        
+      </div>
+      <hr className="border-t border-[#1D1D1D] my-1" />
+    </>
+  }
     {navItems.map((item:any) => (
       <Link 
         key={item.path} 
