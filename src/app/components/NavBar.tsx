@@ -102,7 +102,7 @@ const NavBar: React.FC = () => {
         console.error("Error fetching branches on load:", e);
       });
   }, []);
-  console.log('appState', appState);
+  
   const navItems = navItemsByRol[appState.user.rol];
 
   return (
@@ -166,7 +166,7 @@ const NavBar: React.FC = () => {
       <div className="md:hidden fixed top-0 left-0 right-0 flex items-center justify-between p-4 bg-[#0C0C0C] z-50">
 
         
-        <button onClick={() =>{ if(appState.user.rol === "admin") setMenuOpen(!menuOpen) }}>
+        <button onClick={() =>{ setMenuOpen(!menuOpen) }}>
           <Image src={menuOpen ? '/img/close.svg' : '/img/menu.svg'} alt="Menu" width={30} height={30} />
         </button>
         <Image src="/img/logo-responsive.png" alt="Logo" width={30} height={30} />
