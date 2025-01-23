@@ -6,12 +6,12 @@ import { AppContext } from './AppContext';
 
 const SubNavBar = () => {
   const [state, dispatchState] = React.useContext(AppContext);
-  if(state.user && state.user.rol === "encagado")
-    return null;
+  
   const pathname = usePathname(); // Usa usePathname para obtener la ruta actual
   const isComisiones = pathname === '/comisiones';
   const isEmpleados = pathname === '/empleados';
-
+  if(state.user && state.user.rol === "encagado")
+    return null;
   return (
     <div className="flex justify-start items-center p-4 pb-0 bg-white border-b text-black">
       <div
