@@ -37,7 +37,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ onDateChange }) => {
       <select
         value={selectedMonth}
         onChange={handleMonthChange}
-        className="border border-gray-300 p-2 rounded mr-2"
+        className="border border-gray-300 p-2 rounded mr-2 text-black"
       >
         <option value="" disabled className="text-gray-400">
           Seleccionar mes
@@ -53,7 +53,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ onDateChange }) => {
       <select
         value={selectedYear}
         onChange={handleYearChange}
-        className="border border-gray-300 p-2 rounded mr-2"
+        className="border border-gray-300 p-2 rounded mr-2 text-black"
       >
         <option value="" disabled className="text-gray-400">
           Seleccionar año
