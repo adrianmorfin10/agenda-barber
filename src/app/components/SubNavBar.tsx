@@ -2,10 +2,13 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
+import { AppContext } from './AppContext';
 
 const SubNavBar = () => {
+  const [state, dispatchState] = React.useContext(AppContext);
+  if(state.user && state.user.rol === "encagado")
+    return null;
   const pathname = usePathname(); // Usa usePathname para obtener la ruta actual
-
   const isComisiones = pathname === '/comisiones';
   const isEmpleados = pathname === '/empleados';
 
@@ -17,12 +20,16 @@ const SubNavBar = () => {
       >
         Empleados
       </div>
-      <div
-        className={`cursor-pointer poppins font-medium text-lg ${isComisiones ? 'border-b-2 border-black' : ''}`}
-        onClick={() => window.location.href = '/comisiones'} // Navegación simple
-      >
-        Comisiones
-      </div>
+      {
+        (state.user && state.user.rol !== "encargado") &&
+        <div
+          className={`cursor-pointer poppins font-medium text-lg ${isComisiones ? 'border-b-2 border-black' : ''}`}
+          onClick={() => window.location.href = '/comisiones'} // Navegación simple
+        >
+          Comisiones
+        </div>
+      }
+      
     </div>
   );
 };

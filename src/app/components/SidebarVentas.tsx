@@ -17,7 +17,7 @@ const SidebarVentas: React.FC<SidebarVentasProps> = ({ selectedSection, setSelec
   
  
   return (
-    <div className="w-64 p-4 bg-gray-50 border-r border-gray-200">
+    <div className="w-64 max-w-[160px] p-4 bg-gray-50 border-r border-gray-200">
       <h2 className="text-lg font-bold mb-4">Ventas</h2>
       <ul className="space-y-2">
         {sections.map((section) => (

@@ -94,22 +94,23 @@ const ClientesList: React.FC<ClientesListProps> = ({
       {/* Modal para añadir usuario */}
       <AddUserModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onCreateSuccess={reloadClients} />
 
-      {/* Lista de usuarios filtrados */}
-      <div className="overflow-y-auto ">
-        {clientToList.map(cliente => (
-          <div
-            key={cliente.id}
-            className="flex items-center mb-4 cursor-pointer p-2 rounded-lg hover:bg-gray-100"
-            onClick={() => onSelectCliente(cliente)}
-          >
-            <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px]">
-              {cliente.nombre.charAt(0)}{( cliente.apellido ).charAt(0)}
-            </div>
-            <span className="ml-3 poppins text-black">{`${cliente.nombre} ${cliente.apellido}`}</span>
-          </div>
-        ))}
+     
+  {/* Lista de usuarios filtrados */}
+  <div className="overflow-y-auto max-h-[calc(100vh-250px)]">
+    {clientToList.map(cliente => (
+      <div
+        key={cliente.id}
+        className="flex items-center mb-4 cursor-pointer p-2 rounded-lg hover:bg-gray-100"
+        onClick={() => onSelectCliente(cliente)}
+      >
+        <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px]">
+          {cliente.nombre.charAt(0)}{( cliente.apellido ).charAt(0)}
+        </div>
+        <span className="ml-3 poppins text-black">{`${cliente.nombre} ${cliente.apellido}`}</span>
       </div>
-    </div>
+    ))}
+  </div>
+</div>
   );
 };
 

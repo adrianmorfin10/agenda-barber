@@ -235,9 +235,7 @@ const CalendarApp = () => {
       </div>
       {/* Contenedor del calendario pequeño y calendarios de trabajadores */}
       <div className="flex flex-col lg:flex-row font-light lg:justify-between">
-        
-
-        {/* Calendarios de los trabajadores */}
+         {/* Calendarios de los trabajadores */}
         <div className="flex-1 p-4 overflow-x-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 overflow-x-auto">
             {empleados.map((emp:any, index) => (
