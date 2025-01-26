@@ -16,23 +16,20 @@ interface Service {
 
 const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCreateMembership, services }) => {
   const [membershipName, setMembershipName] = useState('');
-  const [membershipPrice, setMembershipPrice ] = useState(0);
+  const [membershipPrice, setMembershipPrice] = useState(0);
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
-
 
   const handleServiceToggle = (serviceId: number) => {
     const _services = selectedServices.some((item) => item.servicio_id === serviceId)
       ? selectedServices.filter((item) => item.servicio_id !== serviceId)
-      : [...selectedServices, { servicio_id: serviceId, cantidad_reservaciones: 1 }]
-    
+      : [...selectedServices, { servicio_id: serviceId, cantidad_reservaciones: 1 }];
+
     setSelectedServices(_services);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     onCreateMembership(membershipName, membershipPrice, selectedServices);
-
   };
 
   if (!isOpen) return null;
@@ -72,17 +69,17 @@ const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onCr
 
           <div>
             <h3 className="text-lg font-medium">Selecciona Servicios</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-2 max-h-[200px] overflow-y-auto border border-gray-200 p-2 rounded-md">
               {services.map((service) => (
                 <li key={`membresia-modal-${service.id}`} className='flex'>
-                  <label className="flex items-center border border-cacaca p-2 rounded-md w-full">
+                  <label className="flex items-center border border-gray-300 p-2 rounded-md w-full">
                     <div
                       className="w-2 h-full mr-2"
                       style={{ backgroundColor: service.color }}
                     />
                     <input
                       type="checkbox"
-                      checked={selectedServices.some(item=>item.servicio_id === service.id)}
+                      checked={selectedServices.some(item => item.servicio_id === service.id)}
                       onChange={() => handleServiceToggle(service.id)}
                       className="mr-2"
                     />
