@@ -14,7 +14,6 @@ export const addInterceptorToAxios = (headers: any) => {
 
 }
 export const getRole = (user: any) => {
-    console.log("getRole", user)
     if (!user) return 'admin';
     const { barberos, clientes, email } = user;
     if (email === process.env.NEXT_PUBLIC_ADMIN_EMAIL)
