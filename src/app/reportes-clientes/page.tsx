@@ -121,7 +121,7 @@ const ReportesClientes: React.FC = () => {
               id="clientSelector"
               value={selectedClient}
               onChange={handleClientChange}
-              className="border border-gray-300 p-2 rounded"
+              className="border border-gray-300 p-2 rounded text-black"
             >
               {
                 clients.map((item:any)=><option value={`${item.id}`} key={`cliente-${item.id}`}>{item.nombre}</option>)
@@ -139,7 +139,7 @@ const ReportesClientes: React.FC = () => {
               id="monthSelector"
               value={selectedMonth}
               onChange={handleMonthChange}
-              className="border border-gray-300 p-2 rounded"
+              className="border border-gray-300 p-2 rounded text-black"
             >
               {['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'].map((month, index) => (
                 <option key={index} value={index}>
@@ -158,7 +158,7 @@ const ReportesClientes: React.FC = () => {
               id="yearSelector"
               value={selectedYear}
               onChange={handleYearChange}
-              className="border border-gray-300 p-2 rounded"
+             className="border border-gray-300 p-2 rounded text-black"
             >
               {[2024, 2023, 2022, 2021].map((year) => (
                 <option key={year} value={year}>
