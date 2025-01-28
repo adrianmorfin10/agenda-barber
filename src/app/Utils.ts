@@ -117,7 +117,7 @@ export const isPrepago = (cliente:any, service_id: number, reservaciones:any[]) 
     return (reservetions.length < ms.cantidad_reserv);
 }
 export const hasMemberActive = (cliente:any) =>{
-    console.log('hasMemberActive', cliente)
+    
     if(!cliente) return false;
     const { cliente_membresia } = cliente;
     if(!cliente_membresia) return false;

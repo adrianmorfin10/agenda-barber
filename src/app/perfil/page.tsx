@@ -3,14 +3,21 @@
 import React from "react";
 import ClientProfile from "../components/ClientProfile";
 import { AppContext } from "../components/AppContext";
-import ChangePasswordModal from "../components/ChangePasswordModal";
+import UserService from "../services/UserService";
+const userObject = new UserService();
 
 const ClientProfilePage: React.FC = () => {
+
   const [ state, dispatchState] = React.useContext(AppContext);
   const [ openModal, setOpenModal ] = React.useState(false);
   const handlePasswordChange = () => {
     // Aquí se implementa la lógica para redirigir al proceso de Auth0
-    setOpenModal(true);
+    userObject.changePassword(state.user.email).then(()=>{
+      alert("Revise su correo electronico y siga el link para cambiar la contraseña")
+    }).catch((e:any)=>{
+      alert("Ha ocurrido un error al tratar de cambia su contraseña")
+    })
+    
   };
 
   return (
@@ -23,15 +30,7 @@ const ClientProfilePage: React.FC = () => {
         estadoMembresia="Activa"
         onChangePassword={handlePasswordChange}
       />
-      <ChangePasswordModal 
-        isOpen={openModal} 
-        onClose={()=>{ 
-          setOpenModal(!openModal)
-        }} 
-        onConfirm={(confirm:boolean)=>{
-          
-        }} 
-      />
+      
     </main>
   );
 };

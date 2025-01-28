@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import { AppContext } from "./AppContext";
+import { hasMemberActive } from "../Utils";
 
 interface ClientProfileProps {
   nombre: string;
@@ -19,6 +21,8 @@ const ClientProfile: React.FC<ClientProfileProps> = ({
   estadoMembresia,
   onChangePassword,
 }) => {
+  const [ state, dispatchState] = React.useContext(AppContext);
+  const isMember = hasMemberActive(state.user?.clientes?.length ? state.user.clientes[0] : false);
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6 mt-6">
       <h2 className="text-2xl font-semibold mb-6 text-center text-black">Perfil del Cliente</h2>
@@ -44,16 +48,20 @@ const ClientProfile: React.FC<ClientProfileProps> = ({
           <span className="text-gray-800">{email}</span>
         </div>
 
-        <div className="flex justify-between items-center border-b pb-3">
-          <span className="text-gray-600 font-medium">Estado de Membresía:</span>
-          <span
-            className={`font-semibold ${
-              estadoMembresia === "Activa" ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {estadoMembresia}
-          </span>
-        </div>
+        {
+          state.user.rol === "cliente" &&
+          <div className="flex justify-between items-center border-b pb-3">
+            <span className="text-gray-600 font-medium">Estado de Membresía:</span>
+            <span
+              className={`font-semibold ${
+                isMember ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              { isMember ? 'Activa' : 'Inactiva' }
+            </span>
+          </div>
+        }
+        
       </div>
 
       <div className="mt-6 text-center">
