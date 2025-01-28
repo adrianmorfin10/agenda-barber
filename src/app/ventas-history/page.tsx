@@ -22,7 +22,7 @@ const getName = (venta:any)=>{
 const VentasHistory: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState<SectionType | null>("Ventas Realizadas");
   const [filterType, setFilterType] = useState<'dia' | 'semana' | 'mes' | 'year'>('dia');
-  const [sales, setSales] = useState<{id:number, hora: String; fecha: string, empleado: string, producto: string, precio: string, cliente: string}[]>([]);
+  const [sales, setSales] = useState<{id:number, hora: string; fecha: string, empleado: string, producto: string, precio: string, cliente: string}[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [state, dispatchState] = React.useContext(AppContext);
   React.useEffect(() => {
