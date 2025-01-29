@@ -42,7 +42,7 @@ const VentasHistory: React.FC = () => {
           empleado: item.barbero.usuario.nombre,
           producto: getName(item),
           precio: `$${item.total}`,
-          cliente: item.carrito_compra.client?.usuario?.nombre || "Cliente no encontrado"
+          cliente: item.carrito_compra.cliente?.usuario?.nombre || "Cliente no encontrado"
         }
         
       });
