@@ -11,6 +11,7 @@ const clientService = new ClientService();
 const ventaObject = new VentaService();
 import EmpleadoService from "../services/EmpleadoService";
 const empleadoServiceObject = new EmpleadoService();
+import Modal from './ModalCarrito'; // Importamos el componente Modal
 
 interface CartItem {
   id: number;
@@ -31,8 +32,10 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
   const [discount, setDiscount] = useState<number>(0);
   const [clientes, setClientes] = React.useState<Cliente[]>([]);
   const [empleados, setEmpleados] = React.useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState<number | "">(""); // Cambiado a string vacío para manejar mejor el estado inicial
+  const [selectedEmployee, setSelectedEmployee] = useState<number | "">("");
   const [state, dispatchState] = React.useContext(AppContext);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
 
   React.useEffect(() => {
     if(!state.sucursal?.id)
@@ -44,7 +47,6 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
       console.error("Error al obtener los clientes", error);
     });
 
-    // Obtener empleados cuando se cambie la sucursal
     getEmpleados();
   }, [state.sucursal]);
 
@@ -82,19 +84,16 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
             nombre: item.usuario.nombre,
             apellido: item.usuario.apellido_paterno,
             telefono: item.usuario.telefono,
-
             email: item.usuario.email,
             instagram: '',
             citas: reservacions?.length || 0,
             inasistencias: insistidas?.length || 0,
             cancelaciones: canceladas?.length || 0,
             ultimaVisita: reservacions.length ? new Date(reservacions[0].fecha).toLocaleString() : '',
-            //falta guardar el costo de la reservacion para calcular esto
             ingresosTotales: 0,
             tipo: 'Black',
             diasTrabajo: item.working_days || [],
             servicios: item.working_days || [],
-            //Especificar q es proximo pago
             proximoPago: '',
         }
       })
@@ -117,25 +116,24 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
 
   const handleSelectEmployee = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = e.target.value;
-    // Convertir el valor seleccionado a número o dejarlo vacío
     setSelectedEmployee(selectedValue === "" ? "" : Number(selectedValue));
   };
 
   const checkOut = async () =>{
-
-    if(!selectedEmployee)
-      return alert("Seleccione un empleado")
+    if(!selectedEmployee) {
+      setIsEmployeeModalOpen(true);
+      return;
+    }
     try{
       const checkOutData = { ventas: items, descuento: discount, client: selectedClient?.id || false, empleado_id: selectedEmployee, local_id: state.sucursal.id  };
       await ventaObject.checkout(checkOutData);
+      setIsSuccessModalOpen(true);
       onCheckOutSuccess();
     }catch(e){
-
+      console.error("Error durante el checkout", e);
     }
-
   }
 
- 
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
@@ -153,7 +151,6 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
 
       {!isClientListOpen && (
         <>
-          {/* Selector de Cliente */}
           <div className="mb-4 px-4">
             <div
               className="border-dashed border border-gray-400 p-4 rounded-lg cursor-pointer"
@@ -172,7 +169,6 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
             </div>
           </div>
 
-          {/* Selector de Empleado */}
           <div className="mb-4 px-4">
             <label className="block text-sm font-semibold text-black">Selecciona empleado que generó la venta</label>
             <select
@@ -200,14 +196,12 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
         />
       ) : (
         <>
-          {/* Títulos de columnas */}
           <div className="grid grid-cols-3 gap-4 mb-2 font-semibold text-gray-700">
             <div>Artículo</div>
             <div className="text-center">Cantidad</div>
             <div className="text-right">Subtotal</div>
           </div>
 
-          {/* Lista de items del carrito */}
           <ul className="space-y-2">
             {items.map((item, index) => (
               <li
@@ -221,7 +215,6 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
             ))}
           </ul>
 
-          {/* Botón de agregar descuento */}
           <div className="flex justify-end mt-4">
             <div className="flex items-center">
               <label htmlFor="discount" className="text-sm font-semibold mr-2">
@@ -240,7 +233,6 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
             </div>
           </div>
 
-          {/* Total y botón de pago */}
           <div className="mt-6 border-t pt-4">
             <h3 className="text-lg font-semibold">Subtotal: ${subtotal.toFixed(2)}</h3>
             <h3 className="text-lg font-semibold">Total: ${(subtotal - discount).toFixed(2)}</h3>
@@ -250,6 +242,22 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
           </div>
         </>
       )}
+
+      {/* Modal para venta exitosa */}
+      <Modal
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        title="Venta Exitosa"
+        message="La venta se ha realizado correctamente."
+      />
+
+      {/* Modal para seleccionar empleado */}
+      <Modal
+        isOpen={isEmployeeModalOpen}
+        onClose={() => setIsEmployeeModalOpen(false)}
+        title="Empleado Requerido"
+        message="Por favor, selecciona un empleado antes de proceder al pago."
+      />
     </div>
   );
 };
