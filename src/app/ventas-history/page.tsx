@@ -26,14 +26,15 @@ const VentasHistory: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [state, dispatchState] = React.useContext(AppContext);
   React.useEffect(() => {
-    console.log("state sucursal", state)
+    
     if(!state.sucursal)
       return;
     
     ventasObject.getAll(state.sucursal.id, filterType).then((data:any)=>{
-      
+      console.log('mpara length', data.length)
       const salesHsitory = data.map((item:any)=>{
         const ventaDate = moment(item.fecha).add(-6, "hours");
+      
         return{
           id: item.id,
           fecha: ventaDate.format("YYYY-MM-DD"),
@@ -41,15 +42,17 @@ const VentasHistory: React.FC = () => {
           empleado: item.barbero.usuario.nombre,
           producto: getName(item),
           precio: `$${item.total}`,
-          cliente: item.carrito_compra.cliente.usuario.nombre
+          cliente: item.carrito_compra.client?.usuario?.nombre || "Cliente no encontrado"
         }
+        
       });
+      console.log('mpara length', salesHsitory.length)
       setSales(salesHsitory);
       
     }).catch((e:any)=>{
       
     })
-  }, [state.sucursal]);
+  }, [state.sucursal, filterType]);
   const handlePrev = () => {
     const newDate = new Date(currentDate);
     if (filterType === 'dia') newDate.setDate(newDate.getDate() - 1);
@@ -104,7 +107,7 @@ const VentasHistory: React.FC = () => {
 
     return true;
   });
-
+  console.log("sales", sales);
   return (
     <div className="flex min-h-screen bg-gray-100 text-black">
       {/* Sidebar */}
@@ -145,9 +148,9 @@ const VentasHistory: React.FC = () => {
 
         {/* Lista de ventas */}
         <div className="space-y-4">
-          {sales.map((sale) => (
+          {sales.map((sale:any) => (
             <div
-              key={sale.id}
+              key={`sale-${sale.id}`}
               className="p-4 border rounded bg-gray-50 shadow-sm flex justify-between items-center"
             >
               <div>
