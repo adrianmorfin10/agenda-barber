@@ -195,7 +195,7 @@ const NavBar: React.FC = () => {
             <img className="rounded-full" src={appState.user.auth0_user_data.picture} alt="User picture" width={30} height={30} />
           </div>
           
-          <span>{appState.user.auth0_user_data.nickname}</span>
+          <span>{appState.user.auth0_user_data.name}</span>
         </div>
         
         <span onClick={handleLogout} >Salir</span>

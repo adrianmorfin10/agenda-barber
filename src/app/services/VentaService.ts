@@ -7,8 +7,8 @@ class VentaService extends HttpService {
         super();
     }
 
-    async getAll(local_id:number, periodo: string){
-        const response = await axios.get(`${this.baseUrl}/venta?local_id=${local_id}&periodo=${periodo}`);
+    async getAll(local_id:number, periodo: string, currentDate:string){
+        const response = await axios.get(`${this.baseUrl}/venta?local_id=${local_id}&periodo=${periodo}&current_date=${currentDate}`);
         return response.data;
     }
     

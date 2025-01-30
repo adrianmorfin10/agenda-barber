@@ -30,8 +30,8 @@ const VentasHistory: React.FC = () => {
     if(!state.sucursal)
       return;
     
-    ventasObject.getAll(state.sucursal.id, filterType).then((data:any)=>{
-      console.log('mpara length', data.length)
+    ventasObject.getAll(state.sucursal.id, filterType, currentDate.toISOString()).then((data:any)=>{
+ 
       const salesHsitory = data.map((item:any)=>{
         const ventaDate = moment(item.fecha).add(-6, "hours");
       
@@ -46,28 +46,28 @@ const VentasHistory: React.FC = () => {
         }
         
       });
-      console.log('mpara length', salesHsitory.length)
+      
       setSales(salesHsitory);
       
     }).catch((e:any)=>{
       
     })
-  }, [state.sucursal, filterType]);
+  }, [state.sucursal, filterType, currentDate]);
   const handlePrev = () => {
     const newDate = new Date(currentDate);
     if (filterType === 'dia') newDate.setDate(newDate.getDate() - 1);
-    if (filterType === 'semana') newDate.setDate(newDate.getDate() - 7);
-    if (filterType === 'mes') newDate.setMonth(newDate.getMonth() - 1);
-    if (filterType === 'year') newDate.setFullYear(newDate.getFullYear() - 1);
+    // if (filterType === 'semana') newDate.setDate(newDate.getDate() - 7);
+    // if (filterType === 'mes') newDate.setMonth(newDate.getMonth() - 1);
+    // if (filterType === 'year') newDate.setFullYear(newDate.getFullYear() - 1);
     setCurrentDate(newDate);
   };
 
   const handleNext = () => {
     const newDate = new Date(currentDate);
     if (filterType === 'dia') newDate.setDate(newDate.getDate() + 1);
-    if (filterType === 'semana') newDate.setDate(newDate.getDate() + 7);
-    if (filterType === 'mes') newDate.setMonth(newDate.getMonth() + 1);
-    if (filterType === 'year') newDate.setFullYear(newDate.getFullYear() + 1);
+    // if (filterType === 'semana') newDate.setDate(newDate.getDate() + 7);
+    // if (filterType === 'mes') newDate.setMonth(newDate.getMonth() + 1);
+    // if (filterType === 'year') newDate.setFullYear(newDate.getFullYear() + 1);
     setCurrentDate(newDate);
   };
 
@@ -84,30 +84,7 @@ const VentasHistory: React.FC = () => {
     if (filterType === 'year') return currentDate.getFullYear();
   };
 
-  const filteredSales = sales.filter((sale) => {
-    const saleDate = new Date(sale.fecha);
-
-    if (filterType === 'dia') return saleDate.toDateString() === currentDate.toDateString();
-    if (filterType === 'semana') {
-      const startOfWeek = new Date(currentDate);
-      startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      return saleDate >= startOfWeek && saleDate <= endOfWeek;
-    }
-    if (filterType === 'mes') {
-      return (
-        saleDate.getFullYear() === currentDate.getFullYear() &&
-        saleDate.getMonth() === currentDate.getMonth()
-      );
-    }
-    if (filterType === 'year') {
-      return saleDate.getFullYear() === currentDate.getFullYear();
-    }
-
-    return true;
-  });
-  console.log("sales", sales);
+  
   return (
     <div className="flex min-h-screen bg-gray-100 text-black">
       {/* Sidebar */}
@@ -132,16 +109,18 @@ const VentasHistory: React.FC = () => {
               </button>
             ))}
           </div>
+          
           {
-            // <div className="flex items-center justify-between mb-4">
-            //   <button className="p-2 bg-black rounded text-white hover:bg-gray-400" onClick={handlePrev}>
-            //     Anterior
-            //   </button>
-            //   <span className="text-xs font-bold text-black">{formatDate()}</span>
-            //   <button className="p-2 bg-black rounded text-white hover:bg-gray-400" onClick={handleNext}>
-            //     Siguiente
-            //   </button>
-            // </div>
+            filterType === "dia" &&
+            <div className="flex items-center justify-between mb-4">
+              <button className="p-2 bg-black rounded text-white hover:bg-gray-400" onClick={handlePrev}>
+                Anterior
+              </button>
+              <span className="text-xs font-bold text-black">{formatDate()}</span>
+              <button className="p-2 bg-black rounded text-white hover:bg-gray-400" onClick={handleNext}>
+                Siguiente
+              </button>
+            </div>
           }
           
         </div>
