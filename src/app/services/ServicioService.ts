@@ -15,5 +15,8 @@ class ServicioService extends HttpService {
     async createService(servicio: any): Promise<void> {
         await axios.post(`${this.baseUrl}/servicio/create`, servicio);
     }
+    async deleteService(id: number): Promise<void> {
+        await axios.post(`${this.baseUrl}/servicio/${id}/delete`);
+    }
 }
 export default ServicioService;

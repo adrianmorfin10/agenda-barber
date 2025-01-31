@@ -21,7 +21,8 @@ const ServicesPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [state, dispatchState] = React.useContext(AppContext);
   React.useEffect(()=>{
-    getServices();
+    if(state.sucursal?.id)
+      getServices();
   },[state.sucursal])
   const getServices = ()=>{
     serviciosObject.getServicios(state.sucursal ? { local_id: state.sucursal.id } : false).then((response:any)=>{
@@ -36,7 +37,6 @@ const ServicesPage: React.FC = () => {
   };
 
   const handleSelectService = (id: number) => {
-    console.log('Servicio seleccionado:', id);
     router.push(`/servicios/${id}`); // Navega a la página de detalle del servicio
   };
 
@@ -46,7 +46,11 @@ const ServicesPage: React.FC = () => {
       <div className="p-4">
         <ServiceList 
           services={services} 
-          onSelectService={handleSelectService} 
+          onSelectService={handleSelectService}
+          onDelete={(id:number)=>{
+            if(confirm("Esta seguro de eliminar este servicio"))
+              serviciosObject.deleteService(id).then(()=>getServices()).catch(()=>alert("Lo siento ha ocurrido un error al borrar el serivcio"))
+          }}
         />
         <button
           onClick={() => setIsModalOpen(true)} // Abre el modal al hacer clic

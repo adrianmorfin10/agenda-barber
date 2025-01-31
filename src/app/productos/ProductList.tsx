@@ -31,7 +31,8 @@ const ProductList: React.FC = () => {
     })
   }
   React.useEffect(()=>{
-    getProductos();
+    if(state.sucursal?.id)
+      getProductos();
   },[state.sucursal])
   const handleAddProduct = () => {
     getProductos();// Agregar el nuevo producto
@@ -47,6 +48,7 @@ const ProductList: React.FC = () => {
             <th className="border-b-2 border-gray-300 p-2 text-left">Marca</th>
             <th className="border-b-2 border-gray-300 p-2 text-left">Stock</th>
             <th className="border-b-2 border-gray-300 p-2 text-left">Precio</th>
+            <th className="border-b-2 border-gray-300 p-2 text-left"></th>
           </tr>
         </thead>
         <tbody>
@@ -60,6 +62,14 @@ const ProductList: React.FC = () => {
               <td className="border-b border-gray-200 p-2">{product.marca}</td>
               <td className="border-b border-gray-200 p-2">{product.stock}</td>
               <td className="border-b border-gray-200 p-2">${product.precio}</td>
+              <td className="border-b border-gray-200 p-2">
+                <button onClick={()=>{ 
+                  if(confirm('Esta seguro de eliminar este producto ?'))
+                    productoObject.deleteProducto(product.id).then(()=>getProductos()).catch(()=>alert('Ha ocurrido un error al eleminiar el producto'))
+                }} className="border border-red-400 text-red-400 px-4 py-2 rounded text-sm md:text-base">
+                  Borrar
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

@@ -16,5 +16,9 @@ class ProductoService extends HttpService {
         await axios.post(`${this.baseUrl}/producto/create`, producto);
     }
 
+    async deleteProducto(idProducto:number): Promise<void>{
+        await axios.post(`${this.baseUrl}/producto/${idProducto}/delete`);
+    }
+
 }
 export default ProductoService;

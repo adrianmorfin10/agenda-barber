@@ -64,6 +64,7 @@ const MembershipsPage = () => {
             <th className="border-b-2 border-gray-300 p-2 text-left">Nombre</th>
             <th className="border-b-2 border-gray-300 p-2 text-left">Precio</th>
             <th className="border-b-2 border-gray-300 p-2 text-left">Servicios</th>
+            <th className="border-b-2 border-gray-300 p-2 text-left"></th>
           </tr>
         </thead>
         <tbody>
@@ -72,6 +73,14 @@ const MembershipsPage = () => {
               <td className="border-b border-gray-200 p-2">{membership.nombre}</td>
               <td className="border-b border-gray-200 p-2">{membership.precio}</td>
               <td className="border-b border-gray-200 p-2">{membership.membresia_servicios.map((item:any)=>item.servicio.nombre).join(", ")}</td>
+              <td className="border-b border-gray-200 p-2">
+                <button onClick={()=>{
+                  if(confirm('Esta seguro de borrar esta membresia ?'))
+                    membresíaObject.deleteMembresia(membership.id).then(()=>getMembreships()).catch(()=>alert('Lo sentimos ha ocurrido un error al tratar borrar la membresia.'))
+                 }} className="border border-red-400 text-red-400 px-4 py-2 rounded text-sm md:text-base">
+                  Borrar
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

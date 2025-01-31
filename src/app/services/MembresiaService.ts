@@ -15,6 +15,10 @@ class MembresiaService extends HttpService {
     async createMembresia(membresia: any): Promise<void> {
         await axios.post(`${this.baseUrl}/membresia/create`, membresia);
     }
+
+    async deleteMembresia(id: number): Promise<void> {
+        await axios.post(`${this.baseUrl}/membresia/${id}/delete`);
+    }
 }
 
 export default MembresiaService;
