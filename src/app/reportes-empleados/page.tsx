@@ -10,6 +10,7 @@ import { AppContext } from '../components/AppContext';
 import EmpleadoService from '../services/EmpleadoService';
 import ReporteService from '../services/ReporteService';
 import TablaFiltrosEmpleados from '../components/FiltroEmpleados';
+import moment from 'moment';
 
 const employeeService = new EmpleadoService();
 const reporteObject = new ReporteService();
@@ -18,11 +19,26 @@ ChartJS.register(ArcElement, Tooltip, Legend, Title, BarElement, CategoryScale, 
 
 const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
+const current_date = moment().format("YYYY-MM-DD");
 const ReportesEmpleados: React.FC = () => {
   const [state, dispatchState] = React.useContext(AppContext);
   const [selectedEmployee, setSelectedEmployee] = useState<number | ''>('');
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth()); // Mes actual por defecto
   const [employees, setEmployees] = useState<any[]>([]);
+  const [periodo, setPeriodo] = useState('dia');
+  const [ ventaEmpleadoData, setVentaEmpleadoData ] = React.useState<{ 
+    total_citas: number, 
+    total_comision: number, 
+    total_ventas: number, 
+    membresias_vendidas: number, 
+    productos_vendidos: number
+  }>({ 
+    total_citas: 0, 
+    total_comision: 0, 
+    total_ventas: 0, 
+    membresias_vendidas: 0, 
+    productos_vendidos: 0 
+  })
   const [employeeData, setEmployeeData] = useState({
     totalCitas: 0,
     citasPorSemana: [0, 0, 0, 0], // Datos de ejemplo para las citas semanales
@@ -45,11 +61,12 @@ const ReportesEmpleados: React.FC = () => {
   React.useEffect(() => {
     if (!state.sucursal?.id || !selectedEmployee) return;
     getData(state.sucursal?.id, selectedMonth + 1, selectedEmployee).finally();
-  }, [state.sucursal, selectedMonth, selectedEmployee]);
+  }, [state.sucursal, selectedMonth, selectedEmployee, periodo]);
 
   const getData = async (local_id: any, month: number | null, employee_id: number | null) => {
     const data = await reporteObject.reporteEmpleado(local_id, month, employee_id);
-
+    const dataEmpleado = await reporteObject.reporteVentaEmpleado(local_id, periodo, employee_id,  current_date);
+    setVentaEmpleadoData(dataEmpleado);
     const dataList = [0, 0, 0, 0];
     data.citas.forEach((item: any, index: number) => {
       dataList[index] = item.total_citas;
@@ -157,7 +174,12 @@ const ReportesEmpleados: React.FC = () => {
 
           {/* Tabla con filtros */}
           <div className="flex-1 max-w-[400px]">
-            <TablaFiltrosEmpleados />
+            <TablaFiltrosEmpleados
+              data={ventaEmpleadoData}
+              onChangePeriodo={(periodo)=>{
+                setPeriodo(periodo)
+              }}
+            />
           </div>
         </div>
       </div>

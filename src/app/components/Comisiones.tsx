@@ -56,7 +56,8 @@ const Comisiones: React.FC = () => {
   const [state, dispatchState] = React.useContext(AppContext);
   
   React.useEffect(() => {
-    getData(state.sucursal ? { local_id: state.sucursal.id } : false).then();
+    if(state.sucursal)
+      getData(state.sucursal ? { local_id: state.sucursal.id } : false).then();
   }, [state.sucursal]);
 
   React.useEffect(()=>{

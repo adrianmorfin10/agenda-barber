@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AppContext } from '../components/AppContext';
 
 interface Servicio {
   id: number;
@@ -16,6 +17,7 @@ interface ServiceListProps {
 
 const ServiceList: React.FC<ServiceListProps> = ({ services, onSelectService, onEdit, onDelete }) => {
   const [tooltipServiceId, setTooltipServiceId] = useState<number | null>(null);
+  const [state, dispatchState] = React.useContext(AppContext);
 
   const handleEditClick = (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
@@ -69,7 +71,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ services, onSelectService, on
                 </button>
 
                 {/* Tooltip con Editar y Eliminar */}
-                {tooltipServiceId === service.id && (
+                {state.user?.rol === "admin" && tooltipServiceId === service.id &&  (
                   <div
                     className="absolute right-0 mt-2 bg-white border border-gray-300 shadow-md rounded-md w-32 z-50"
                     onClick={(e) => e.stopPropagation()} // Evita que se cierre al hacer clic dentro

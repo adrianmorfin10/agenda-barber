@@ -22,6 +22,12 @@ class VentaService extends HttpService {
         return response.data;
     }
 
+
+    async deleteVenta(id:number){
+        const response = await axios.post(`${this.baseUrl}/venta/${id}/delete`);
+        return response.data;
+    }
+
     async checkout(carrito:any){
 
         const response = await axios.post(`${this.baseUrl}/venta/create`, carrito);
