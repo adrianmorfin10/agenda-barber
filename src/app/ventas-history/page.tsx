@@ -30,6 +30,9 @@ const VentasHistory: React.FC = () => {
     if(!state.sucursal)
       return;
     
+    getSales();
+  }, [state.sucursal, filterType, currentDate]);
+  const getSales = ()=>{
     ventasObject.getAll(state.sucursal.id, filterType, currentDate.toISOString()).then((data:any)=>{
  
       const salesHsitory = data.map((item:any)=>{
@@ -52,7 +55,7 @@ const VentasHistory: React.FC = () => {
     }).catch((e:any)=>{
       
     })
-  }, [state.sucursal, filterType, currentDate]);
+  }
   const handlePrev = () => {
     const newDate = new Date(currentDate);
     if (filterType === 'dia') newDate.setDate(newDate.getDate() - 1);
@@ -138,7 +141,19 @@ const VentasHistory: React.FC = () => {
                   {sale.fecha} - {sale.hora} por {sale.empleado} a {sale.cliente}
                 </p>
               </div>
-              <span className="font-bold text-black">{sale.precio}</span>
+              <div className="p-2 flex flex-row items-center gap-2.5">
+                <span className="font-bold text-black">{sale.precio}</span>
+                {
+                  state.user?.rol === "admin" &&
+                  <button onClick={()=>{ 
+                    if(confirm('Esta seguro de eliminar esta venta ?'))
+                      ventasObject.deleteVenta(sale.id).then(()=>getSales()).catch(()=>alert('Ha ocurrido un error al elimina la venta'))
+                  }} className="border border-red-400 text-red-400 px-4 py-2 rounded text-sm md:text-base">
+                    Borrar
+                  </button>
+                }
+              </div>
+              
             </div>
           ))}
           {sales.length === 0 && (

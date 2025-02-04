@@ -6,6 +6,7 @@ import Link from 'next/link'; // Asegúrate de importar Link
 import Image from 'next/image'; // Importa el componente Image para cargar el ícono
 import ProductoService from '../services/ProductoService';
 import { AppContext } from '../components/AppContext';
+import EditProductModal from './EditProductModal';
 const productoObject = new ProductoService();
 interface Product {
   id: number; // o string, según lo que estés usando como identificador
@@ -20,6 +21,8 @@ const ProductList: React.FC = () => {
   // Agrega algunos productos de ejemplo
   const [products, setProducts] = useState<Product[]>([]); // Estado para los productos
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openEditModal, setOpenEditModal] = React.useState(false);
+  const [editProduct, setEditProduct] = React.useState({});
   const [state, dispatchState] = React.useContext(AppContext);
   const getProductos = ()=>{
     productoObject.getProductos(state.sucursal ? { local_id: state.sucursal.id } : false).then(response=>{
@@ -62,13 +65,24 @@ const ProductList: React.FC = () => {
               <td className="border-b border-gray-200 p-2">{product.marca}</td>
               <td className="border-b border-gray-200 p-2">{product.stock}</td>
               <td className="border-b border-gray-200 p-2">${product.precio}</td>
-              <td className="border-b border-gray-200 p-2">
-                <button onClick={()=>{ 
-                  if(confirm('Esta seguro de eliminar este producto ?'))
-                    productoObject.deleteProducto(product.id).then(()=>getProductos()).catch(()=>alert('Ha ocurrido un error al eleminiar el producto'))
-                }} className="border border-red-400 text-red-400 px-4 py-2 rounded text-sm md:text-base">
-                  Borrar
-                </button>
+              <td className="border-b border-gray-200 p-2 flex">
+                {
+                  state.user?.rol === "admin" &&
+                  <>
+                    <button onClick={()=>{ 
+                        setEditProduct(product);
+                        setOpenEditModal(true);
+                      }} className="block px-4 py-2 text-left hover:bg-gray-100 text-sm">
+                      Editar
+                    </button>
+                    <button onClick={()=>{ 
+                      if(confirm('Esta seguro de eliminar este producto ?'))
+                        productoObject.deleteProducto(product.id).then(()=>getProductos()).catch(()=>alert('Ha ocurrido un error al eleminiar el producto'))
+                    }} className="border border-red-400 text-red-400 px-4 py-2 rounded text-sm md:text-base">
+                      Borrar
+                    </button>
+                  </> 
+                }
               </td>
             </tr>
           ))}
@@ -85,6 +99,15 @@ const ProductList: React.FC = () => {
         isModalOpen={isModalOpen} 
         setIsModalOpen={setIsModalOpen} 
         onAddProduct={handleAddProduct} 
+      />
+      <EditProductModal
+        open={openEditModal}
+        product={editProduct}
+        onSaveSuccess={()=>{
+          getProductos();
+          setOpenEditModal(false);
+        }}
+        onClose={()=>setOpenEditModal(!openEditModal)}
       />
     </div>
   );

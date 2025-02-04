@@ -20,5 +20,9 @@ class ProductoService extends HttpService {
         await axios.post(`${this.baseUrl}/producto/${idProducto}/delete`);
     }
 
+    async saveProduct(producto:any): Promise<void>{
+        await axios.post(`${this.baseUrl}/producto/${producto.id}/update`, producto);
+    }
+
 }
 export default ProductoService;
