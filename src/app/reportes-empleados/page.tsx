@@ -22,7 +22,7 @@ const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', '
 const current_date = moment().format("YYYY-MM-DD");
 const ReportesEmpleados: React.FC = () => {
   const [state, dispatchState] = React.useContext(AppContext);
-  const [selectedEmployee, setSelectedEmployee] = useState<number | ''>('');
+  const [selectedEmployee, setSelectedEmployee] = useState<number | null >(null);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth()); // Mes actual por defecto
   const [employees, setEmployees] = useState<any[]>([]);
   const [periodo, setPeriodo] = useState('dia');
@@ -134,7 +134,7 @@ const ReportesEmpleados: React.FC = () => {
             </label>
             <select
               id="employeeSelector"
-              value={selectedEmployee}
+              value={selectedEmployee || ''}
               onChange={handleEmployeeChange}
               className="border border-gray-300 p-2 rounded text-black"
             >
@@ -176,8 +176,14 @@ const ReportesEmpleados: React.FC = () => {
           <div className="flex-1 max-w-[400px]">
             <TablaFiltrosEmpleados
               data={ventaEmpleadoData}
-              onChangePeriodo={(periodo)=>{
-                setPeriodo(periodo)
+              onChangePeriodo={(periodo, selectedDate)=>{
+
+                if(!state.sucursal?.id || !selectedEmployee) return;
+                console.log("state.sucursal")
+                reporteObject.reporteVentaEmpleado(state.sucursal?.id, periodo, selectedEmployee, selectedDate.toISOString()).then((reportData)=>{
+                  setVentaEmpleadoData(reportData);
+                }).catch(()=>alert('Error al tratar de obtener los datos'));
+                
               }}
             />
           </div>
