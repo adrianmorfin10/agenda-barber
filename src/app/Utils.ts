@@ -116,10 +116,18 @@ export const isPrepago = (cliente:any, service_id: number, reservaciones:any[]) 
  
     return (reservetions.length < ms.cantidad_reserv);
 }
+const cache: { [key: string]: boolean } = {};
 export const hasMemberActive = (cliente:any) =>{
     
     if(!cliente) return false;
-    const { cliente_membresia } = cliente;
+    const { id, cliente_membresia } = cliente;
+    if (!id) return false;
+
+    // Check if the result is already in the cache
+    if (cache[id] !== undefined) {
+        return cache[id];
+    }
+
     if(!cliente_membresia) return false;
     const active_cliente_membresia = cliente_membresia.find((cm:any)=>cm.activo === true) || {};
     const {  membresia, fecha_inicio, fecha_fin } = active_cliente_membresia;
@@ -127,7 +135,9 @@ export const hasMemberActive = (cliente:any) =>{
     const currentUTCDate = moment().utc().toDate();
     const fechaFinDate = moment(fecha_fin).toDate();
 
-    if(currentUTCDate >= fechaFinDate)
-        return false;
+    const isActive = currentUTCDate < fechaFinDate;
+    // Store the result in the cache
+    cache[id] = isActive;
+    
     return true
 }

@@ -8,6 +8,7 @@ import WarningModal from './WarningModal';
 import HttpService from '../services/HttpService';
 import MembresiaService from '../services/MembresiaService';
 import { AppContext } from './AppContext';
+import { hasMemberActive } from '../Utils';
 const membresiaServiceObject = new MembresiaService();
 
 interface Cliente {
@@ -190,15 +191,15 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
               }
               
               {/* Sección de Membresía */}
-              <div className="w-full">
-                <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">¿Agregar Membresía?</label>
+             
+              <div className="w-full flex flex-col">
+                <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">Membresía</label>
                 <div className="flex items-center px-2 py-2">
                   <button
-                    className={`w-10 h-5 flex items-center rounded-full p-1 ${membresia ? 'bg-green-500' : 'bg-gray-300'}`}
-                    onClick={() =>{ setMembresia(!membresia) }}
+                    className={`w-10 h-5 flex items-center rounded-full p-1 ${hasMemberActive(cliente) ? 'bg-green-500' : 'bg-gray-300'} `}
                   >
                     <div
-                      className={`w-4 h-4 bg-white rounded-full shadow-md transform duration-300 ease-in-out ${membresia ? 'translate-x-5' : 'translate-x-0'}`}
+                      className={`w-4 h-4 bg-white rounded-full shadow-md transform duration-300 ease-in-out ${hasMemberActive(cliente) ? 'translate-x-5' : 'translate-x-0'}`}
                     />
                   </button>
                 </div>
