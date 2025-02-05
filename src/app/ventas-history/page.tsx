@@ -36,7 +36,7 @@ const VentasHistory: React.FC = () => {
     ventasObject.getAll(state.sucursal.id, filterType, currentDate.toISOString()).then((data:any)=>{
  
       const salesHsitory = data.map((item:any)=>{
-        const ventaDate = moment(item.fecha).add(-6, "hours");
+        const ventaDate = moment(item.fecha);
       
         return{
           id: item.id,

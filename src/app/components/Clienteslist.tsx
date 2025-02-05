@@ -14,7 +14,7 @@ interface Cliente {
   inasistencias: number;
   cancelaciones: number;
   ultimaVisita: string;
-  descuento: string;
+  descuento: string | number;
   ingresosTotales: string;
   isMember?: boolean;
   membresia?: object;

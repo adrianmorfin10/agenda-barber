@@ -291,16 +291,24 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
               </option>
             ))}
           </select>
-          <input
-            type="email"
-            name="email"
-            placeholder="Correo Electrónico"
-            value={nuevoCliente.email}
-            onChange={handleInputChange}
-            className="border p-2 mb-2 w-full rounded-lg text-black placeholder-gray"
-            maxLength={50}
-            required
-          />
+          <div>
+            <input
+              type="email"
+              name="email"
+              placeholder="Correo Electrónico"
+              value={nuevoCliente.email}
+              onChange={handleInputChange}
+              className="border p-2 mb-2 w-full rounded-lg text-black placeholder-gray"
+              maxLength={50}
+              required
+            />
+            {
+              nuevoCliente.email.length > 2 && (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(nuevoCliente.email)) &&
+              <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                <p>Este email no tiene un formato valido</p>
+              </div>
+            }
+          </div>
           <input
             type="text"
             name="instagram"

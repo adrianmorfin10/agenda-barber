@@ -20,7 +20,7 @@ interface Cliente {
   inasistencias: number;
   cancelaciones: number;
   ultimaVisita: string;
-  descuento: string;
+  descuento: string | number;
   ingresosTotales: string;
   is_member?: boolean;
   membresia?: boolean;
@@ -43,6 +43,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
   const [editedNombre, setEditedNombre] = useState(cliente?.nombre || '');
   const [editedApellido, setEditedApellido] = useState(cliente?.apellido || '');
   const [editedTelefono, setEditedTelefono] = useState(cliente?.telefono || '');
+  const [descuento, setDescuento] = useState(cliente?.descuento || 0);
   const [membresia, setMembresia ] = useState(false);
   const [openWarning, setOpenWarning] = useState(false);
   const [membresias, setMembresias] = useState([]);
@@ -81,6 +82,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
         nombre: editedNombre,
         apellido: editedApellido,
         telefono: editedTelefono,
+        descuento: descuento
       };
       
       const response = await clientService.updateClient(cliente.id.toString(), {
@@ -174,6 +176,19 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
                 onChange={(e) => setEditedTelefono(e.target.value)}
                 className="border p-1 rounded mt-1 mb-2 text-black w-full text-sm md:text-base"
               />
+              {
+                state.user.rol === "admin" &&
+                <>
+                  <label className="block text-sm text-gray-500">Descuento:</label>
+                  <input
+                    type="text"
+                    value={descuento}
+                    onChange={(e) => setDescuento(Number(e.target.value))}
+                    className="border p-1 rounded mt-1 mb-2 text-black w-full text-sm md:text-base"
+                  />
+                </>
+              }
+              
               {/* Sección de Membresía */}
               <div className="w-full">
                 <label className="block mb-1 text-[#858585] text-sm md:text-[12px] font-light">¿Agregar Membresía?</label>
@@ -255,7 +270,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
         </div>
         <div className="grid grid-cols-3 gap-4 font-bold mb-4">
           <div className="text-black text-xs md:text-sm">{cliente.ultimaVisita}</div>
-          <div className="text-black text-xs md:text-sm">{cliente.descuento}</div>
+          <div className="text-black text-xs md:text-sm">{descuento}</div>
           <div className="text-black text-xs md:text-sm">{cliente.ingresosTotales}</div>
         </div>
       </div>
