@@ -56,22 +56,31 @@ const VentasHistory: React.FC = () => {
       
     })
   }
+  const changeDate = (_filterType:string, operation: 'add' | 'less'): Date=>{
+    const newDate = moment(currentDate);
+    const value = operation === 'add' ? 1 : -1 ;
+    switch (filterType) {
+      case 'dia':
+        newDate.add(value, 'day')
+        break;
+      case 'semana':
+        newDate.add(value, 'week')
+        break;
+      case 'mes':
+        newDate.add(value, 'month')
+        break;
+      case 'year':
+        newDate.add(value, 'year')
+        break;
+    }
+    return newDate.toDate()
+  }
   const handlePrev = () => {
-    const newDate = new Date(currentDate);
-    if (filterType === 'dia') newDate.setDate(newDate.getDate() - 1);
-    // if (filterType === 'semana') newDate.setDate(newDate.getDate() - 7);
-    // if (filterType === 'mes') newDate.setMonth(newDate.getMonth() - 1);
-    // if (filterType === 'year') newDate.setFullYear(newDate.getFullYear() - 1);
-    setCurrentDate(newDate);
+    setCurrentDate(changeDate(filterType, 'less'));
   };
 
   const handleNext = () => {
-    const newDate = new Date(currentDate);
-    if (filterType === 'dia') newDate.setDate(newDate.getDate() + 1);
-    // if (filterType === 'semana') newDate.setDate(newDate.getDate() + 7);
-    // if (filterType === 'mes') newDate.setMonth(newDate.getMonth() + 1);
-    // if (filterType === 'year') newDate.setFullYear(newDate.getFullYear() + 1);
-    setCurrentDate(newDate);
+    setCurrentDate(changeDate(filterType, 'add'));
   };
 
   const formatDate = () => {
@@ -113,8 +122,7 @@ const VentasHistory: React.FC = () => {
             ))}
           </div>
           
-          {
-            filterType === "dia" &&
+          
             <div className="flex items-center justify-between mb-4">
               <button className="p-2 bg-black rounded text-white hover:bg-gray-400" onClick={handlePrev}>
                 Anterior
@@ -124,7 +132,7 @@ const VentasHistory: React.FC = () => {
                 Siguiente
               </button>
             </div>
-          }
+          
           
         </div>
 

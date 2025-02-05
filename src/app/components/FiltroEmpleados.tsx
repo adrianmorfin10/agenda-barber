@@ -1,25 +1,39 @@
+import moment from 'moment';
 import React, { useState } from 'react';
 
-const TablaFiltrosEmpleados = ({ data, onChangePeriodo }:{ data:any, onChangePeriodo:(periodo:string)=>void }) => {
+const TablaFiltrosEmpleados = ({ data, onChangePeriodo }:{ data:any, onChangePeriodo:(periodo:string, currentDate: Date)=>void }) => {
   const [filterType, setFilterType] = useState<'dia' | 'semana' | 'mes' | 'year'>('dia');
   const [currentDate, setCurrentDate] = useState(new Date());
 
+  const changeDate = (_filterType:string, operation: 'add' | 'less'): Date=>{
+    const newDate = moment(currentDate);
+    const value = operation === 'add' ? 1 : -1 ;
+    switch (filterType) {
+      case 'dia':
+        newDate.add(value, 'day')
+        break;
+      case 'semana':
+        newDate.add(value, 'week')
+        break;
+      case 'mes':
+        newDate.add(value, 'month')
+        break;
+      case 'year':
+        newDate.add(value, 'year')
+        break;
+    }
+    return newDate.toDate()
+  }
   const handlePrev = () => {
-    const newDate = new Date(currentDate);
-    if (filterType === 'dia') newDate.setDate(newDate.getDate() - 1);
-    if (filterType === 'semana') newDate.setDate(newDate.getDate() - 7);
-    if (filterType === 'mes') newDate.setMonth(newDate.getMonth() - 1);
-    if (filterType === 'year') newDate.setFullYear(newDate.getFullYear() - 1);
-    setCurrentDate(newDate);
+    const _date = changeDate(filterType, 'less');
+    setCurrentDate(_date);
+    onChangePeriodo(filterType, _date);
   };
 
   const handleNext = () => {
-    const newDate = new Date(currentDate);
-    if (filterType === 'dia') newDate.setDate(newDate.getDate() + 1);
-    if (filterType === 'semana') newDate.setDate(newDate.getDate() + 7);
-    if (filterType === 'mes') newDate.setMonth(newDate.getMonth() + 1);
-    if (filterType === 'year') newDate.setFullYear(newDate.getFullYear() + 1);
-    setCurrentDate(newDate);
+    const _date = changeDate(filterType, 'add');
+    setCurrentDate(_date);
+    onChangePeriodo(filterType, _date);
   };
 
   const formatDate = () => {
@@ -47,7 +61,7 @@ const TablaFiltrosEmpleados = ({ data, onChangePeriodo }:{ data:any, onChangePer
             }`}
             onClick={() =>{ 
               setFilterType(type as 'dia' | 'semana' | 'mes' | 'year');
-              onChangePeriodo(type)
+              onChangePeriodo(type, currentDate)
             }}
           >
             {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -57,15 +71,15 @@ const TablaFiltrosEmpleados = ({ data, onChangePeriodo }:{ data:any, onChangePer
 
       {/* Controles de navegación */}
       <div className="flex items-center justify-between mb-4">
-        {
-          // <button className="p-2 bg-black rounded  hover:bg-gray-400 text-white" onClick={handlePrev}>
-          //   Anterior
-          // </button>
-          // <span className="text-xs font-bold text-black">{formatDate()}</span>
-          // <button className="p-2 bg-black rounded  hover:bg-gray-400 text-white" onClick={handleNext}>
-          //   Siguiente
-          // </button>
-        }
+        
+          <button className="p-2 bg-black rounded  hover:bg-gray-400 text-white" onClick={handlePrev}>
+            Anterior
+          </button>
+          <span className="text-xs font-bold text-black">{formatDate()}</span>
+          <button className="p-2 bg-black rounded  hover:bg-gray-400 text-white" onClick={handleNext}>
+            Siguiente
+          </button>
+      
       </div>
 
       {/* Diseño estilo app */}
