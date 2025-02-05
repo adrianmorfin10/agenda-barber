@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import AddUserModal from './AddUserModal'; // Asegúrate de que la ruta es correcta
+import { hasMemberActive } from '../Utils';
 
 interface Cliente {
   id: number;
@@ -100,13 +101,21 @@ const ClientesList: React.FC<ClientesListProps> = ({
     {clientToList.map(cliente => (
       <div
         key={cliente.id}
-        className="flex items-center mb-4 cursor-pointer p-2 rounded-lg hover:bg-gray-100"
+        className="flex justify-between items-center mb-4 cursor-pointer p-2 rounded-lg hover:bg-gray-100"
         onClick={() => onSelectCliente(cliente)}
       >
-        <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px]">
-          {cliente.nombre.charAt(0)}{( cliente.apellido ).charAt(0)}
+        <div className='flex'>
+          <div className="flex items-center justify-center bg-black text-white rounded-full w-[44px] h-[44px]">
+            {cliente.nombre.charAt(0)}{( cliente.apellido ).charAt(0)}
+          </div>
+          <span className="ml-3 poppins text-black">{`${cliente.nombre} ${cliente.apellido}`}</span>
         </div>
-        <span className="ml-3 poppins text-black">{`${cliente.nombre} ${cliente.apellido}`}</span>
+        {
+          hasMemberActive(cliente) &&
+          <svg width="20" height="20" viewBox="0 0 200 200" className="fill-green-500" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="100,10 120,70 180,75 130,115 145,175 100,140 55,175 70,115 20,75 80,70" />
+          </svg>
+        }
       </div>
     ))}
   </div>
