@@ -111,13 +111,13 @@ const ClientesList: React.FC<ClientesListProps> = ({
           </div>
           <span className="ml-3 poppins text-black">{`${cliente.nombre} ${cliente.apellido}`}</span>
         </div>
-        <button
-          className={`w-10 h-5 flex items-center rounded-full p-1 ${hasMemberActive(cliente) ? 'bg-green-500' : 'bg-gray-300'} `}
-        >
-          <div
-            className={`w-4 h-4 bg-white rounded-full shadow-md transform duration-300 ease-in-out ${hasMemberActive(cliente) ? 'translate-x-5' : 'translate-x-0'}`}
-          />
-        </button>
+        {
+          cliente.membresia &&
+          <svg width="10" height="10" viewBox="0 0 50 50" className={hasMemberActive(cliente) ? 'fill-green-500' : 'fill-gray-300'} xmlns="http://www.w3.org/2000/svg">
+            <circle cx="25" cy="25" r="25" />
+          </svg>
+        }
+        
         
       </div>
     ))}
