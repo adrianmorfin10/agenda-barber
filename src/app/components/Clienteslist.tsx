@@ -5,6 +5,7 @@ import Image from 'next/image';
 import AddUserModal from './AddUserModal'; // Asegúrate de que la ruta es correcta
 import { hasMemberActive } from '../Utils';
 
+
 interface Cliente {
   id: number;
   nombre: string;
@@ -110,12 +111,14 @@ const ClientesList: React.FC<ClientesListProps> = ({
           </div>
           <span className="ml-3 poppins text-black">{`${cliente.nombre} ${cliente.apellido}`}</span>
         </div>
-        {
-          hasMemberActive(cliente) &&
-          <svg width="20" height="20" viewBox="0 0 200 200" className="fill-green-500" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="100,10 120,70 180,75 130,115 145,175 100,140 55,175 70,115 20,75 80,70" />
-          </svg>
-        }
+        <button
+          className={`w-10 h-5 flex items-center rounded-full p-1 ${hasMemberActive(cliente) ? 'bg-green-500' : 'bg-gray-300'} `}
+        >
+          <div
+            className={`w-4 h-4 bg-white rounded-full shadow-md transform duration-300 ease-in-out ${hasMemberActive(cliente) ? 'translate-x-5' : 'translate-x-0'}`}
+          />
+        </button>
+        
       </div>
     ))}
   </div>
