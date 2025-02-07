@@ -61,26 +61,24 @@ const ServiceList: React.FC<ServiceListProps> = ({ services, onSelectService, on
               <td className="border-b border-gray-200 p-2">{service.nombre}</td>
               <td className="border-b border-gray-200 p-2">{service.tiempo}</td>
               <td className="border-b border-gray-200 p-2">${service.precio}</td>
-              <td className="border-b border-gray-200 p-2 relative">
+              <td className="border-b border-gray-200 p-2 flex flex-row ">
                 {/* Tooltip con Editar y Eliminar */}
-                {state.user?.rol === "admin" && tooltipServiceId === service.id &&  (
-                  <div
-                    className="absolute right-0 mt-2 bg-white border border-gray-300 shadow-md rounded-md w-32 z-50"
-                    onClick={(e) => e.stopPropagation()} // Evita que se cierre al hacer clic dentro
-                  >
+                {state.user?.rol === "admin"  &&  (
+                  <>
                     <button
                       onClick={(e) => handleEditClick(e, service.id)}
-                      className="border border-gray-400 text-gray-600 px-3 py-1 rounded text-sm"
+                      className=" text-gray-600 px-3 py-1 rounded text-sm"
                     >
                       <img src="img/edit.png" alt="Editar" className="w-5 h-5" />
                     </button>
                     <button
                       onClick={(e) => handleDeleteClick(e, service.id)}
-                      className="block px-4 py-2 text-left hover:bg-gray-100 w-full text-sm text-red-600"
+                      className="border border-red-400 text-red-400 px-4 py-2 rounded text-sm md:text-base"
                     >
-                      Eliminar
+                      Borrar
                     </button>
-                  </div>
+                  </>
+                 
                 )}
               </td>
             </tr>
