@@ -126,7 +126,7 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
       return;
     }
     try{
-      const checkOutData = { ventas: items.map(item=>({ ...item, fecha: moment().toISOString()  })),  fecha_creacion: moment().toISOString(), descuento: discount, client: selectedClient?.id || false, empleado_id: selectedEmployee, local_id: state.sucursal.id };
+      const checkOutData = { ventas: items.map(item=>({ ...item, fecha: moment().format("YYYY-MM-DD hh:mm")  })),  fecha_creacion: moment().format("YYYY-MM-DD hh:mm"), descuento: discount, client: selectedClient?.id || false, empleado_id: selectedEmployee, local_id: state.sucursal.id };
       await ventaObject.checkout(checkOutData);
       setIsSuccessModalOpen(true);
       onCheckOutSuccess();

@@ -19,6 +19,7 @@ const getName = (venta:any)=>{
     return venta.venta_servicio.servicio.nombre;
   return `cita`
 }
+
 const VentasHistory: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState<SectionType | null>("Ventas Realizadas");
   const [filterType, setFilterType] = useState<'dia' | 'semana' | 'mes' | 'year'>('dia');
@@ -33,7 +34,7 @@ const VentasHistory: React.FC = () => {
     getSales();
   }, [state.sucursal, filterType, currentDate]);
   const getSales = ()=>{
-    ventasObject.getAll(state.sucursal.id, filterType, currentDate.toISOString()).then((data:any)=>{
+    ventasObject.getAll(state.sucursal.id, filterType, moment(currentDate).format("YYYY-MM-DD hh:mm")).then((data:any)=>{
  
       const salesHsitory = data.map((item:any)=>{
         const ventaDate = moment(item.fecha);
@@ -115,7 +116,10 @@ const VentasHistory: React.FC = () => {
                 className={`p-2 rounded text-sm font-light ${
                   filterType === type ? 'bg-black text-white' : 'bg-gray-200 text-black hover:bg-gray-300'
                 }`}
-                onClick={() => setFilterType(type as 'dia' | 'semana' | 'mes' | 'year')}
+                onClick={() =>{
+                  setCurrentDate(new Date())
+                  setFilterType(type as 'dia' | 'semana' | 'mes' | 'year')
+                } }
               >
                 {type.charAt(0).toUpperCase() + type.slice(1)}
               </button>

@@ -179,7 +179,7 @@ const ReportesEmpleados: React.FC = () => {
               onChangePeriodo={(periodo, selectedDate)=>{
 
                 if(!state.sucursal?.id || !selectedEmployee) return;
-                console.log("state.sucursal")
+                
                 reporteObject.reporteVentaEmpleado(state.sucursal?.id, periodo, selectedEmployee, selectedDate.toISOString()).then((reportData)=>{
                   setVentaEmpleadoData(reportData);
                 }).catch(()=>alert('Error al tratar de obtener los datos'));

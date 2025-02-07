@@ -60,8 +60,9 @@ const TablaFiltrosEmpleados = ({ data, onChangePeriodo }:{ data:any, onChangePer
               filterType === type ? 'bg-black text-white' : 'bg-gray-200 text-black hover:bg-gray-300'
             }`}
             onClick={() =>{ 
+              setCurrentDate(new Date())
               setFilterType(type as 'dia' | 'semana' | 'mes' | 'year');
-              onChangePeriodo(type, currentDate)
+              onChangePeriodo(type, new Date())
             }}
           >
             {type.charAt(0).toUpperCase() + type.slice(1)}
