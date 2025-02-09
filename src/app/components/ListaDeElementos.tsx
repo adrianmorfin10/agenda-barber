@@ -14,6 +14,7 @@ interface Item {
   id: number;
   nombre: string;
   precio: number;
+  type: string;
 }
 
 interface ListaDeElementosProps {
@@ -52,7 +53,7 @@ const ListaDeElementos = forwardRef<any, ListaDeElementosProps>( ({ section, onA
     const resposonseProducts = await productoObject.getProductos(filter);
     const productos = resposonseProducts.map((item: any)=>{
       const { precio_productos, id, nombre, } = item;
-      return { producto_id: id, nombre, precio: precio_productos.length ? precio_productos[0].precio : 0, type: "producto"   }
+      return { id: id, producto_id: id, nombre, precio: precio_productos.length ? precio_productos[0].precio : 0, type: "producto"   }
     });
     newItems["Productos"] = productos;
     const responseServicio = await servicioObject.getServicios(filter);

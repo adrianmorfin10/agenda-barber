@@ -23,10 +23,11 @@ interface CartItem {
 
 interface CarritoProps {
   items: CartItem[],
-  onCheckOutSuccess: ()=>void
+  onCheckOutSuccess: ()=>void,
+  onLessItem:(index: number)=>void
 }
 
-const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
+const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem }) => {
   const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
   const [isClientListOpen, setIsClientListOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -210,7 +211,19 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess }) => {
                 className="flex justify-between items-center bg-white p-3 rounded-lg shadow"
               >
                 <span className="flex-1">{item.nombre}</span>
-                <span className="text-right w-12 text-sm font-light text-gray-500">{`x${item.cantidad}`}</span>
+                <div className=" flex flex-row gap-[10px]"> 
+                  {
+                    <button
+                      onClick={(e) => onLessItem(index) }
+                      className=" text-gray-600 rounded text-sm "
+                    >
+                      -
+                    </button>
+                  }
+                  <span className="text-right  text-sm font-light text-gray-500">
+                    {`x${item.cantidad}`}
+                  </span>
+                </div>
                 <span className="text-right w-20">${(item.precio * item.cantidad).toFixed(2)}</span>
               </li>
             ))}
