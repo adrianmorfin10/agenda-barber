@@ -127,7 +127,7 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
       return;
     }
     try{
-      const checkOutData = { ventas: items.map(item=>({ ...item, fecha: moment().format("YYYY-MM-DD hh:mm")  })),  fecha_creacion: moment().format("YYYY-MM-DD hh:mm"), descuento: discount, client: selectedClient?.id || false, empleado_id: selectedEmployee, local_id: state.sucursal.id };
+      const checkOutData = { ventas: items.map(item=>({ ...item, fecha: moment().utcOffset(0, false).format("YYYY-MM-DD hh:mm")  })),  fecha_creacion: moment().utcOffset(0, false).format("YYYY-MM-DD hh:mm"), descuento: discount, client: selectedClient?.id || false, empleado_id: selectedEmployee, local_id: state.sucursal.id };
       await ventaObject.checkout(checkOutData);
       setIsSuccessModalOpen(true);
       onCheckOutSuccess();
