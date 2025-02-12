@@ -7,6 +7,7 @@ import RepNavBar from '../components/RepNavBar'; // Importamos el componente Rep
 import { AppContext } from '../components/AppContext';
 import ReporteService from '../services/ReporteService';
 import ClientService from '../services/ClientService';
+import ClienteFrecuente from '../components/ClienteFrecuente';
 const clientService = new ClientService();
 const reporteObject = new ReporteService();
 ChartJS.register(ArcElement, Tooltip, Legend, Title, BarElement, CategoryScale, LinearScale);
@@ -104,7 +105,7 @@ const ReportesClientes: React.FC = () => {
   };
 
   return (
-    <div className="p-4 bg-white h-full">
+    <div className="p-4 bg-white h-full overflow-scroll">
       <RepNavBar /> {/* Barra de navegación fuera del contenedor */}
 
       <div className="p-4" style={{ padding: '1rem' }}> {/* Padding de 1rem */}
@@ -142,7 +143,7 @@ const ReportesClientes: React.FC = () => {
               className="border border-gray-300 p-2 rounded text-black"
             >
               {['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'].map((month, index) => (
-                <option key={index} value={index}>
+                <option key={index} value={index+1}>
                   {month}
                 </option>
               ))}
@@ -160,7 +161,7 @@ const ReportesClientes: React.FC = () => {
               onChange={handleYearChange}
              className="border border-gray-300 p-2 rounded text-black"
             >
-              {[2024, 2023, 2022, 2021].map((year) => (
+              {[2030, 2029, 2028, 2027, 2026, 2025, 2024, 2023, 2022, 2021].map((year) => (
                 <option key={year} value={year}>
                   {year}
                 </option>
@@ -172,6 +173,17 @@ const ReportesClientes: React.FC = () => {
         {/* Gráfico de citas mensuales */}
         <div className="mt-5 max-h-[400px] w-full h-full">
           <Bar data={data} options={options} />
+        </div>
+        <div className="mt-5 max-h-[400px] w-full h-full">
+          {
+            state.sucursal?.id &&
+            <ClienteFrecuente
+              local_id={state.sucursal?.id}
+              current_date={`${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-01 00:00:00`}
+
+            />
+          }
+          
         </div>
       </div>
     </div>
