@@ -7,7 +7,7 @@ import ClientService from '../services/ClientService';
 import Cliente from '../interfaces/cliente';
 import { AppContext } from './AppContext';
 
-const getClients = async (filter: any): Promise<Cliente[]> => {
+export const getClients = async (filter: any): Promise<Cliente[]> => {
   const clientService = new ClientService();
   const clientsData = await clientService.getClients(filter);
   const clients: Cliente[] = clientsData.map((client: any) => ({

@@ -32,7 +32,9 @@ interface ClientesListProps {
   onSelectCliente: (cliente: Cliente) => void;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  reloadClients?: () => void
+  reloadClients?: () => void;
+  title?: string;
+  createUser?:boolean;
 }
 let idTime:any = false;
 const ClientesList: React.FC<ClientesListProps> = ({
@@ -40,7 +42,9 @@ const ClientesList: React.FC<ClientesListProps> = ({
   onSelectCliente,
   searchTerm,
   setSearchTerm,
-  reloadClients
+  reloadClients,
+  title = "Usurios",
+  createUser = true
 }) => {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -70,7 +74,7 @@ const ClientesList: React.FC<ClientesListProps> = ({
  
   return (
     <div className="p-5 w-full md:max-w-[450px] overflow-y-auto">
-      <h1 className="font-semibold text-2xl poppins mb-5 text-black">Usuarios</h1>
+      <h1 className="font-semibold text-2xl poppins mb-5 text-black">{title}</h1>
 
       {/* Barra de búsqueda */}
       <div className="flex items-center bg-[#F1F1F1] p-2 rounded mb-5">
@@ -88,10 +92,14 @@ const ClientesList: React.FC<ClientesListProps> = ({
       </div>
 
       {/* Botón para añadir nuevo usuario */}
-      <div className="flex items-center p-4 bg-white mb-5 cursor-pointer hover:bg-[#e0e0e0]" onClick={() => setIsModalOpen(true)}>
-        <Image src="/img/plus.svg" alt="Añadir nuevo usuario" width={20} height={20} />
-        <span className="ml-2 font-medium poppins text-lg text-black">Añadir nuevo usuario</span>
-      </div>
+      { 
+        createUser &&
+        <div className="flex items-center p-4 bg-white mb-5 cursor-pointer hover:bg-[#e0e0e0]" onClick={() => setIsModalOpen(true)}>
+          <Image src="/img/plus.svg" alt="Añadir nuevo usuario" width={20} height={20} />
+          <span className="ml-2 font-medium poppins text-lg text-black">Añadir nuevo usuario</span>
+        </div>
+      }
+      
 
       {/* Modal para añadir usuario */}
       <AddUserModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onCreateSuccess={reloadClients} />
