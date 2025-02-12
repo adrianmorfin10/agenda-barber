@@ -56,6 +56,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
       setEditedNombre(cliente.nombre);
       setEditedApellido(cliente.apellido);
       setEditedTelefono(cliente.telefono);
+      setDescuento(cliente.descuento);
       setMembresia(cliente.membresia || false);
     }
   }, [cliente]);
@@ -90,9 +91,9 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
         nombre: editedNombre,
         apellido: editedApellido,
         telefono: editedTelefono,
-        is_member: membresia
+        is_member: membresia,
+        descuento: descuento
       });
-      console.log('Respuesta de la API:', response); // Verificar la respuesta de la API
       onUpdate(updatedCliente); // Actualizar los datos en el componente padre
       setIsEditing(false); // Salir del modo de edición
     } catch (error) {

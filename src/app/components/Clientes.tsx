@@ -20,7 +20,7 @@ const getClients = async (filter: any): Promise<Cliente[]> => {
     inasistencias: client.inasistencias || 0,
     cancelaciones: client.cancelaciones || 0,
     ultimaVisita: client.ultima_visita || "Sin fecha",
-    descuento: client.descuento || "Sin descuento",
+    descuento: client.descuento || 0,
     ingresosTotales: client.ingresos_totales || "Sin ingresos",
     membresia: client.is_member,
     tipo: client.usuario.tipo || "Sin tipo",
