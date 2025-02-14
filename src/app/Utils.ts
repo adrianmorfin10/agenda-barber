@@ -114,7 +114,7 @@ export const isPrepago = (cliente:any, service_id: number, reservaciones:any[]) 
     
     const reservetions = reservetionsGroupedByService[service_id.toString()] || [];
  
-    return (reservetions.length < ms.cantidad_reserv);
+    return (reservetions.length < (ms?.cantidad_reserv || 0));
 }
 const cache: { [key: string]: boolean } = {};
 export const hasMemberActive = (cliente:any) =>{

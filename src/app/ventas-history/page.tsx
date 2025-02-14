@@ -38,7 +38,7 @@ const VentasHistory: React.FC = () => {
  
       const salesHsitory = data.map((item:any)=>{
         
-        const ventaDate = moment(item.fecha).utcOffset(0, false);
+        const ventaDate = moment(item.fecha).local();
       
         return{
           id: item.id,
