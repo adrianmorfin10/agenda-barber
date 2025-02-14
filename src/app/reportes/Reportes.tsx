@@ -3,6 +3,7 @@
 import React from 'react';
 import DateSelector from './DateSelector';
 import { Doughnut } from 'react-chartjs-2';
+import NuevosReportes from './nuevosreportes';
 import Image from 'next/image';
 
 import {
@@ -174,63 +175,11 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
             </tbody>
           </table>
         </div>
-
-        {/* Componente de la derecha (comentado) */}
-        {/* 
-        <div className="bg-white p-4 max-w-[320px] w-full lg:ml-4 border border-[#CACACA] rounded mt-5">
-          <div className="flex justify-between mb-4">
-            <div className="flex flex-col w-full">
-              <p className="font-light text-gray-500 text-[0.75rem]">Citas</p>
-              <p className="font-bold text-black">50</p>
-            </div>
-            <div className="flex flex-col w-full">
-              <p className="font-light text-gray-500 text-[0.75rem]">Tiempo Reservado</p>
-              <p className="font-bold text-black">20 horas</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col mb-4">
-            <div className="flex justify-between mb-4">
-              <div className="flex flex-col w-full">
-                <p className="font-light text-gray-500 text-[0.75rem]">Confirmadas</p>
-                <p className="font-bold text-black">30</p>
-              </div>
-              <div className="flex flex-col w-full">
-                <p className="font-light text-gray-500 text-[0.75rem]">Finalizadas</p>
-                <p className="font-bold text-black">25</p>
-              </div>
-            </div>
-            <div className="flex justify-between mb-4">
-              <div className="flex flex-col w-full">
-                <p className="font-light text-gray-500 text-[0.75rem]">Inasistencias</p>
-                <p className="font-bold text-black">5</p>
-              </div>
-              <div className="flex flex-col w-full">
-                <p className="font-light text-gray-500 text-[0.75rem]">Canceladas</p>
-                <p className="font-bold text-black">2</p>
-              </div>
-            </div>
-          </div>
-
-          <h2 className="font-semibold text-lg mb-3 text-black">Informes</h2>
-          <div className="border-t border-[#CACACA] pt-2">
-            <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
-              <p className="font-light text-black">Resumen de Ventas</p>
-              <Image src="/img/chevron.svg" alt="Chevron" width={24} height={24} />
-            </div>
-            <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
-              <p className="font-light text-black">Ventas por Producto</p>
-              <Image src="/img/chevron.svg" alt="Chevron" width={24} height={24} />
-            </div>
-            <div className="flex justify-between items-center mb-2 p-2 hover:bg-gray-200 cursor-pointer">
-              <p className="font-light text-black">Ventas por Servicio</p>
-              <Image src="/img/chevron.svg" alt="Chevron" width={24} height={24} />
-            </div>
-          </div>
         </div>
-        */}
-      </div>
-    </div>
+
+{/* Insertar el componente NuevosReportes aquí */}
+<NuevosReportes />
+</div>
   );
 };
 
