@@ -26,13 +26,13 @@ const VentasHistory: React.FC = () => {
   const [sales, setSales] = useState<{id:number, hora: string; fecha: string, empleado: string, producto: string, precio: string, cliente: string}[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [state, dispatchState] = React.useContext(AppContext);
+
   React.useEffect(() => {
-    
     if(!state.sucursal)
       return;
-    
     getSales();
   }, [state.sucursal, filterType, currentDate]);
+
   const getSales = ()=>{
     ventasObject.getAll(state.sucursal.id, filterType, moment(currentDate).format("YYYY-MM-DD hh:mm")).then((data:any)=>{
  
@@ -59,7 +59,7 @@ const VentasHistory: React.FC = () => {
     })
   }
   const changeDate = (_filterType:string, operation: 'add' | 'less'): Date=>{
-    const newDate = moment(currentDate);
+    const newDate = moment(currentDate).utcOffset(0, false);
     const value = operation === 'add' ? 1 : -1 ;
     switch (filterType) {
       case 'dia':

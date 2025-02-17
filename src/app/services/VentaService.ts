@@ -8,6 +8,7 @@ class VentaService extends HttpService {
     }
 
     async getAll(local_id:number, periodo: string, currentDate:string){
+        console.log("current date", currentDate)
         const response = await axios.get(`${this.baseUrl}/venta?local_id=${local_id}&periodo=${periodo}&current_date=${currentDate}`);
         return response.data;
     }

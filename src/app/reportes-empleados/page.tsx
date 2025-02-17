@@ -19,7 +19,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, Title, BarElement, CategoryScale, 
 
 const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-const current_date = moment().format("YYYY-MM-DD");
+const current_date = moment(new Date()).format("YYYY-MM-DD");
 const ReportesEmpleados: React.FC = () => {
   const [state, dispatchState] = React.useContext(AppContext);
   const [selectedEmployee, setSelectedEmployee] = useState<number | null >(null);
@@ -180,7 +180,7 @@ const ReportesEmpleados: React.FC = () => {
 
                 if(!state.sucursal?.id || !selectedEmployee) return;
                 
-                reporteObject.reporteVentaEmpleado(state.sucursal?.id, periodo, selectedEmployee, selectedDate.toISOString()).then((reportData)=>{
+                reporteObject.reporteVentaEmpleado(state.sucursal?.id, periodo, selectedEmployee, moment(selectedDate).format("YYYY-MM-DD hh:mm")).then((reportData)=>{
                   setVentaEmpleadoData(reportData);
                 }).catch(()=>alert('Error al tratar de obtener los datos'));
                 
