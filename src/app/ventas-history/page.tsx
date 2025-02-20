@@ -84,12 +84,15 @@ const VentasHistory: React.FC = () => {
   const handleNext = () => {
     setCurrentDate(changeDate(filterType, 'add'));
   };
+  const totalVentas = sales.length;
+const totalPrecio = sales.reduce((sum, sale) => sum + parseFloat(sale.precio.replace('$', '')), 0)
 
   const formatDate = () => {
     if (filterType === 'dia') return currentDate.toLocaleDateString();
     if (filterType === 'semana') {
       const startOfWeek = new Date(currentDate);
-      startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+      // Ajustar para que el inicio de la semana sea el lunes
+      startOfWeek.setDate(currentDate.getDate() - (currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1));
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       return `${startOfWeek.toLocaleDateString()} - ${endOfWeek.toLocaleDateString()}`;
@@ -140,6 +143,11 @@ const VentasHistory: React.FC = () => {
           
           
         </div>
+
+<div className="flex justify-between items-center mt-4">
+  <span className="text-sm font-medium">Total de ventas: {totalVentas}</span>
+  <span className="text-sm font-medium">Total: ${totalPrecio.toFixed(2)}</span>
+</div>
 
         {/* Lista de ventas */}
         <div className="space-y-4">
