@@ -52,9 +52,9 @@ const VentasHistory: React.FC = () => {
     getSales(selectedEmployee?.id || 0); // Pasar 0 si no hay empleado seleccionado
   }, [state.sucursal, filterType, currentDate, selectedEmployee]);
 
-  const getSales = (employeeId: number) => {
+  const getSales = (barbero_id: number) => {
     ventasObject
-      .getAll(state.sucursal.id, filterType, moment(currentDate).format("YYYY-MM-DD hh:mm"), employeeId)
+      .getAll(state.sucursal.id, filterType, moment(currentDate).format("YYYY-MM-DD hh:mm"), barbero_id)
       .then((data: any) => {
         const salesHistory = data.map((item: any) => {
           const ventaDate = moment(item.fecha).local();
