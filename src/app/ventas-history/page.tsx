@@ -5,9 +5,10 @@ import SidebarVentas from "../components/SidebarVentas";
 import { AppContext } from "../components/AppContext";
 import VentaService from "../services/VentaService";
 import moment from "moment";
+import EmpleadoService from "../services/EmpleadoService";
 
 const ventasObject = new VentaService();
-
+const empleadoObject = new EmpleadoService();
 // Define el tipo de las secciones
 type SectionType = "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías" | "Ventas Realizadas";
 
@@ -26,33 +27,37 @@ const VentasHistory: React.FC = () => {
   >([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [state, dispatchState] = React.useContext(AppContext);
-  const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
-  const [employees, setEmployees] = useState<string[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<{ id: number, nombre: string} | null>(null);
+  const [employees, setEmployees] = useState<{ id: number, nombre: string }[]>([]);
 
-  useEffect(() => {
+  useEffect(()=>{
     if (!state.sucursal) return;
 
     // Obtener la lista de empleados
-    ventasObject
-      .getEmpleados(state.sucursal.id)
+    empleadoObject
+      .getEmpleados({ local_id: state.sucursal.id })
       .then((data: any) => {
-        const employeeNames = data.map((employee: any) => employee.usuario.nombre);
+        const employeeNames = data.map((employee: any) =>({ id: employee.id, nombre: employee.usuario.nombre }));
         setEmployees(employeeNames);
       })
       .catch((e: any) => {
         console.error("Error al obtener empleados:", e);
       });
 
+  },[state.sucursal])
+
+  useEffect(() => {
+    if(!state.sucursal) return;
     // Obtener las ventas
-    getSales();
+    getSales(selectedEmployee?.id || 0);
   }, [state.sucursal, filterType, currentDate, selectedEmployee]);
 
-  const getSales = () => {
+  const getSales = (employeeId:number) => {
     ventasObject
-      .getAll(state.sucursal.id, filterType, moment(currentDate).format("YYYY-MM-DD hh:mm"))
+      .getAll(state.sucursal.id, filterType, moment(currentDate).format("YYYY-MM-DD hh:mm"), employeeId)
       .then((data: any) => {
         const salesHistory = data
-          .filter((item: any) => !selectedEmployee || item.barbero.usuario.nombre === selectedEmployee)
+          .filter((item: any) => !selectedEmployee || item.barbero.id === selectedEmployee.id)
           .map((item: any) => {
             const ventaDate = moment(item.fecha).local();
             return {
@@ -163,13 +168,17 @@ const VentasHistory: React.FC = () => {
             <select
               id="employee"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-              value={selectedEmployee || ""}
-              onChange={(e) => setSelectedEmployee(e.target.value || null)}
+              value={(selectedEmployee?.id || '').toString()}
+              onChange={(e) =>{ 
+                const _employee = employees.find(item=>item.id.toString() === e.target.value) || null;
+                console.log('_employee', _employee, e.target.value);
+                setSelectedEmployee(_employee);
+              }}
             >
               <option value="">Todos los empleados</option>
               {employees.map((employee) => (
-                <option key={employee} value={employee}>
-                  {employee}
+                <option key={employee.id} value={employee.id}>
+                  {employee.nombre}
                 </option>
               ))}
             </select>
@@ -202,7 +211,7 @@ const VentasHistory: React.FC = () => {
                       if (confirm("¿Está seguro de eliminar esta venta?"))
                         ventasObject
                           .deleteVenta(sale.id)
-                          .then(() => getSales())
+                          .then(() => getSales(selectedEmployee?.id || 0))
                           .catch(() => alert("Ha ocurrido un error al eliminar la venta"));
                     }}
                     className="border border-red-400 text-red-400 px-4 py-2 rounded text-sm md:text-base"

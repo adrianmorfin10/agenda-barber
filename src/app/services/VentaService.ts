@@ -6,10 +6,10 @@ class VentaService extends HttpService {
     super();
   }
 
-  async getAll(local_id: number, periodo: string, currentDate: string) {
-    console.log("current date", currentDate);
+  async getAll(local_id: number, periodo: string, currentDate: string, employeeId: number) {
+    
     const response = await axios.get(
-      `${this.baseUrl}/venta?local_id=${local_id}&periodo=${periodo}&current_date=${currentDate}`
+      `${this.baseUrl}/venta?local_id=${local_id}&periodo=${periodo}&current_date=${currentDate}&barbero_id=${employeeId}`
     );
     return response.data;
   }
@@ -34,10 +34,6 @@ class VentaService extends HttpService {
     return response.data;
   }
 
-  async getEmpleados(local_id: number) {
-    const response = await axios.get(`${this.baseUrl}/barbero?local_id=${local_id}`);
-    return response.data;
-  }
 }
 
 export default VentaService;

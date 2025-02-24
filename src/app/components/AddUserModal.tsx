@@ -55,7 +55,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isModalOpen, setIsModalOpen
           nombre: item.usuario.nombre,
           apellido: item.usuario.apellido_paterno,
           telefono: item.usuario.telefono,
-
           email: item.usuario.email,
           instagram: '',
           citas: reservacions?.length || 0,
