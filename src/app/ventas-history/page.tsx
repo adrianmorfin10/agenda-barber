@@ -9,6 +9,7 @@ import EmpleadoService from "../services/EmpleadoService";
 
 const ventasObject = new VentaService();
 const empleadoObject = new EmpleadoService();
+
 // Define el tipo de las secciones
 type SectionType = "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías" | "Ventas Realizadas";
 
@@ -27,49 +28,46 @@ const VentasHistory: React.FC = () => {
   >([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [state, dispatchState] = React.useContext(AppContext);
-  const [selectedEmployee, setSelectedEmployee] = useState<{ id: number, nombre: string} | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<{ id: number, nombre: string } | null>(null);
   const [employees, setEmployees] = useState<{ id: number, nombre: string }[]>([]);
 
-  useEffect(()=>{
+  // Obtener la lista de empleados
+  useEffect(() => {
     if (!state.sucursal) return;
 
-    // Obtener la lista de empleados
     empleadoObject
       .getEmpleados({ local_id: state.sucursal.id })
       .then((data: any) => {
-        const employeeNames = data.map((employee: any) =>({ id: employee.id, nombre: employee.usuario.nombre }));
+        const employeeNames = data.map((employee: any) => ({ id: employee.id, nombre: employee.usuario.nombre }));
         setEmployees(employeeNames);
       })
       .catch((e: any) => {
         console.error("Error al obtener empleados:", e);
       });
+  }, [state.sucursal]);
 
-  },[state.sucursal])
-
+  // Obtener las ventas
   useEffect(() => {
-    if(!state.sucursal) return;
-    // Obtener las ventas
-    getSales(selectedEmployee?.id || 0);
+    if (!state.sucursal) return;
+    getSales(selectedEmployee?.id || 0); // Pasar 0 si no hay empleado seleccionado
   }, [state.sucursal, filterType, currentDate, selectedEmployee]);
 
-  const getSales = (employeeId:number) => {
+  const getSales = (employeeId: number) => {
     ventasObject
       .getAll(state.sucursal.id, filterType, moment(currentDate).format("YYYY-MM-DD hh:mm"), employeeId)
       .then((data: any) => {
-        const salesHistory = data
-          .filter((item: any) => !selectedEmployee || item.barbero.id === selectedEmployee.id)
-          .map((item: any) => {
-            const ventaDate = moment(item.fecha).local();
-            return {
-              id: item.id,
-              fecha: ventaDate.format("YYYY-MM-DD"),
-              hora: ventaDate.format("HH:mm"),
-              empleado: item.barbero.usuario.nombre,
-              producto: getName(item),
-              precio: `$${item.total}`,
-              cliente: item.carrito_compra.cliente?.usuario?.nombre || "Cliente no encontrado",
-            };
-          });
+        const salesHistory = data.map((item: any) => {
+          const ventaDate = moment(item.fecha).local();
+          return {
+            id: item.id,
+            fecha: ventaDate.format("YYYY-MM-DD"),
+            hora: ventaDate.format("HH:mm"),
+            empleado: item.barbero.usuario.nombre,
+            producto: getName(item),
+            precio: `$${item.total}`,
+            cliente: item.carrito_compra.cliente?.usuario?.nombre || "Cliente no encontrado",
+          };
+        });
 
         setSales(salesHistory);
       })
@@ -168,10 +166,9 @@ const VentasHistory: React.FC = () => {
             <select
               id="employee"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-              value={(selectedEmployee?.id || '').toString()}
-              onChange={(e) =>{ 
-                const _employee = employees.find(item=>item.id.toString() === e.target.value) || null;
-                console.log('_employee', _employee, e.target.value);
+              value={(selectedEmployee?.id || "").toString()}
+              onChange={(e) => {
+                const _employee = employees.find((item) => item.id.toString() === e.target.value) || null;
                 setSelectedEmployee(_employee);
               }}
             >
