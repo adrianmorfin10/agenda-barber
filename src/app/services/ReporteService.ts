@@ -31,6 +31,11 @@ class ReporteService extends HttpService {
         const response = await axios.post(`${this.baseUrl}/reporte/cliente-frecuentes`, { local_id, current_date  });
         return response.data;
     }
+
+    async reportVentasAdmin(){
+        const response = await axios.post(`${this.baseUrl}/reporte/reporte-admin`, { });
+        return response.data;
+    }
     
 }
 export default ReporteService;

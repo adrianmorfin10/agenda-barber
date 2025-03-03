@@ -41,7 +41,11 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
     membresiasIngresos: 0,
     totalCitas: 0
   })
+  const [ reporteAdmin, setReporteAdmin ] = React.useState(null)
   
+  React.useEffect(()=>{
+    getReportDataAdmin().finally()
+  },[])
   React.useEffect(()=>{
     if(!state.sucursal?.id)
       return;
@@ -51,9 +55,14 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
   }, [state.sucursal, date]);
 
 
+  const getReportDataAdmin = async ()=>{
+    const dataAdmin = await reporteObject.reportVentasAdmin();
+    setReporteAdmin(dataAdmin);
+  }
 
   const getGeneralData = async (local_id:number, month:number | null, year:number | null)=>{
     const data = await reporteObject.reporteGeneral(local_id, month, year);
+
     const { ventas } =  data;
     const _reportGeneralData: ReportGeneralData = {
       totalCitas: data.total_citas,
@@ -178,7 +187,7 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
         </div>
 
 {/* Insertar el componente NuevosReportes aquí */}
-<NuevosReportes />
+<NuevosReportes data={reporteAdmin} />
 </div>
   );
 };

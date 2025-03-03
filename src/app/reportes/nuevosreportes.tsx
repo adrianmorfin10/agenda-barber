@@ -11,7 +11,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-
+import LocalService from '../services/LocalService';
+const localesObejct = new LocalService();
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface VentasGenerales {
@@ -19,7 +20,7 @@ interface VentasGenerales {
   semanal: number;
   mensual: number;
   anual: number;
-  transacciones: number;
+  transacciones?: number;
   promedioVenta: number;
 }
 
@@ -55,57 +56,51 @@ interface Servicio {
   ventas: number;
 }
 
-const NuevosReportes: React.FC = () => {
+const NuevosReportes = ({ data }:{ data?: any }) => {
   // Datos dummy para Ventas Generales
-  const ventasGenerales: VentasGenerales = {
+  const [ ventasGenerales, setVentasGenerales ] = React.useState<VentasGenerales>({
     diaria: 1200,
     semanal: 8400,
     mensual: 36000,
     anual: 432000,
     transacciones: 150,
     promedioVenta: 80,
-  };
+  })
+  const [ sucursales, setSucursales ] = React.useState<any[]>([])
+  const [ selectedSucursalId, setSelectedSucursalId ] = React.useState<string>("")
+  const [ ventasBarbero, setVentasBarbero ] = React.useState([]);
 
+  React.useEffect(()=>{
+    localesObejct.getLocales().then((locales:any[])=>{
+      setSucursales(locales);
+    });
+  },[])
+  React.useEffect(()=>{
+    if(!data)
+      return;
+    setVentasBarbero(data.ventasPorBarbero)
+    setVentasGenerales({
+      ...ventasGenerales,
+      diaria: data.ventasDiarias,
+      semanal: data.ventasSemanales,
+      mensual: data.ventasMensuales,
+      anual: data.ventasAnuales
+    })
+  },[data])
   // Datos dummy para Gráfico de Ventas (últimos 30 días)
+  const ventasDiariasUltimos30Ordenadas = (data?.ventasDiariasUltimos30 || []).sort((a:any, b:any) => a.day - b.day);
   const datosVentas30Dias = {
-    labels: Array.from({ length: 30 }, (_, i) => `Día ${i + 1}`),
+    labels:  ventasDiariasUltimos30Ordenadas.map((item:any) => `Día ${item.day}`),
     datasets: [
       {
         label: 'Ventas',
-        data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 1000) + 500),
+        data: ventasDiariasUltimos30Ordenadas.map((item:any)=>item.total_ventas),
         backgroundColor: '#4F46E5', // Color morado moderno
         borderColor: '#3730A3',
         borderWidth: 1,
       },
     ],
   };
-
-  // Datos dummy para Clientes Registrados
-  const clientes: Cliente[] = [
-    { id: 1, nombre: 'Juan Pérez', sucursal: 'Centro', ultimaVisita: '2023-10-01', frecuenciaVisitas: 'Semanal', tipo: 'recurrente', activo: true },
-    { id: 2, nombre: 'Ana Gómez', sucursal: 'Norte', ultimaVisita: '2023-09-15', frecuenciaVisitas: 'Quincenal', tipo: 'recurrente', activo: false },
-    { id: 3, nombre: 'Luis Martínez', sucursal: 'Sur', ultimaVisita: '2023-10-05', frecuenciaVisitas: 'Mensual', tipo: 'nuevo', activo: true },
-    { id: 4, nombre: 'Marta Sánchez', sucursal: 'Centro', ultimaVisita: '2023-08-20', frecuenciaVisitas: 'Semanal', tipo: 'recurrente', activo: true },
-  ];
-
- 
-
-  // Datos dummy para Barberos (ampliados)
-  const barberos: Barbero[] = [
-    { id: 1, nombre: 'Carlos López', sucursal: 'Centro', clientesAtendidos: 50, ingresosGenerados: 5000, serviciosRealizados: 60 },
-    { id: 2, nombre: 'Pedro Ramírez', sucursal: 'Norte', clientesAtendidos: 45, ingresosGenerados: 4500, serviciosRealizados: 55 },
-    { id: 3, nombre: 'Miguel Torres', sucursal: 'Sur', clientesAtendidos: 40, ingresosGenerados: 4000, serviciosRealizados: 50 },
-    { id: 4, nombre: 'Jorge Díaz', sucursal: 'Centro', clientesAtendidos: 35, ingresosGenerados: 3500, serviciosRealizados: 45 },
-    { id: 5, nombre: 'Alejandro Ruiz', sucursal: 'Norte', clientesAtendidos: 30, ingresosGenerados: 3000, serviciosRealizados: 40 },
-    { id: 6, nombre: 'Fernando Gómez', sucursal: 'Sur', clientesAtendidos: 25, ingresosGenerados: 2500, serviciosRealizados: 35 },
-  ];
-
-  // Datos dummy para Sucursales
-  const sucursales: Sucursal[] = [
-    { id: 1, nombre: 'Sucursal Centro', ventas: 10000, citas: 120, membresiasActivas: 50 },
-    { id: 2, nombre: 'Sucursal Norte', ventas: 8000, citas: 100, membresiasActivas: 40 },
-    { id: 3, nombre: 'Sucursal Sur', ventas: 9000, citas: 110, membresiasActivas: 45 },
-  ];
 
   // Datos dummy para Servicios
   const servicios: Servicio[] = [
@@ -146,16 +141,21 @@ const NuevosReportes: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <div className="bg-white p-4 rounded-lg shadow-inner">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Número de Transacciones</h3>
-            <p className="text-2xl font-bold text-gray-800">{ventasGenerales.transacciones}</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-inner">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Promedio de Venta</h3>
-            <p className="text-2xl font-bold text-gray-800">${ventasGenerales.promedioVenta}</p>
-          </div>
-        </div>
+        {
+          /**
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              <div className="bg-white p-4 rounded-lg shadow-inner">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Número de Transacciones</h3>
+                <p className="text-2xl font-bold text-gray-800">{ventasGenerales.transacciones}</p>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow-inner">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Promedio de Venta</h3>
+                <p className="text-2xl font-bold text-gray-800">${ventasGenerales.promedioVenta}</p>
+              </div>
+            </div>
+           */
+        }
+        
 
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas de los Últimos 30 Días</h3>
         <div className="bg-white p-4 rounded-lg shadow-inner">
@@ -177,91 +177,109 @@ const NuevosReportes: React.FC = () => {
       </div>
 
      {/* Tabla de Clientes Registrados */}
-<div className="bg-white rounded-lg shadow-md p-6">
-  {/* Título y filtro */}
-  <div className="flex justify-between items-center mb-4">
-    <h2 className="text-2xl font-bold text-gray-800">
-      Clientes Registrados <span className="text-gray-600 text-lg">({clientes.length})</span>
-    </h2>
-    <select className="border border-gray-300 rounded-md p-2 text-gray-700">
-      <option value="todas">Todas las Sucursales</option>
-      <option value="sucursal1">Sucursal 1</option>
-      <option value="sucursal2">Sucursal 2</option>
-      <option value="sucursal3">Sucursal 3</option>
-      <option value="sucursal4">Sucursal 4</option>
-    </select>
-  </div>
+    
+      {/* Título y filtro */}
+      {
+        /*
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-gray-800">
+            Clientes Registrados <span className="text-gray-600 text-lg">({clientes.length})</span>
+          </h2>
+          
+        </div>
 
-  {/* Tabla */}
-  <div className="overflow-x-auto">
-    <table className="w-full text-left text-gray-700">
-      <thead className="bg-gray-100">
-        <tr>
-          <th className="p-3">Nombre</th>
-          <th className="p-3">Sucursal</th>
-          <th className="p-3">Última Visita</th>
-          <th className="p-3">Frecuencia</th>
-          <th className="p-3">Tipo</th>
-          <th className="p-3">Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        {clientes.map((cliente) => (
-          <tr key={cliente.id} className="border-b hover:bg-gray-50">
-            <td className="p-3">{cliente.nombre}</td>
-            <td className="p-3">{cliente.sucursal}</td>
-            <td className="p-3">{cliente.ultimaVisita}</td>
-            <td className="p-3">{cliente.frecuenciaVisitas}</td>
-            <td className="p-3">
-              <span
-                className={`px-2 py-1 rounded-full text-sm ${
-                  cliente.tipo === 'nuevo'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-green-100 text-green-800'
-                }`}
-              >
-                {cliente.tipo}
-              </span>
-            </td>
-            <td className="p-3">
-              <span
-                className={`px-2 py-1 rounded-full text-sm ${
-                  cliente.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}
-              >
-                {cliente.activo ? 'Activo' : 'Inactivo'}
-              </span>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-
-        {/* Tabla de Barberos */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Desempeño de Barberos</h2>
+        
         <div className="overflow-x-auto">
           <table className="w-full text-left text-gray-700">
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-3">Nombre</th>
                 <th className="p-3">Sucursal</th>
-                <th className="p-3">Clientes Atendidos</th>
-                <th className="p-3">Ingresos Generados</th>
-                <th className="p-3">Servicios Realizados</th>
+                <th className="p-3">Última Visita</th>
+                <th className="p-3">Frecuencia</th>
+                <th className="p-3">Tipo</th>
+                <th className="p-3">Estado</th>
               </tr>
             </thead>
             <tbody>
-              {barberos.map((barbero) => (
-                <tr key={barbero.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{barbero.nombre}</td>
-                  <td className="p-3">{barbero.sucursal}</td>
-                  <td className="p-3">{barbero.clientesAtendidos}</td>
-                  <td className="p-3">${barbero.ingresosGenerados}</td>
-                  <td className="p-3">{barbero.serviciosRealizados}</td>
+              {clientes.map((cliente) => (
+                <tr key={cliente.id} className="border-b hover:bg-gray-50">
+                  <td className="p-3">{cliente.nombre}</td>
+                  <td className="p-3">{cliente.sucursal}</td>
+                  <td className="p-3">{cliente.ultimaVisita}</td>
+                  <td className="p-3">{cliente.frecuenciaVisitas}</td>
+                  <td className="p-3">
+                    <span
+                      className={`px-2 py-1 rounded-full text-sm ${
+                        cliente.tipo === 'nuevo'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}
+                    >
+                      {cliente.tipo}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <span
+                      className={`px-2 py-1 rounded-full text-sm ${
+                        cliente.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {cliente.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      */}
+    
+
+
+        {/* Tabla de Barberos */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Desempeño de Barberos</h2>
+        <div className="overflow-x-auto">
+          <select 
+            className="border border-gray-300 rounded-md p-2 text-gray-700 mb-2" 
+            name="sucursal"
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => { 
+              setSelectedSucursalId(e.target.value);
+              const newsVentaBarberos = data.ventasPorBarbero.filter((item:any)=>item.local_id === e.target.value)
+              console.log("e.target.value", e.target.value, newsVentaBarberos);
+              setVentasBarbero(newsVentaBarberos)
+            }} 
+            value={selectedSucursalId || ''}
+          >
+            <option value={''}>Todos los locales</option>
+            {
+              sucursales.map((item: any) => (
+                <option key={`local-key-${item.id}`} value={item.id}>{item.nombre}</option>
+              ))
+            }
+          </select>
+          <table className="w-full text-left text-gray-700">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3">Nombre</th>
+                <th className="p-3">Sucursal</th>
+                { /*<th className="p-3">{barbero.clientesAtendidos}</th> */ }
+                <th className="p-3">Ingresos Generados</th>
+                {
+                  /** <th className="p-3">Servicios Realizados</th> */
+                }
+              </tr>
+            </thead>
+            <tbody>
+            {
+              ventasBarbero.map((item: any, i) => (
+                <tr key={`venta-barbero-${i}`} className="border-b hover:bg-gray-50">
+                  <td className="p-3">{item.nombre_barbero}</td>
+                  <td className="p-3">{item.nombre_local}</td>
+                  <td className="p-3">${item.total_ventas}</td>
                 </tr>
               ))}
             </tbody>
@@ -278,15 +296,17 @@ const NuevosReportes: React.FC = () => {
               <tr>
                 <th className="p-3">Sucursal</th>
                 <th className="p-3">Ventas</th>
-                <th className="p-3">Citas</th>
+                {/** <th className="p-3">Citas</th> */}
+                
               </tr>
             </thead>
             <tbody>
-              {sucursales.map((sucursal) => (
-                <tr key={sucursal.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{sucursal.nombre}</td>
-                  <td className="p-3">${sucursal.ventas}</td>
-                  <td className="p-3">{sucursal.citas}</td>
+              {(data?.ventasPorSucursal || []).map((sucursal:any, i:any) => (
+                <tr key={`row-branch-${i}`} className="border-b hover:bg-gray-50">
+                  <td className="p-3">{sucursal.nombre_local}</td>
+                  <td className="p-3">${sucursal.total_ventas}</td>
+                  {/** <td className="p-3">{sucursal.citas}</td>*/}
+                  
                 </tr>
               ))}
             </tbody>
@@ -305,7 +325,6 @@ const NuevosReportes: React.FC = () => {
 
         {/* Tabla de Servicios y Promociones */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Servicios y Promociones</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-gray-700">
               <thead className="bg-gray-100">
@@ -315,47 +334,45 @@ const NuevosReportes: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {servicios.map((servicio) => (
+                {(data?.ventasByReservaciones || []).map((servicio:any) => (
                   <tr key={servicio.tipo} className="border-b hover:bg-gray-50">
-                    <td className="p-3">{servicio.tipo}</td>
-                    <td className="p-3">${servicio.ventas}</td>
+                    <td className="p-3">{servicio.nombre}</td>
+                    <td className="p-3">${servicio.total_ventas}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-        {/* Tabla de Membresías Activas por Sucursal */}
-<div className="mb-8">
-  <h3 className="text-xl font-semibold text-gray-800 mb-4">Membresías Activas por Sucursal</h3>
-  <div className="overflow-x-auto">
-    <table className="w-full text-left text-gray-700">
-      <thead className="bg-gray-100">
-        <tr>
-          <th className="p-3">Sucursal</th>
-          <th className="p-3">Membresías Activas</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sucursales.map((sucursal) => (
-          <tr key={sucursal.id} className="border-b hover:bg-gray-50">
-            <td className="p-3">{sucursal.nombre}</td>
-            <td className="p-3">{sucursal.membresiasActivas}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-
-        {/* Indicadores de Mercado y Operación */}
+        {/* 
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Membresías Activas por Sucursal</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-gray-700">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-3">Sucursal</th>
+                  <th className="p-3">Membresías Activas</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sucursales.map((sucursal) => (
+                  <tr key={sucursal.id} className="border-b hover:bg-gray-50">
+                    <td className="p-3">{sucursal.nombre}</td>
+                    <td className="p-3">{sucursal.membresiasActivas}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
         <div>
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Indicadores de Mercado y Operación</h3>
           <div className="bg-white p-4 rounded-lg shadow-inner">
             <p className="text-black">Tasa de No Shows: {noShows}%</p>
           </div>
         </div>
+        */}
       </div>
     </div>
   );
