@@ -248,7 +248,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
             name="sucursal"
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => { 
               setSelectedSucursalId(e.target.value);
-              const newsVentaBarberos = data.ventasPorBarbero.filter((item:any)=>item.local_id === e.target.value)
+              const newsVentaBarberos = data.ventasPorBarbero.filter((item:any)=>(e.target.value === "" ||item.local_id === e.target.value))
               console.log("e.target.value", e.target.value, newsVentaBarberos);
               setVentasBarbero(newsVentaBarberos)
             }} 
