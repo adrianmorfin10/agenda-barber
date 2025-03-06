@@ -6,11 +6,13 @@ class VentaService extends HttpService {
     super();
   }
 
-  async getAll(local_id: number, periodo: string, currentDate: string, employeeId: number) {
+  async getAll(local_id: number, periodo: string, currentDate: string, employeeId: number, start_date?: string, end_date?: string) {
     
-    const response = await axios.get(
-      `${this.baseUrl}/venta?local_id=${local_id}&periodo=${periodo}&current_date=${currentDate}&barbero_id=${employeeId}`
-    );
+    let url = `${this.baseUrl}/venta?local_id=${local_id}&periodo=${periodo}&current_date=${currentDate}&barbero_id=${employeeId}`;
+    if(start_date) url =  `${url}&start_date=${start_date}`;
+    if(end_date) url = `${url}&end_date=${end_date}`;
+
+    const response = await axios.get(url);
     return response.data;
   }
 

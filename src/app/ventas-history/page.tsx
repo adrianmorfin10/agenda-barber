@@ -30,7 +30,8 @@ const VentasHistory: React.FC = () => {
   const [state, dispatchState] = React.useContext(AppContext);
   const [selectedEmployee, setSelectedEmployee] = useState<{ id: number, nombre: string } | null>(null);
   const [employees, setEmployees] = useState<{ id: number, nombre: string }[]>([]);
-
+  const [ startDate, setStartDate ] = useState<any>(null);
+  const [ endDate, setEndDate ] = useState<any>(null);
   // Obtener la lista de empleados
   useEffect(() => {
     if (!state.sucursal) return;
@@ -49,12 +50,14 @@ const VentasHistory: React.FC = () => {
   // Obtener las ventas
   useEffect(() => {
     if (!state.sucursal) return;
+    console.log("useEffect", startDate, endDate)
     getSales(selectedEmployee?.id || 0); // Pasar 0 si no hay empleado seleccionado
   }, [state.sucursal, filterType, currentDate, selectedEmployee]);
 
   const getSales = (barbero_id: number) => {
+    console.log("barbero_id", startDate, endDate)
     ventasObject
-      .getAll(state.sucursal.id, filterType, moment(currentDate).format("YYYY-MM-DD hh:mm"), barbero_id)
+      .getAll(state.sucursal.id, filterType, moment(currentDate).format("YYYY-MM-DD hh:mm"), barbero_id, startDate, endDate)
       .then((data: any) => {
         const salesHistory = data.map((item: any) => {
           const ventaDate = moment(item.fecha).local();
@@ -107,13 +110,18 @@ const VentasHistory: React.FC = () => {
   const totalVentas = sales.length;
   const totalPrecio = sales.reduce((sum, sale) => sum + parseFloat(sale.precio.replace("$", "")), 0);
 
+  const getStartAndEndDate =()=>{
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - (currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1));
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    return { startOfWeek, endOfWeek }
+  }
+
   const formatDate = () => {
     if (filterType === "dia") return currentDate.toLocaleDateString();
     if (filterType === "semana") {
-      const startOfWeek = new Date(currentDate);
-      startOfWeek.setDate(currentDate.getDate() - (currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1));
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      const { startOfWeek, endOfWeek } = getStartAndEndDate();
       return `${startOfWeek.toLocaleDateString()} - ${endOfWeek.toLocaleDateString()}`;
     }
     if (filterType === "mes") return currentDate.toLocaleDateString("default", { year: "numeric", month: "long" });
@@ -139,6 +147,11 @@ const VentasHistory: React.FC = () => {
                   filterType === type ? "bg-black text-white" : "bg-gray-200 text-black hover:bg-gray-300"
                 }`}
                 onClick={() => {
+                  if(type === "semana"){
+                    const { startOfWeek, endOfWeek } = getStartAndEndDate();
+                    setStartDate(moment(startOfWeek).format("YYYY-MM-DD hh:mm"));
+                    setEndDate(moment(endOfWeek).format("YYYY-MM-DD hh:mm"));
+                  }
                   setCurrentDate(new Date());
                   setFilterType(type as "dia" | "semana" | "mes" | "year");
                 }}
