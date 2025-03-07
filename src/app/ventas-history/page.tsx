@@ -100,19 +100,38 @@ const VentasHistory: React.FC = () => {
   };
 
   const handlePrev = () => {
-    setCurrentDate(changeDate(filterType, "less"));
+    if(filterType === "semana"){
+      const _date = changeDate(filterType, "less");
+      const { startOfWeek, endOfWeek } = getStartAndEndDate(_date);
+      setStartDate(moment(startOfWeek).format("YYYY-MM-DD hh:mm"));
+      setEndDate(moment(endOfWeek).format("YYYY-MM-DD hh:mm"));
+      setCurrentDate(_date);
+    }else{
+      setCurrentDate(changeDate(filterType, "less"));
+    }
+    
   };
 
   const handleNext = () => {
-    setCurrentDate(changeDate(filterType, "add"));
+    if(filterType === "semana"){
+      const _date = changeDate(filterType, "add");
+      const { startOfWeek, endOfWeek } = getStartAndEndDate(_date);
+      setStartDate(moment(startOfWeek).format("YYYY-MM-DD hh:mm"));
+      setEndDate(moment(endOfWeek).format("YYYY-MM-DD hh:mm"));
+      setCurrentDate(_date);
+    }else{
+      setCurrentDate(changeDate(filterType, "add"));
+    }
+    
   };
 
   const totalVentas = sales.length;
   const totalPrecio = sales.reduce((sum, sale) => sum + parseFloat(sale.precio.replace("$", "")), 0);
 
-  const getStartAndEndDate =()=>{
-    const startOfWeek = new Date(currentDate);
-    startOfWeek.setDate(currentDate.getDate() - (currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1));
+  const getStartAndEndDate =( _date:any = null)=>{
+    const datoToProccess = _date || currentDate
+    const startOfWeek = new Date(datoToProccess);
+    startOfWeek.setDate(datoToProccess.getDate() - (datoToProccess.getDay() === 0 ? 6 : datoToProccess.getDay() - 1));
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     return { startOfWeek, endOfWeek }
