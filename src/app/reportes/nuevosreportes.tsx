@@ -69,7 +69,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
   const [ sucursales, setSucursales ] = React.useState<any[]>([])
   const [ selectedSucursalId, setSelectedSucursalId ] = React.useState<string>("")
   const [ ventasBarbero, setVentasBarbero ] = React.useState([]);
-
+  const [ ventasClientes, setVentasClientes ] = React.useState([]);
   React.useEffect(()=>{
     localesObejct.getLocales().then((locales:any[])=>{
       setSucursales(locales);
@@ -79,6 +79,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
     if(!data)
       return;
     setVentasBarbero(data.ventasPorBarbero)
+    setVentasClientes(data.ventasPorCliente)
     setVentasGenerales({
       ...ventasGenerales,
       diaria: data.ventasDiarias,
@@ -237,10 +238,54 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
       </div>
       */}
     
+      {/* Tabla de Clientes */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Clientes</h2>
+        <div className="overflow-x-auto">
+          <select 
+            className="border border-gray-300 rounded-md p-2 text-gray-700 mb-2" 
+            name="sucursal"
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => { 
+              setSelectedSucursalId(e.target.value);
+              const newsVentaClientes = data.ventasPorCliente.filter((item:any)=>(e.target.value === "" || item.local_id === e.target.value))
+             
+              setVentasClientes(newsVentaClientes)
+            }} 
+            value={selectedSucursalId || ''}
+          >
+            <option value={''}>Todos los locales</option>
+            {
+              sucursales.map((item: any) => (
+                <option key={`local-key-${item.id}`} value={item.id}>{item.nombre}</option>
+              ))
+            }
+          </select>
+          <table className="w-full text-left text-gray-700">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3">Nombre</th>
+                { /*<th className="p-3">{barbero.clientesAtendidos}</th> */ }
+                <th className="p-3">Cantidad de compras</th>
+                <th className="p-3">Total gastado</th>
+                
+              </tr>
+            </thead>
+            <tbody>
+            {
+              ventasClientes.map((item: any, i) => (
+                <tr key={`venta-cliente-${i}`} className="border-b hover:bg-gray-50">
+                  <td className="p-3">{item.nombre_cliente}</td>
+                  <td className="p-3">{item.cantidad}</td>
+                  <td className="p-3">${item.total_ventas}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-
-        {/* Tabla de Barberos */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+      {/* Tabla de Barberos */}
+      <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Desempeño de Barberos</h2>
         <div className="overflow-x-auto">
           <select 
@@ -249,7 +294,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => { 
               setSelectedSucursalId(e.target.value);
               const newsVentaBarberos = data.ventasPorBarbero.filter((item:any)=>(e.target.value === "" ||item.local_id === e.target.value))
-              console.log("e.target.value", e.target.value, newsVentaBarberos);
+              
               setVentasBarbero(newsVentaBarberos)
             }} 
             value={selectedSucursalId || ''}
@@ -268,9 +313,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
                 <th className="p-3">Sucursal</th>
                 { /*<th className="p-3">{barbero.clientesAtendidos}</th> */ }
                 <th className="p-3">Ingresos Generados</th>
-                {
-                  /** <th className="p-3">Servicios Realizados</th> */
-                }
+                <th className="p-3">Cantidad de ventas</th>
               </tr>
             </thead>
             <tbody>
@@ -280,6 +323,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
                   <td className="p-3">{item.nombre_barbero}</td>
                   <td className="p-3">{item.nombre_local}</td>
                   <td className="p-3">${item.total_ventas}</td>
+                  <td className="p-3">{item.cantidad}</td>
                 </tr>
               ))}
             </tbody>
@@ -296,7 +340,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
               <tr>
                 <th className="p-3">Sucursal</th>
                 <th className="p-3">Ventas</th>
-                {/** <th className="p-3">Citas</th> */}
+                <th className="p-3">Cantidad</th>
                 
               </tr>
             </thead>
@@ -305,6 +349,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
                 <tr key={`row-branch-${i}`} className="border-b hover:bg-gray-50">
                   <td className="p-3">{sucursal.nombre_local}</td>
                   <td className="p-3">${sucursal.total_ventas}</td>
+                  <td className="p-3">{sucursal.cantidad}</td>
                   {/** <td className="p-3">{sucursal.citas}</td>*/}
                   
                 </tr>
@@ -331,6 +376,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
                 <tr>
                   <th className="p-3">Tipo de Servicio</th>
                   <th className="p-3">Ventas</th>
+                  <th className="p-3">Cantidad</th>
                 </tr>
               </thead>
               <tbody>
@@ -338,6 +384,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
                   <tr key={servicio.tipo} className="border-b hover:bg-gray-50">
                     <td className="p-3">{servicio.nombre}</td>
                     <td className="p-3">${servicio.total_ventas}</td>
+                    <td className="p-3">{servicio.cantidad}</td>
                   </tr>
                 ))}
               </tbody>
