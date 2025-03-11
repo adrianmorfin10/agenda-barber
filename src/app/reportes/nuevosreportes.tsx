@@ -140,20 +140,18 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
           </div>
         </div>
 
-        {
-          /**
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <div className="bg-white p-4 rounded-lg shadow-inner">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Número de Transacciones</h3>
-                <p className="text-2xl font-bold text-gray-800">{ventasGenerales.transacciones}</p>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow-inner">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Promedio de Venta</h3>
-                <p className="text-2xl font-bold text-gray-800">${ventasGenerales.promedioVenta}</p>
-              </div>
-            </div>
-           */
-        }
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="bg-white p-4 rounded-lg shadow-inner">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Número de Transacciones</h3>
+            <p className="text-2xl font-bold text-gray-800">{data?.ventasNumeroPromedios?.length ? data.ventasNumeroPromedios[0].cantidad : ""}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-inner">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Promedio de Venta</h3>
+            <p className="text-2xl font-bold text-gray-800">${data?.ventasNumeroPromedios?.length ? Number(data.ventasNumeroPromedios[0].promedio_ventas).toFixed(2) : ""}</p>
+          </div>
+        </div>
+           
         
 
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas de los Últimos 30 Días</h3>
