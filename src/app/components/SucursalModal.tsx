@@ -86,8 +86,8 @@ const SucursalModal: React.FC<SucursalModalProps> = ({ sucursalSeleccionada, suc
                   className={`p-4 text-left rounded-md border ${sucursalSeleccionada?.id === sucursal.id ? 'border-2 border-black bg-white text-black' : 'border border-gray-300 bg-gray-200 text-gray-700'}`}
                 >
                   <div className="font-semibold text-black">{sucursal.nombre}</div>
-                  <div className="text-sm text-black">{sucursal.direccion}</div>
-                  <div className="text-sm text-black">Encargado: {sucursal.encargado}</div>
+                {/* <div className="text-sm text-black">{sucursal.direccion}</div>*/}
+                  <div className="text-sm text-black">Encargado: Edwin Silva</div>
                 </button>
               ))}
             </div>
