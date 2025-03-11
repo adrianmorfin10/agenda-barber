@@ -43,7 +43,7 @@ const ClientesList: React.FC<ClientesListProps> = ({
   searchTerm,
   setSearchTerm,
   reloadClients,
-  title = "Usurios",
+  title = "Usuarios",
   createUser = true
 }) => {
   
