@@ -1,9 +1,11 @@
 import moment from 'moment';
 import React, { useState } from 'react';
 
-const TablaFiltrosEmpleados = ({ data, onChangePeriodo }:{ data:any, onChangePeriodo:(periodo:string, currentDate: Date)=>void }) => {
+const TablaFiltrosEmpleados = ({ data, onChangePeriodo }:{ data:any, onChangePeriodo:(periodo:string, currentDate: Date, startDate?:any, endDate?:any)=>void }) => {
   const [filterType, setFilterType] = useState<'dia' | 'semana' | 'mes' | 'year'>('dia');
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [ startDate, setStartDate ] = useState<any>(null);
+  const [ endDate, setEndDate ] = useState<any>(null);
 
   const changeDate = (_filterType:string, operation: 'add' | 'less'): Date=>{
     const newDate = moment(currentDate);
@@ -25,24 +27,49 @@ const TablaFiltrosEmpleados = ({ data, onChangePeriodo }:{ data:any, onChangePer
     return newDate.toDate()
   }
   const handlePrev = () => {
-    const _date = changeDate(filterType, 'less');
-    setCurrentDate(_date);
-    onChangePeriodo(filterType, _date);
+    const _date = changeDate(filterType, "less");
+    if(filterType === "semana"){
+      
+      const { startOfWeek, endOfWeek } = getStartAndEndDate(_date);
+      setStartDate(moment(startOfWeek).format("YYYY-MM-DD hh:mm"));
+      setEndDate(moment(endOfWeek).format("YYYY-MM-DD hh:mm"));
+      setCurrentDate(_date);
+      onChangePeriodo(filterType, _date, moment(startOfWeek).format("YYYY-MM-DD hh:mm"), moment(endOfWeek).format("YYYY-MM-DD hh:mm") );
+    }else{
+      setCurrentDate(_date);
+      onChangePeriodo(filterType, _date, startDate, endDate);
+    }
+    
   };
 
   const handleNext = () => {
     const _date = changeDate(filterType, 'add');
-    setCurrentDate(_date);
-    onChangePeriodo(filterType, _date);
+    if(filterType === "semana"){
+      
+      const { startOfWeek, endOfWeek } = getStartAndEndDate(_date);
+      setStartDate(moment(startOfWeek).format("YYYY-MM-DD hh:mm"));
+      setEndDate(moment(endOfWeek).format("YYYY-MM-DD hh:mm"));
+      setCurrentDate(_date);
+      onChangePeriodo(filterType, _date, moment(startOfWeek).format("YYYY-MM-DD hh:mm"), moment(endOfWeek).format("YYYY-MM-DD hh:mm") );
+    }else{
+      setCurrentDate(_date);
+      onChangePeriodo(filterType, _date, startDate, endDate);
+    }
   };
+
+  const getStartAndEndDate =( _date:any = null)=>{
+    const datoToProccess = _date || currentDate
+    const startOfWeek = new Date(datoToProccess);
+    startOfWeek.setDate(datoToProccess.getDate() - (datoToProccess.getDay() === 0 ? 6 : datoToProccess.getDay() - 1));
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    return { startOfWeek, endOfWeek }
+  }
 
   const formatDate = () => {
     if (filterType === 'dia') return currentDate.toLocaleDateString();
     if (filterType === 'semana') {
-      const startOfWeek = new Date(currentDate);
-      startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      const { startOfWeek, endOfWeek } = getStartAndEndDate();
       return `${startOfWeek.toLocaleDateString()} - ${endOfWeek.toLocaleDateString()}`;
     }
     if (filterType === 'mes') return currentDate.toLocaleDateString('default', { year: 'numeric', month: 'long' });
@@ -61,8 +88,17 @@ const TablaFiltrosEmpleados = ({ data, onChangePeriodo }:{ data:any, onChangePer
             }`}
             onClick={() =>{ 
               setCurrentDate(new Date())
+              if(type === "semana"){
+                const { startOfWeek, endOfWeek } = getStartAndEndDate();
+                setStartDate(moment(startOfWeek).format("YYYY-MM-DD hh:mm"));
+                setEndDate(moment(endOfWeek).format("YYYY-MM-DD hh:mm"));
+                onChangePeriodo(type, new Date(), moment(startOfWeek).format("YYYY-MM-DD hh:mm"), moment(endOfWeek).format("YYYY-MM-DD hh:mm"))
+              }else{
+                onChangePeriodo(type, new Date())
+              }
+              
               setFilterType(type as 'dia' | 'semana' | 'mes' | 'year');
-              onChangePeriodo(type, new Date())
+              
             }}
           >
             {type.charAt(0).toUpperCase() + type.slice(1)}
