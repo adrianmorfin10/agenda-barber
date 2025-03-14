@@ -12,6 +12,8 @@ import {
   Legend,
 } from 'chart.js';
 import LocalService from '../services/LocalService';
+import moment from 'moment';
+
 const localesObejct = new LocalService();
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -262,6 +264,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
             <th className="p-3">Nombre</th>
             <th className="p-3">Cantidad de compras</th>
             <th className="p-3">Total gastado</th>
+            <th className="p-3">Ultima visita</th>
           </tr>
         </thead>
         <tbody>
@@ -271,6 +274,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
                 <td className="p-3">{item.nombre_cliente}</td>
                 <td className="p-3">{item.cantidad}</td>
                 <td className="p-3">${item.total_ventas}</td>
+                <td className="p-3">{moment(item.ultima_venta).local().format('DD-MMM-YYYY, HH:mm')}</td>
               </tr>
             ))
           }

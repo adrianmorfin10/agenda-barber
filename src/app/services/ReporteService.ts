@@ -22,8 +22,8 @@ class ReporteService extends HttpService {
         return response.data;
     }
 
-    async reporteVentaEmpleado(local_id: any, periodo: string, employee_id: number | null, current_date: string){
-        const response = await axios.post(`${this.baseUrl}/reporte/ventas-empleado`, { local_id, employee_id, periodo, current_date  });
+    async reporteVentaEmpleado(local_id: any, periodo: string, employee_id: number | null, current_date: string, start_date?: string, end_date?: string){
+        const response = await axios.post(`${this.baseUrl}/reporte/ventas-empleado`, { local_id, employee_id, periodo, current_date, start_date, end_date  });
         return response.data;
     }
 

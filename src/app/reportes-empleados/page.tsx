@@ -82,6 +82,8 @@ const ReportesEmpleados: React.FC = () => {
     setSelectedMonth(parseInt(event.target.value));
   };
 
+  
+
   const data = {
     labels: employeeData.semanas.map((semana) => `${semana} de ${meses[selectedMonth]}`),
     datasets: [
@@ -176,11 +178,11 @@ const ReportesEmpleados: React.FC = () => {
           <div className="flex-1 max-w-[400px]">
             <TablaFiltrosEmpleados
               data={ventaEmpleadoData}
-              onChangePeriodo={(periodo, selectedDate)=>{
+              onChangePeriodo={(periodo, selectedDate, startDate, endDate)=>{
 
                 if(!state.sucursal?.id || !selectedEmployee) return;
                 
-                reporteObject.reporteVentaEmpleado(state.sucursal?.id, periodo, selectedEmployee, moment(selectedDate).format("YYYY-MM-DD hh:mm")).then((reportData)=>{
+                reporteObject.reporteVentaEmpleado(state.sucursal?.id, periodo, selectedEmployee, moment(selectedDate).format("YYYY-MM-DD hh:mm"), startDate, endDate).then((reportData)=>{
                   setVentaEmpleadoData(reportData);
                 }).catch(()=>alert('Error al tratar de obtener los datos'));
                 
