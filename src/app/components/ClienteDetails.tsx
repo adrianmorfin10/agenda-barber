@@ -212,6 +212,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
               <span className="text-black text-sm md:text-base">{cliente.nombre} {cliente.apellido}</span>
               <span className="text-black text-sm md:text-base">{cliente.telefono}</span>
               <span className="text-black text-sm md:text-base">{cliente.instagram}</span>
+              <div className="text-black text-xs md:text-sm">Descuento: {descuento}</div>
             </>
           )}
         </div>
@@ -252,7 +253,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
         </div>
       )}
 
-      {/* Contenedor de estadísticas */}
+      {/* Contenedor de estadísticas 
       
       <div className="bg-white p-4 md:p-5 rounded mb-4 mt-6">
         <div className="grid grid-cols-3 gap-4">
@@ -276,6 +277,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
           <div className="text-black text-xs md:text-sm">{cliente.ingresosTotales}</div>
         </div>
       </div>
+      */}
       
       {/* Contenedor de membresía y servicios */}
       {/*
