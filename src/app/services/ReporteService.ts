@@ -1,6 +1,11 @@
 import axios from "axios";
 import HttpService from "./HttpService";
-
+import moment from "moment";
+export enum EstadoCliente {
+    NUEVO = "NUEVO",
+    ACTIVO = "ACTIVO",
+    INACTIVO = "INACTIVO",
+}
 class ReporteService extends HttpService {
 
     constructor() {
@@ -35,6 +40,15 @@ class ReporteService extends HttpService {
     async reportVentasAdmin(){
         const response = await axios.post(`${this.baseUrl}/reporte/reporte-admin`, { });
         return response.data;
+    }
+
+    static getEstadoCliente(fecha?: Date){
+        if(!fecha) return EstadoCliente.NUEVO
+        const now = moment();
+        const fecha_moment = moment(fecha);
+        const diferenciaMeses = now.diff(fecha_moment, 'months');
+        if(diferenciaMeses >= 1) return EstadoCliente.INACTIVO;
+        return EstadoCliente.ACTIVO
     }
     
 }

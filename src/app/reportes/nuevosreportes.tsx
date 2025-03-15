@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import LocalService from '../services/LocalService';
 import moment from 'moment';
+import ReporteService from '../services/ReporteService';
 
 const localesObejct = new LocalService();
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -265,6 +266,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
             <th className="p-3">Cantidad de compras</th>
             <th className="p-3">Total gastado</th>
             <th className="p-3">Ultima visita</th>
+            <th className="p-3">Estado</th>
           </tr>
         </thead>
         <tbody>
@@ -275,6 +277,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
                 <td className="p-3">{item.cantidad}</td>
                 <td className="p-3">${item.total_ventas}</td>
                 <td className="p-3">{moment(item.ultima_venta).local().format('DD-MMM-YYYY, HH:mm')}</td>
+                <td className="p-3">{ReporteService.getEstadoCliente(moment(item.ultima_venta).local().toDate())}</td>
               </tr>
             ))
           }
@@ -362,7 +365,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
       {/* Sección Específica de la Sucursal Seleccionada */}
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">
-          Servicios y promociones
+          Servicios
         </h2>
         <p className="text-gray-600 mb-6">
          
@@ -375,6 +378,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
               <thead className="bg-gray-100">
                 <tr>
                   <th className="p-3">Tipo de Servicio</th>
+                  <th className="p-3">Sucursal</th>
                   <th className="p-3">Ventas</th>
                   <th className="p-3">Cantidad</th>
                 </tr>
@@ -383,8 +387,9 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
                 {(data?.ventasByReservaciones || []).map((servicio:any) => (
                   <tr key={servicio.tipo} className="border-b hover:bg-gray-50">
                     <td className="p-3">{servicio.nombre}</td>
-                    <td className="p-3">${servicio.total_ventas}</td>
-                    <td className="p-3">{servicio.cantidad}</td>
+                    <td className="p-3">{servicio.local_nombre}</td>
+                    <td className="p-3">${(Number(servicio.total_ventas_servicios || 0) + Number(servicio.total_ventas_reservaciones || 0))}</td>
+                    <td className="p-3">{(Number(servicio.cantidad_ventas_servicios || 0) + Number(servicio.cantidad_ventas_reservaciones_servicios || 0))}</td>
                   </tr>
                 ))}
               </tbody>
