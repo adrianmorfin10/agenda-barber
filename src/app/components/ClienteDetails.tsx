@@ -226,6 +226,7 @@ const ClienteDetails: React.FC<ClienteDetailsProps> = ({ cliente, onBack, onUpda
            
           </Link>
         </div>
+        
 
       </div>
 
