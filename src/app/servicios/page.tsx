@@ -36,6 +36,7 @@ const ServicesPage: React.FC = () => {
     serviciosObject
       .getServicios(state.sucursal ? { local_id: state.sucursal.id } : false)
       .then((response: any) => {
+        console.log("response", response)
         setServices(
           response.map((item: any) => {
             const { precio_servicios } = item;
@@ -83,8 +84,13 @@ const ServicesPage: React.FC = () => {
 
   const handleSaveEdit = (updatedService: Servicio) => {
     console.log('Servicio actualizado:', updatedService);
-    setIsEditModalOpen(false);
-    getServices();
+    serviciosObject.updateService(updatedService.id, updatedService).then((data)=>{
+      setIsEditModalOpen(false);
+      getServices();
+    }).catch((e)=>{
+      console.log(e);
+    })
+    
   };
 
   return (
