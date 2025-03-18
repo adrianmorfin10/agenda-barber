@@ -47,7 +47,7 @@ class ReporteService extends HttpService {
         const now = moment();
         const fecha_moment = moment(fecha);
         const diferenciaMeses = now.diff(fecha_moment, 'months');
-        if(diferenciaMeses >= 1) return EstadoCliente.INACTIVO;
+        if(diferenciaMeses >= 3) return EstadoCliente.INACTIVO;
         return EstadoCliente.ACTIVO
     }
     
