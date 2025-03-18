@@ -11,8 +11,9 @@ const clientService = new ClientService();
 const ventaObject = new VentaService();
 import EmpleadoService from "../services/EmpleadoService";
 const empleadoServiceObject = new EmpleadoService();
-import Modal from './ModalCarrito'; // Importamos el componente Modal
+import Modal from './ModalCarrito';
 import moment from "moment";
+import SurveyModal from "./SurveyModal";
 
 interface CartItem {
   id: number;
@@ -23,8 +24,8 @@ interface CartItem {
 
 interface CarritoProps {
   items: CartItem[],
-  onCheckOutSuccess: ()=>void,
-  onLessItem:(index: number)=>void
+  onCheckOutSuccess: () => void,
+  onLessItem: (index: number) => void
 }
 
 const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem }) => {
@@ -38,12 +39,13 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
   const [state, dispatchState] = React.useContext(AppContext);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
+  const [isSurveyModalOpen, setIsSurveyModalOpen] = useState(false);
 
   React.useEffect(() => {
-    if(!state.sucursal?.id)
+    if (!state.sucursal?.id)
       return;
 
-    getClients(state.sucursal ? { local_id: state.sucursal.id } : false ).then(data => {
+    getClients(state.sucursal ? { local_id: state.sucursal.id } : false).then(data => {
       setClientes(data);
     }).catch(error => {
       console.error("Error al obtener los clientes", error);
@@ -52,7 +54,7 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
     getEmpleados();
   }, [state.sucursal]);
 
-  const getClients = async (filter:any): Promise<any[]> => {
+  const getClients = async (filter: any): Promise<any[]> => {
     const clientsData = await clientService.getClients(filter);
     const clients: Cliente[] = clientsData.map((client: any) => ({
       id: client.id,
@@ -77,28 +79,28 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
 
   const getEmpleados = () => {
     empleadoServiceObject.getEmpleados(state.sucursal ? { local_id: state.sucursal.id } : false).then(response => {
-        const _empleados = response.map((item:any)=>{
-          const { reservacions } = item;
-          const canceladas = reservacions.filter((item:any)=>item.state === "cancel");
-          const insistidas = reservacions.filter((item:any)=>item.state === "inasistsida");
-          return {
-            id: item.id,
-            nombre: item.usuario.nombre,
-            apellido: item.usuario.apellido_paterno,
-            telefono: item.usuario.telefono,
-            email: item.usuario.email,
-            instagram: '',
-            citas: reservacions?.length || 0,
-            inasistencias: insistidas?.length || 0,
-            cancelaciones: canceladas?.length || 0,
-            ultimaVisita: reservacions.length ? new Date(reservacions[0].fecha).toLocaleString() : '',
-            ingresosTotales: 0,
-            tipo: 'Black',
-            diasTrabajo: item.working_days || [],
-            servicios: item.working_days || [],
-            proximoPago: '',
-        }
-      })
+      const _empleados = response.map((item: any) => {
+        const { reservacions } = item;
+        const canceladas = reservacions.filter((item: any) => item.state === "cancel");
+        const insistidas = reservacions.filter((item: any) => item.state === "inasistsida");
+        return {
+          id: item.id,
+          nombre: item.usuario.nombre,
+          apellido: item.usuario.apellido_paterno,
+          telefono: item.usuario.telefono,
+          email: item.usuario.email,
+          instagram: '',
+          citas: reservacions?.length || 0,
+          inasistencias: insistidas?.length || 0,
+          cancelaciones: canceladas?.length || 0,
+          ultimaVisita: reservacions.length ? new Date(reservacions[0].fecha).toLocaleString() : '',
+          ingresosTotales: 0,
+          tipo: 'Black',
+          diasTrabajo: item.working_days || [],
+          servicios: item.working_days || [],
+          proximoPago: '',
+        };
+      });
       setEmpleados(_empleados);
     }).catch(error => {
       console.error("Error al obtener los empleados", error);
@@ -121,20 +123,29 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
     setSelectedEmployee(selectedValue === "" ? "" : Number(selectedValue));
   };
 
-  const checkOut = async () =>{
-    if(!selectedEmployee) {
+  const checkOut = async () => {
+    if (!selectedEmployee) {
       setIsEmployeeModalOpen(true);
       return;
     }
-    try{
-      const checkOutData = { ventas: items.map(item=>({ ...item, fecha: moment().local().toISOString() })),  fecha_creacion: moment().local().toISOString(), descuento: discount, client: selectedClient?.id || false, empleado_id: selectedEmployee, local_id: state.sucursal.id };
+    try {
+      const checkOutData = { ventas: items.map(item => ({ ...item, fecha: moment().local().toISOString() })), fecha_creacion: moment().local().toISOString(), descuento: discount, client: selectedClient?.id || false, empleado_id: selectedEmployee, local_id: state.sucursal.id };
       await ventaObject.checkout(checkOutData);
       setIsSuccessModalOpen(true);
-      onCheckOutSuccess();
-    }catch(e){
+    } catch (e) {
       console.error("Error durante el checkout", e);
     }
-  }
+  };
+
+  const handleSuccessModalClose = () => {
+    setIsSuccessModalOpen(false);
+    setIsSurveyModalOpen(true);
+  };
+
+  const handleSurveyModalClose = (rating: number) => {
+    setIsSurveyModalOpen(false);
+    onCheckOutSuccess();
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -211,10 +222,10 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
                 className="flex justify-between items-center bg-white p-3 rounded-lg shadow"
               >
                 <span className="flex-1">{item.nombre}</span>
-                <div className=" flex flex-row gap-[10px]"> 
+                <div className=" flex flex-row gap-[10px]">
                   {
                     <button
-                      onClick={(e) => onLessItem(index) }
+                      onClick={(e) => onLessItem(index)}
                       className=" text-gray-600 rounded text-sm "
                     >
                       -
@@ -257,15 +268,22 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
         </>
       )}
 
-      {/* Modal para venta exitosa */}
       <Modal
         isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
+        onClose={handleSuccessModalClose}
         title="Venta Exitosa"
         message="La venta se ha realizado correctamente."
       />
 
-      {/* Modal para seleccionar empleado */}
+      {/*
+      <SurveyModal
+        isOpen={isSurveyModalOpen}
+        onClose={() => setIsSurveyModalOpen(false)}
+        onConfirm={handleSurveyModalClose}
+      /> 
+
+      */}
+
       <Modal
         isOpen={isEmployeeModalOpen}
         onClose={() => setIsEmployeeModalOpen(false)}

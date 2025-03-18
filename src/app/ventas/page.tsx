@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import SidebarVentas from "../components/SidebarVentas";
 import ListaDeElementos from "../components/ListaDeElementos";
 import Carrito from "../components/Carrito";
+import SurveyModal from "../components/SuccessModal"; // Importa el componente SurveyModal
 
 // Define SectionType de manera consistente
 type SectionType = "Venta Rápida" | "Por Cobrar" | "Productos" | "Membresías" | "Ventas Realizadas";
@@ -24,7 +25,7 @@ const VentasPage: React.FC = () => {
 
   const handleAddToCart = (item: Omit<CartItemType, "cantidad">) => {
     setCartItems((prevItems) => {
-      console.log("item", item)
+      console.log("item", item);
       const existingItem = prevItems.find((cartItem) => cartItem.id === item.id && cartItem.type === item.type);
       if (existingItem) {
         return prevItems.map((cartItem) =>
@@ -38,20 +39,21 @@ const VentasPage: React.FC = () => {
     });
   };
 
-  const lessCartItems = (index:number)=>{
-    const tmpCarItems = [ ...cartItems ];
-    if(tmpCarItems[index].cantidad > 1)
+  const lessCartItems = (index: number) => {
+    const tmpCarItems = [...cartItems];
+    if (tmpCarItems[index].cantidad > 1)
       tmpCarItems[index].cantidad--;
     else
       tmpCarItems.splice(index, 1);
-    setCartItems(tmpCarItems)
-  }
+    setCartItems(tmpCarItems);
+  };
+
   const onCheckOutSuccess = () => {
-    setCartItems([]);
+    setCartItems([]); // Limpia el carrito
     if (listaDeElementosRef.current) {
-      listaDeElementosRef.current.refreshData();
+      listaDeElementosRef.current.refreshData(); // Actualiza la lista de elementos
     }
-    alert("Su venta se registró correctamente");
+    // El alert ha sido eliminado
   };
 
   const openCart = () => setIsCartModalOpen(true);
@@ -76,7 +78,7 @@ const VentasPage: React.FC = () => {
 
       <div className="hidden lg:block w-[450px] p-6 bg-white shadow-lg">
         <h1 className="text-2xl font-bold mb-4">Detalle de Venta</h1>
-        <Carrito items={cartItems} onCheckOutSuccess={onCheckOutSuccess} onLessItem={(index:number)=>lessCartItems(index)}/>
+        <Carrito items={cartItems} onCheckOutSuccess={onCheckOutSuccess} onLessItem={(index: number) => lessCartItems(index)} />
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-white p-4 shadow-md">
@@ -92,7 +94,7 @@ const VentasPage: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end items-start z-50">
           <div className="bg-white p-6 rounded-lg w-[90%] max-w-md h-full animate-slideInFromRight relative">
             <h1 className="text-2xl font-bold mb-4">Detalle de Venta</h1>
-            <Carrito items={cartItems} onCheckOutSuccess={onCheckOutSuccess} onLessItem={(index:number)=>lessCartItems(index)} />
+            <Carrito items={cartItems} onCheckOutSuccess={onCheckOutSuccess} onLessItem={(index: number) => lessCartItems(index)} />
             <button
               className="absolute top-2 right-2"
               onClick={closeCart}
