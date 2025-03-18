@@ -275,11 +275,14 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
         message="La venta se ha realizado correctamente."
       />
 
+      {/*
       <SurveyModal
         isOpen={isSurveyModalOpen}
         onClose={() => setIsSurveyModalOpen(false)}
         onConfirm={handleSurveyModalClose}
-      />
+      /> 
+
+      */}
 
       <Modal
         isOpen={isEmployeeModalOpen}
