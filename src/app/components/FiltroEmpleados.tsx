@@ -127,6 +127,7 @@ const TablaFiltrosEmpleados = ({ data, onChangePeriodo }:{ data:any, onChangePer
           { titulo: 'Citas\nAgendadas', valor: data.total_citas },
           { titulo: 'Membresías Vendidas', valor: data.membresias_vendidas },
           { titulo: 'Productos Vendidos', valor: data.productos_vendidos },
+          { titulo: 'Score', valor: data.averageEncuesta ? Number(data.averageEncuesta.average_calificacion).toFixed(2) : 0 },
         ].map((dato, index) => (
           <div
             key={index}

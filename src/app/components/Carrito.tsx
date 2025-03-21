@@ -146,13 +146,15 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
   };
 
   const handleSurveyModalClose = (rating: number) => {
-    if(!carritoSavedID || !selectedClient?.id || rating > 0){
+
+    debugger
+    if(!carritoSavedID || rating == 0){
       setIsSurveyModalOpen(false);
       onCheckOutSuccess();
       return;
     };
 
-    encuestaObject.create({ barbero_id: selectedEmployee, carrito_id: carritoSavedID, cliente_id: selectedClient.id,  calificacion: rating}).then(()=>{ 
+    encuestaObject.create({ barbero_id: selectedEmployee, carrito_id: carritoSavedID, cliente_id: null,  calificacion: rating}).then(()=>{ 
       setIsSurveyModalOpen(false);
       onCheckOutSuccess();
     })

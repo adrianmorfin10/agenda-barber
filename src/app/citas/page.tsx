@@ -353,7 +353,7 @@ const CalendarApp = () => {
         onConfirm={(rating:number)=>{
           if(!selectedEvent)
             return
-          encuestaObject.create({ barbero_id: nuevaSolicitudData.id, reservacion_id: selectedEvent.id, cliente_id: selectedClient.id,  calificacion: rating}).then(()=>{ 
+          encuestaObject.create({ barbero_id: nuevaSolicitudData.id, reservacion_id: selectedEvent.id, cliente_id: null,  calificacion: rating}).then(()=>{ 
             setOpenSurveyModal(false)
           })
         }} 
