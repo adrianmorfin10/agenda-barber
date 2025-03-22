@@ -27,9 +27,11 @@ import { clientHasMembershipActive, getMembershipServices, isPrepago } from "../
 import { useSearchParams } from "next/navigation";
 import TokenConfirmationModal from "../components/TokenConfirmationModal";
 import Modal from "../components/Modal";
+import EncuestaService from "../services/EncuestaService";
 const solicitudObject = new SolicitudService();
 const servicioObject = new ServicioService();
 const empleadoObject = new EmpleadoService();
+const encuestaObject = new EncuestaService();
 const locales = {
   es: es,
 };
@@ -76,6 +78,7 @@ const CalendarApp = () => {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [tokenConfirmation, setTokenConfirmation] = useState<string | null>(null);
   const [loadingToken, setLoadingToken] = useState<boolean>(false);
+  const [nuevaSolicitudData, setNuevaSolicitudData] = useState<any>(false)
   const [state, dispatchState] = React.useContext(AppContext);
   const getData = async (filter:any) => {
     const _servicios = await servicioObject.getServicios(filter);
@@ -125,6 +128,7 @@ const CalendarApp = () => {
       
     }
     solicitudObject.createSolicitud(nuevaSolicitud).then(data=>{
+      setNuevaSolicitudData(nuevaSolicitud);
       setIsModalOpen(false);
       return getData(state.sucursal ? { local_id: state.sucursal.id } : false);
     }).then(()=>{
@@ -349,7 +353,7 @@ const CalendarApp = () => {
         onConfirm={(rating:number)=>{
           if(!selectedEvent)
             return
-          solicitudObject.updateSolicitud(selectedEvent?.id, { ...selectedEvent, calificacion: rating}).then(()=>{ 
+          encuestaObject.create({ barbero_id: nuevaSolicitudData.id, reservacion_id: selectedEvent.id, cliente_id: null,  calificacion: rating}).then(()=>{ 
             setOpenSurveyModal(false)
           })
         }} 

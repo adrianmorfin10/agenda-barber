@@ -11,9 +11,11 @@ const clientService = new ClientService();
 const ventaObject = new VentaService();
 import EmpleadoService from "../services/EmpleadoService";
 const empleadoServiceObject = new EmpleadoService();
+const encuestaObject = new EncuestaService();
 import Modal from './ModalCarrito';
 import moment from "moment";
 import SurveyModal from "./SurveyModal";
+import EncuestaService from "../services/EncuestaService";
 
 interface CartItem {
   id: number;
@@ -40,7 +42,7 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
   const [isSurveyModalOpen, setIsSurveyModalOpen] = useState(false);
-
+  const [ carritoSavedID, setCarritoSavedId ] = useState(false);
   React.useEffect(() => {
     if (!state.sucursal?.id)
       return;
@@ -130,7 +132,8 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
     }
     try {
       const checkOutData = { ventas: items.map(item => ({ ...item, fecha: moment().local().toISOString() })), fecha_creacion: moment().local().toISOString(), descuento: discount, client: selectedClient?.id || false, empleado_id: selectedEmployee, local_id: state.sucursal.id };
-      await ventaObject.checkout(checkOutData);
+      const carritoSavedData = await ventaObject.checkout(checkOutData);
+      setCarritoSavedId(carritoSavedData?.id || false)
       setIsSuccessModalOpen(true);
     } catch (e) {
       console.error("Error durante el checkout", e);
@@ -143,8 +146,19 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
   };
 
   const handleSurveyModalClose = (rating: number) => {
-    setIsSurveyModalOpen(false);
-    onCheckOutSuccess();
+
+    debugger
+    if(!carritoSavedID || rating == 0){
+      setIsSurveyModalOpen(false);
+      onCheckOutSuccess();
+      return;
+    };
+
+    encuestaObject.create({ barbero_id: selectedEmployee, carrito_id: carritoSavedID, cliente_id: null,  calificacion: rating}).then(()=>{ 
+      setIsSurveyModalOpen(false);
+      onCheckOutSuccess();
+    })
+    
   };
 
   return (
@@ -275,14 +289,14 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
         message="La venta se ha realizado correctamente."
       />
 
-      {/*
+      
       <SurveyModal
         isOpen={isSurveyModalOpen}
         onClose={() => setIsSurveyModalOpen(false)}
         onConfirm={handleSurveyModalClose}
       /> 
 
-      */}
+      
 
       <Modal
         isOpen={isEmployeeModalOpen}
