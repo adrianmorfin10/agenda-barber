@@ -66,8 +66,10 @@ const VentasHistory: React.FC = () => {
             fecha: ventaDate.format("YYYY-MM-DD"),
             hora: ventaDate.format("HH:mm"),
             empleado: item.barbero.usuario.nombre,
+            cantidad: item.cantidad,
             producto: getName(item),
             precio: `$${item.total}`,
+            descuento: item.descuento,
             cliente: item.carrito_compra.cliente?.usuario?.nombre || "Cliente no encontrado",
           };
         });
@@ -227,9 +229,9 @@ const VentasHistory: React.FC = () => {
               className="p-4 border rounded bg-gray-50 shadow-sm flex justify-between items-center"
             >
               <div>
-                <p className="text-sm font-medium">{sale.producto}</p>
+                <p className="text-sm font-medium">{sale.producto} <span className="text-xs text-gray-500" >({sale.cantidad})</span></p>
                 <p className="text-xs text-gray-600">
-                  {sale.fecha} - {sale.hora} por {sale.empleado} a {sale.cliente}
+                  {sale.fecha} - {sale.hora} por {sale.empleado} a {sale.cliente} con descuento de ${sale.descuento} pesos
                 </p>
               </div>
               <div className="p-2 flex flex-row items-center gap-2.5">
