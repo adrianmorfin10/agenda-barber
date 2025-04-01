@@ -107,7 +107,7 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
   return (
     <div className="flex flex-col h-full p-5 bg-white">
       <div className="flex items-center mb-4">
-        <h1 className="font-bold text-2xl mr-4 text-black">Estadísticas e Informes</h1>
+        <h1 className="font-bold text-2xl mr-4 text-black">Reporte de Sucursal</h1>
         <DateSelector onDateChange={handleDateChange} />
       </div>
       <hr className="border-t border-gray-300" />
