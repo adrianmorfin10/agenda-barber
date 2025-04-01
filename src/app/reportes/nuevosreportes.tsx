@@ -571,7 +571,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
           onFiltrar={aplicarFiltrosServicios}
         />
         
-        <div className="overflow-x-auto">
+        <div className="h-[500px] overflow-y-auto">
           <table className="w-full text-left text-gray-700">
             <thead className="bg-gray-100">
               <tr>
