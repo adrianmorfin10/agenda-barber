@@ -43,6 +43,8 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
   const [ventasClientes, setVentasClientes] = React.useState<any[]>([]);
   const [ventasServicios, setVentasServicios] = React.useState<any[]>([]);
   const [ventasSucursales, setVentasSucursales] = React.useState<any[]>([]);
+  const [mesSeleccionado, setMesSeleccionado] = React.useState<number>(moment().month());
+  const [anoSeleccionado, setAnoSeleccionado] = React.useState<number>(moment().year());
 
   // Estados para filtros
   const [selectedSucursalId, setSelectedSucursalId] = React.useState<string>("");
@@ -373,20 +375,54 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
     </div>
   );
 
+  // Función para obtener los días del mes seleccionado
+  const obtenerDiasDelMes = () => {
+    const fecha = moment().month(mesSeleccionado).year(anoSeleccionado);
+    const diasEnMes = fecha.daysInMonth();
+    return Array.from({length: diasEnMes}, (_, i) => i + 1);
+  };
+
+  // Función para formatear la fecha completa
+  const formatearFechaCompleta = (dia: number) => {
+    return moment()
+      .month(mesSeleccionado)
+      .year(anoSeleccionado)
+      .date(dia)
+      .format('DD/MM/YYYY');
+  };
+
   // Datos para gráfico
   const ventasDiariasUltimos30Ordenadas = (data?.ventasDiariasUltimos30 || []).sort((a: any, b: any) => a.day - b.day);
-  const datosVentas30Dias = {
-    labels: ventasDiariasUltimos30Ordenadas.map((item: any) => `Día ${item.day}`),
+  const diasDelMes = obtenerDiasDelMes();
+  
+  // Crear datos para el mes seleccionado
+  const datosVentasMes = {
+    labels: diasDelMes.map(dia => formatearFechaCompleta(dia)),
     datasets: [
       {
         label: 'Ventas',
-        data: ventasDiariasUltimos30Ordenadas.map((item: any) => item.total_ventas),
+        data: diasDelMes.map(dia => {
+          const ventaDia = ventasDiariasUltimos30Ordenadas.find((v: any) => 
+            moment(v.fecha).date() === dia && 
+            moment(v.fecha).month() === mesSeleccionado && 
+            moment(v.fecha).year() === anoSeleccionado
+          );
+          return ventaDia ? ventaDia.total_ventas : 0;
+        }),
         backgroundColor: '#4F46E5',
         borderColor: '#3730A3',
         borderWidth: 1,
       },
     ],
   };
+
+  // Opciones para los selectores de mes y año
+  const meses = moment.months().map((mes, index) => ({
+    value: index,
+    label: mes
+  }));
+
+  const anos = Array.from({length: 5}, (_, i) => moment().year() - 2 + i);
 
   return (
     <div className="flex flex-col space-y-8 p-4 md:p-6 bg-gray-50">
@@ -423,10 +459,36 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
           </div>
         </div>
 
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas de los Últimos 30 Días</h3>
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas del mes</h3>
+        <div className="flex gap-4 mb-4">
+          <div className="w-1/2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mes</label>
+            <select 
+              className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
+              value={mesSeleccionado}
+              onChange={(e) => setMesSeleccionado(parseInt(e.target.value))}
+            >
+              {meses.map((mes) => (
+                <option key={mes.value} value={mes.value}>{mes.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="w-1/2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Año</label>
+            <select 
+              className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
+              value={anoSeleccionado}
+              onChange={(e) => setAnoSeleccionado(parseInt(e.target.value))}
+            >
+              {anos.map((ano) => (
+                <option key={ano} value={ano}>{ano}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="bg-white p-4 rounded-lg shadow-inner">
           <Bar
-            data={datosVentas30Dias}
+            data={datosVentasMes}
             options={{
               responsive: true,
               plugins: {
