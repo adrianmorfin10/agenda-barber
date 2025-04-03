@@ -75,7 +75,7 @@ const ReportesEmpleados: React.FC = () => {
       citasList[index] = item.total_citas;
     });
     
-    data.ventas.forEach((item: any, index: number) => {
+    (data.ventas || []).forEach((item: any, index: number) => {
       ventasList[index] = item.total_ventas;
     });
     

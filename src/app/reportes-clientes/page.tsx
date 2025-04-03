@@ -56,7 +56,7 @@ const ReportesClientes: React.FC = () => {
       citasDataList[month - 1] = item.total_citas;
     });
 
-    data.ventas.forEach((item: any) => {
+    (data.ventas || []).forEach((item: any) => {
       const month = parseInt(item.month);
       ventasDataList[month - 1] = item.total_ventas;
     });
