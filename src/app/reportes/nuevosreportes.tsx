@@ -14,7 +14,7 @@ import {
 import LocalService from '../services/LocalService';
 import moment from 'moment';
 import ReporteService from '../services/ReporteService';
-
+import FiltrosCompletos from './FiltrosCompletos';
 const localesObejct = new LocalService();
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -81,26 +81,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
     });
   }, [data]);
 
-  // Función para limpiar todos los filtros
-  const limpiarFiltros = () => {
-    setSelectedSucursalId("");
-    setFechaInicio('');
-    setFechaFin('');
-    setOrdenClientes('');
-    setOrdenBarberos('');
-    
-    if (data) {
-      setVentasBarbero(data.ventasPorBarbero);
-      setVentasClientes(data.ventasPorCliente);
-      setVentasServicios([...data.ventasByReservaciones].sort((a, b) => {
-        const totalA = (Number(a.total_ventas_servicios || 0) + Number(a.total_ventas_reservaciones || 0));
-        const totalB = (Number(b.total_ventas_servicios || 0) + Number(b.total_ventas_reservaciones || 0));
-        return totalB - totalA;
-      }));
-      setVentasSucursales(data.ventasPorSucursal || []);
-    }
-  };
-
+ 
   // Función para aplicar filtros comunes
   const aplicarFiltros = (datos: any[], campoFecha: string) => {
     let filtered = [...datos];
@@ -134,246 +115,10 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
     setVentasClientes(filtered);
   }
 
-  const aplicarFiltrosBarberos = () => {
-    let filtered = aplicarFiltros(data.ventasPorBarbero, 'fecha_venta');
-    
-    if (ordenBarberos) {
-      filtered.sort((a, b) => ordenBarberos === 'asc' ? a.total_ventas - b.total_ventas : b.total_ventas - a.total_ventas);
-    }
-    
-    setVentasBarbero(filtered);
-  }
 
-  const aplicarFiltrosServicios = () => {
-    let filtered = data.ventasByReservaciones;
-    
-    if (selectedSucursalId) {
-      filtered = filtered.filter((item: any) => item.local_id === selectedSucursalId);
-    }
-    
-    if (fechaInicio || fechaFin) {
-      filtered = filtered.filter((item: any) => {
-        const fechaVenta = moment(item.fecha_venta).local();
-        const cumpleInicio = !fechaInicio || fechaVenta.isSameOrAfter(moment(fechaInicio), 'day');
-        const cumpleFin = !fechaFin || fechaVenta.isSameOrBefore(moment(fechaFin), 'day');
-        return cumpleInicio && cumpleFin;
-      });
-    }
-    
-    // Ordenar siempre por ventas de mayor a menor
-    setVentasServicios([...filtered].sort((a, b) => {
-      const totalA = (Number(a.total_ventas_servicios || 0) + Number(a.total_ventas_reservaciones || 0));
-      const totalB = (Number(b.total_ventas_servicios || 0) + Number(b.total_ventas_reservaciones || 0));
-      return totalB - totalA;
-    }));
-  }
-
-  const aplicarFiltrosSucursales = () => {
-    let filtered = data.ventasPorSucursal;
-    
-    if (fechaInicio || fechaFin) {
-      filtered = filtered.filter((item: any) => {
-        const fechaItem = moment(item.fecha).local();
-        const cumpleInicio = !fechaInicio || fechaItem.isSameOrAfter(moment(fechaInicio), 'day');
-        const cumpleFin = !fechaFin || fechaItem.isSameOrBefore(moment(fechaFin), 'day');
-        return cumpleInicio && cumpleFin;
-      });
-    }
-    
-    setVentasSucursales(filtered);
-  }
-
-  // Componente de filtros para clientes y barberos
-  const FiltrosCompletos = ({ 
-    onOrdenChange, 
-    ordenValue,
-    opcionesOrden,
-    tipoDatos,
-    onFiltrar
-  }: {
-    onOrdenChange: (e: React.ChangeEvent<HTMLSelectElement>) => void,
-    ordenValue: string,
-    opcionesOrden: {value: string, label: string}[],
-    tipoDatos: string,
-    onFiltrar: () => void
-  }) => (
-    <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-      <h3 className="font-medium text-gray-700 mb-3">Filtrar {tipoDatos}</h3>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
-          <select 
-            className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-            onChange={(e) => setSelectedSucursalId(e.target.value)}
-            value={selectedSucursalId}
-          >
-            <option value="">Todas las sucursales</option>
-            {sucursales.map((item) => (
-              <option key={`local-${item.id}`} value={item.id}>{item.nombre}</option>
-            ))}
-          </select>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha inicio</label>
-          <input
-            type="date"
-            className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-            onChange={(e) => setFechaInicio(e.target.value)}
-            value={fechaInicio}
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha fin</label>
-          <input
-            type="date"
-            className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-            onChange={(e) => setFechaFin(e.target.value)}
-            value={fechaFin}
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
-          <select 
-            className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-            onChange={onOrdenChange}
-            value={ordenValue}
-          >
-            {opcionesOrden.map(opcion => (
-              <option key={opcion.value} value={opcion.value}>{opcion.label}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-      
-      <div className="mt-3 flex justify-end gap-2">
-        <button
-          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 flex items-center"
-          onClick={limpiarFiltros}
-        >
-          Limpiar Filtros
-        </button>
-        <button
-          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 flex items-center"
-          onClick={onFiltrar}
-        >
-          Aplicar Filtros
-        </button>
-      </div>
-    </div>
-  );
-
-  // Componente de filtros solo fechas (para sucursales)
-  const FiltrosSoloFechas = ({ 
-    tipoDatos,
-    onFiltrar
-  }: {
-    tipoDatos: string,
-    onFiltrar: () => void
-  }) => (
-    <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-      <h3 className="font-medium text-gray-700 mb-3">Filtrar {tipoDatos}</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha inicio</label>
-          <input
-            type="date"
-            className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-            onChange={(e) => setFechaInicio(e.target.value)}
-            value={fechaInicio}
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha fin</label>
-          <input
-            type="date"
-            className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-            onChange={(e) => setFechaFin(e.target.value)}
-            value={fechaFin}
-          />
-        </div>
-      </div>
-      
-      <div className="mt-3 flex justify-end gap-2">
-        <button
-          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 flex items-center"
-          onClick={limpiarFiltros}
-        >
-          Limpiar Filtros
-        </button>
-        <button
-          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 flex items-center"
-          onClick={onFiltrar}
-        >
-          Aplicar Filtros
-        </button>
-      </div>
-    </div>
-  );
-
-  // Componente de filtros para servicios (sucursal y fechas)
-  const FiltrosServicios = ({ 
-    onFiltrar
-  }: {
-    onFiltrar: () => void
-  }) => (
-    <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-      <h3 className="font-medium text-gray-700 mb-3">Filtrar servicios</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
-          <select 
-            className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-            onChange={(e) => setSelectedSucursalId(e.target.value)}
-            value={selectedSucursalId}
-          >
-            <option value="">Todas las sucursales</option>
-            {sucursales.map((item) => (
-              <option key={`local-${item.id}`} value={item.id}>{item.nombre}</option>
-            ))}
-          </select>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha inicio</label>
-          <input
-            type="date"
-            className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-            onChange={(e) => setFechaInicio(e.target.value)}
-            value={fechaInicio}
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha fin</label>
-          <input
-            type="date"
-            className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-            onChange={(e) => setFechaFin(e.target.value)}
-            value={fechaFin}
-          />
-        </div>
-      </div>
-      
-      <div className="mt-3 flex justify-end gap-2">
-        <button
-          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 flex items-center"
-          onClick={limpiarFiltros}
-        >
-          Limpiar Filtros
-        </button>
-        <button
-          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 flex items-center"
-          onClick={onFiltrar}
-        >
-          Aplicar Filtros
-        </button>
-      </div>
-    </div>
-  );
+ 
+ 
+  
 
   // Función para obtener los días del mes seleccionado
   const obtenerDiasDelMes = () => {
@@ -416,16 +161,9 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
     ],
   };
 
-  // Opciones para los selectores de mes y año
-  const meses = moment.months().map((mes, index) => ({
-    value: index,
-    label: mes
-  }));
-
-  const anos = Array.from({length: 5}, (_, i) => moment().year() - 2 + i);
-
   return (
     <div className="flex flex-col space-y-8 p-4 md:p-6 bg-gray-50">
+      
       {/* Sección General */}
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Ventas Generales</h2>
@@ -460,32 +198,6 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
         </div>
 
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas del mes</h3>
-        <div className="flex gap-4 mb-4">
-          <div className="w-1/2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mes</label>
-            <select 
-              className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-              value={mesSeleccionado}
-              onChange={(e) => setMesSeleccionado(parseInt(e.target.value))}
-            >
-              {meses.map((mes) => (
-                <option key={mes.value} value={mes.value}>{mes.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className="w-1/2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Año</label>
-            <select 
-              className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
-              value={anoSeleccionado}
-              onChange={(e) => setAnoSeleccionado(parseInt(e.target.value))}
-            >
-              {anos.map((ano) => (
-                <option key={ano} value={ano}>{ano}</option>
-              ))}
-            </select>
-          </div>
-        </div>
         <div className="bg-white p-4 rounded-lg shadow-inner">
           <Bar
             data={datosVentasMes}
@@ -504,22 +216,16 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
         </div>
       </div>
 
+      <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Filtros generales</h2>
+        <FiltrosCompletos
+          onFiltrar={aplicarFiltrosClientes}
+        />
+      </div>
+
       {/* Tabla de Clientes */}
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Clientes</h2>
-        
-        <FiltrosCompletos
-          onOrdenChange={(e) => setOrdenClientes(e.target.value)}
-          ordenValue={ordenClientes}
-          opcionesOrden={[
-            {value: '', label: 'Orden predeterminado'},
-            {value: 'desc', label: 'Mayor cantidad de compras'},
-            {value: 'asc', label: 'Menor cantidad de compras'}
-          ]}
-          tipoDatos="clientes"
-          onFiltrar={aplicarFiltrosClientes}
-        />
-        
         <div className="h-[500px] overflow-y-auto">
           <table className="w-full text-left text-gray-700">
             <thead className="bg-gray-100 sticky top-0">
@@ -557,19 +263,6 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
       {/* Tabla de Barberos */}
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Desempeño de Barberos</h2>
-        
-        <FiltrosCompletos
-          onOrdenChange={(e) => setOrdenBarberos(e.target.value)}
-          ordenValue={ordenBarberos}
-          opcionesOrden={[
-            {value: '', label: 'Orden predeterminado'},
-            {value: 'desc', label: 'Mayores ingresos primero'},
-            {value: 'asc', label: 'Menores ingresos primero'}
-          ]}
-          tipoDatos="barberos"
-          onFiltrar={aplicarFiltrosBarberos}
-        />
-        
         <div className="overflow-x-auto">
           <table className="w-full text-left text-gray-700">
             <thead className="bg-gray-100">
@@ -597,12 +290,6 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
       {/* Tabla de Análisis por Sucursal */}
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Análisis por Sucursal</h2>
-        
-        <FiltrosSoloFechas
-          tipoDatos="sucursales"
-          onFiltrar={aplicarFiltrosSucursales}
-        />
-        
         <div className="overflow-x-auto">
           <table className="w-full text-left text-gray-700">
             <thead className="bg-gray-100">
@@ -628,11 +315,6 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
       {/* Tabla de Servicios */}
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Servicios</h2>
-        
-        <FiltrosServicios
-          onFiltrar={aplicarFiltrosServicios}
-        />
-        
         <div className="h-[500px] overflow-y-auto">
           <table className="w-full text-left text-gray-700">
             <thead className="bg-gray-100">
