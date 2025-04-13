@@ -37,8 +37,11 @@ class ReporteService extends HttpService {
         return response.data;
     }
 
-    async reportVentasAdmin(){
-        const response = await axios.post(`${this.baseUrl}/reporte/reporte-admin`, { });
+    async reportVentasAdmin(filter?:any, order?:any){
+        const body = { ...filter };
+        if(order)
+            body.order = order;
+        const response = await axios.post(`${this.baseUrl}/reporte/reporte-admin`, body);
         return response.data;
     }
 

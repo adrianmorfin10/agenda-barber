@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import LocalService from '../services/LocalService';
 import moment from 'moment';
-import ReporteService from '../services/ReporteService';
+import ReporteService, { EstadoCliente } from '../services/ReporteService';
 import FiltrosCompletos from './FiltrosCompletos';
 const localesObejct = new LocalService();
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -27,7 +27,12 @@ interface VentasGenerales {
   promedioVenta: number;
 }
 
-const NuevosReportes = ({ data }:{ data?: any }) => {
+interface NuevosReportesProps{
+  sucursales:any[], 
+  data?: any, 
+  setOrderByAndFilter: (filter:any,order:any)=>void ,
+}
+const NuevosReportes = ({ data, sucursales, setOrderByAndFilter }:NuevosReportesProps) => {
   // Estados para datos
   const [ventasGenerales, setVentasGenerales] = React.useState<VentasGenerales>({
     diaria: 1200,
@@ -38,7 +43,6 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
     promedioVenta: 80,
   });
   
-  const [sucursales, setSucursales] = React.useState<any[]>([]);
   const [ventasBarbero, setVentasBarbero] = React.useState<any[]>([]);
   const [ventasClientes, setVentasClientes] = React.useState<any[]>([]);
   const [ventasServicios, setVentasServicios] = React.useState<any[]>([]);
@@ -46,18 +50,13 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
   const [mesSeleccionado, setMesSeleccionado] = React.useState<number>(moment().month());
   const [anoSeleccionado, setAnoSeleccionado] = React.useState<number>(moment().year());
 
-  // Estados para filtros
-  const [selectedSucursalId, setSelectedSucursalId] = React.useState<string>("");
-  const [fechaInicio, setFechaInicio] = React.useState<string>('');
-  const [fechaFin, setFechaFin] = React.useState<string>('');
-  const [ordenClientes, setOrdenClientes] = React.useState<string>('');
-  const [ordenBarberos, setOrdenBarberos] = React.useState<string>('');
+  const [order, setOrder] = React.useState({})
+  const [ filters, setFilters ] = React.useState({})
+  
 
-  React.useEffect(() => {
-    localesObejct.getLocales().then((locales: any[]) => {
-      setSucursales(locales);
-    });
-  }, []);
+  React.useEffect(()=>{
+    setOrderByAndFilter(filters, order);
+  }, [order, filters]);
 
   React.useEffect(() => {
     if (!data) return;
@@ -65,11 +64,7 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
     setVentasBarbero(data.ventasPorBarbero);
     setVentasClientes(data.ventasPorCliente);
     // Ordenar servicios por ventas de mayor a menor por defecto
-    setVentasServicios([...data.ventasByReservaciones].sort((a, b) => {
-      const totalA = (Number(a.total_ventas_servicios || 0) + Number(a.total_ventas_reservaciones || 0));
-      const totalB = (Number(b.total_ventas_servicios || 0) + Number(b.total_ventas_reservaciones || 0));
-      return totalB - totalA;
-    }));
+    setVentasServicios(data.ventasByReservaciones);
     setVentasSucursales(data.ventasPorSucursal || []);
     
     setVentasGenerales({
@@ -83,37 +78,10 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
 
  
   // Función para aplicar filtros comunes
-  const aplicarFiltros = (datos: any[], campoFecha: string) => {
-    let filtered = [...datos];
-    
-    // Filtro por sucursal
-    if (selectedSucursalId) {
-      filtered = filtered.filter(item => item.local_id === selectedSucursalId);
-    }
-    
-    // Filtro por fecha
-    if (fechaInicio || fechaFin) {
-      filtered = filtered.filter(item => {
-        const fechaItem = moment(item[campoFecha]).local();
-        const cumpleInicio = !fechaInicio || fechaItem.isSameOrAfter(moment(fechaInicio), 'day');
-        const cumpleFin = !fechaFin || fechaItem.isSameOrBefore(moment(fechaFin), 'day');
-        return cumpleInicio && cumpleFin;
-      });
-    }
-    
-    return filtered;
+  const aplicarFiltros = (filter:any) => {
+    setFilters(filter)
   }
 
-  // Funciones específicas para cada tabla
-  const aplicarFiltrosClientes = () => {
-    let filtered = aplicarFiltros(data.ventasPorCliente, 'ultima_venta');
-    
-    if (ordenClientes) {
-      filtered.sort((a, b) => ordenClientes === 'asc' ? a.cantidad - b.cantidad : b.cantidad - a.cantidad);
-    }
-    
-    setVentasClientes(filtered);
-  }
 
 
  
@@ -219,7 +187,8 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Filtros generales</h2>
         <FiltrosCompletos
-          onFiltrar={aplicarFiltrosClientes}
+          sucursales={sucursales}
+          onFiltrar={aplicarFiltros}
         />
       </div>
 
@@ -231,30 +200,37 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
             <thead className="bg-gray-100 sticky top-0">
               <tr>
                 <th className="p-3">Nombre</th>
-                <th className="p-3">Compras</th>
-                <th className="p-3">Total gastado</th>
+                <th className="p-3 cursor-pointer" onClick={()=>{
+                  setOrder((prev:any)=>({ ...prev, cliente: { field: 'cantidad', criteria: prev.cliente?.field === "cantidad" ? (prev.cliente?.criteria === "ASC" ? "DESC" : "ASC") : "ASC" } }))
+                }} >Compras</th>
+                <th className="p-3 cursor-pointer" onClick={()=>{
+                  setOrder((prev:any)=>({ ...prev, cliente: { field: 'total_ventas', criteria: prev.cliente?.field === "total_ventas" ? (prev.cliente?.criteria === "ASC" ? "DESC" : "ASC") : "ASC" } }))
+                }} >Total gastado</th>
                 <th className="p-3">Última visita</th>
                 <th className="p-3">Estado</th>
               </tr>
             </thead>
             <tbody>
-              {ventasClientes.map((item, i) => (
-                <tr key={`venta-cliente-${i}`} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{item.nombre_cliente}</td>
-                  <td className="p-3">{item.cantidad}</td>
-                  <td className="p-3">${item.total_ventas}</td>
-                  <td className="p-3">{moment(item.ultima_venta).local().format('DD-MMM-YYYY, HH:mm')}</td>
-                  <td className="p-3">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      ReporteService.getEstadoCliente(moment(item.ultima_venta).local().toDate()) === 'Activo' 
-                      ? 'bg-red-100 text-red-800' 
-                      : 'bg-green-100 text-green-800'
-                    }`}>
-                      {ReporteService.getEstadoCliente(moment(item.ultima_venta).local().toDate())}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {ventasClientes.map((item, i) => {
+                const estado = ReporteService.getEstadoCliente(moment(item.ultima_venta).local().toDate())
+                  return (
+                  <tr key={`venta-cliente-${i}`} className="border-b hover:bg-gray-50">
+                    <td className="p-3">{item.nombre_cliente}</td>
+                    <td className="p-3">{item.cantidad}</td>
+                    <td className="p-3">${item.total_ventas}</td>
+                    <td className="p-3">{moment(item.ultima_venta).local().format('DD-MMM-YYYY, HH:mm')}</td>
+                    <td className="p-3">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        estado === EstadoCliente.ACTIVO
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800' 
+                      }`}>
+                        {estado}
+                      </span>
+                    </td>
+                  </tr>
+                )}
+              )}
             </tbody>
           </table>
         </div>
@@ -269,8 +245,12 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
               <tr>
                 <th className="p-3">Nombre</th>
                 <th className="p-3">Sucursal</th>
-                <th className="p-3">Ingresos</th>
-                <th className="p-3">Ventas</th>
+                <th className="p-3 cursor-pointer" onClick={()=>{
+                  setOrder((prev:any)=>({ ...prev, barbero: { field: 'total_ventas', criteria: prev.barbero?.field === "total_ventas" ? (prev.barbero?.criteria === "ASC" ? "DESC" : "ASC") : "ASC" } }))
+                }}>Ingresos</th>
+                <th className="p-3 cursor-pointer" onClick={()=>{
+                  setOrder((prev:any)=>({ ...prev, barbero: { field: 'cantidad', criteria: prev.barbero?.field === "cantidad" ? (prev.barbero?.criteria === "ASC" ? "DESC" : "ASC") : "ASC" } }))
+                }}>Ventas</th>
               </tr>
             </thead>
             <tbody>
@@ -295,16 +275,20 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-3">Sucursal</th>
-                <th className="p-3">Ventas</th>
-                <th className="p-3">Transacciones</th>
+                <th className="p-3 cursor-pointer" onClick={()=>{
+                    setOrder((prev:any)=>({ ...prev, sucursal: { field: 'total_ventas', criteria: prev.sucursal?.field === "total_ventas" ? (prev.sucursal?.criteria === "ASC" ? "DESC" : "ASC") : "ASC" } }))
+                  }}>Ventas</th>
+                <th className="p-3 cursor-pointer" onClick={()=>{
+                    setOrder((prev:any)=>({ ...prev, sucursal: { field: 'cantidad', criteria: prev.sucursal?.field === "cantidad" ? (prev.sucursal?.criteria === "ASC" ? "DESC" : "ASC") : "ASC" } }))
+                  }}>Transacciones</th>
               </tr>
             </thead>
             <tbody>
               {ventasSucursales.map((sucursal, i) => (
                 <tr key={`row-branch-${i}`} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{sucursal.nombre_local}</td>
-                  <td className="p-3">${sucursal.total_ventas}</td>
-                  <td className="p-3">{sucursal.cantidad}</td>
+                  <td className="p-3" >{sucursal.nombre_local}</td>
+                  <td className="p-3" >${sucursal.total_ventas}</td>
+                  <td className="p-3" >{sucursal.cantidad}</td>
                 </tr>
               ))}
             </tbody>
@@ -321,8 +305,12 @@ const NuevosReportes = ({ data }:{ data?: any }) => {
               <tr>
                 <th className="p-3">Servicio</th>
                 <th className="p-3">Sucursal</th>
-                <th className="p-3">Ventas</th>
-                <th className="p-3">Cantidad</th>
+                <th className="p-3 cursor-pointer" onClick={()=>{
+                    setOrder((prev:any)=>({ ...prev, servicio: { field: 'total_ventas', criteria: prev.servicio?.field === "total_ventas" ? (prev.servicio?.criteria === "ASC" ? "DESC" : "ASC") : "ASC" } }))
+                  }}>Ventas</th>
+                <th className="p-3 cursor-pointer" onClick={()=>{
+                    setOrder((prev:any)=>({ ...prev, servicio: { field: 'cantidad_ventas', criteria: prev.servicio?.field === "cantidad_ventas" ? (prev.servicio?.criteria === "ASC" ? "DESC" : "ASC") : "ASC" } }))
+                  }}>Cantidad</th>
               </tr>
             </thead>
             <tbody>
