@@ -51,6 +51,7 @@ const NuevosReportes = ({ data, sucursales, setOrderByAndFilter }: NuevosReporte
   const [ventasSucursales, setVentasSucursales] = React.useState<any[]>([]);
   const [mesSeleccionado, setMesSeleccionado] = React.useState<number>(moment().month());
   const [anoSeleccionado, setAnoSeleccionado] = React.useState<number>(moment().year());
+  const [datosVentasMes, setDatosVentasMes] = React.useState<any>(null);
   const [sucursalSeleccionada, setSucursalSeleccionada] = React.useState<string>('todas');
 
   const [order, setOrder] = React.useState<any>({});
@@ -67,7 +68,7 @@ const NuevosReportes = ({ data, sucursales, setOrderByAndFilter }: NuevosReporte
     setVentasClientes(data.ventasPorCliente || []);
     setVentasServicios(data.ventasByReservaciones || []);
     setVentasSucursales(data.ventasPorSucursal || []);
-    
+    proccesSaleMonth(data.ventasDiariasUltimos30)
     setVentasGenerales({
       diaria: data.ventasDiarias || 0,
       semanal: data.ventasSemanales || 0,
@@ -141,30 +142,27 @@ const NuevosReportes = ({ data, sucursales, setOrderByAndFilter }: NuevosReporte
       .format('DD/MM/YYYY');
   };
 
-  // Datos para gráfico
-  const ventasDiariasUltimos30Ordenadas = (data?.ventasDiariasUltimos30 || []).sort((a: any, b: any) => a.day - b.day);
-  const diasDelMes = obtenerDiasDelMes();
+  const proccesSaleMonth = (ventasDiariasUltimos30:any[] = [])=>{
+    // Datos para gráfico
+    const ventasDiariasUltimos30Ordenadas = (ventasDiariasUltimos30 || []).sort((a: any, b: any) => a.day - b.day);
+    const diasDelMes = obtenerDiasDelMes();
+    
+    // Crear datos para el mes seleccionado
+    const datosVentasMes = {
+      labels: ventasDiariasUltimos30Ordenadas.map(item => item.day),
+      datasets: [
+        {
+          label: 'Ventas',
+          data: ventasDiariasUltimos30Ordenadas.map(item => item.total_ventas),
+          backgroundColor: '#4F46E5',
+          borderColor: '#3730A3',
+          borderWidth: 1,
+        },
+      ],
+    };
+    setDatosVentasMes(datosVentasMes);
+  }
   
-  // Crear datos para el mes seleccionado
-  const datosVentasMes = {
-    labels: diasDelMes.map(dia => formatearFechaCompleta(dia)),
-    datasets: [
-      {
-        label: 'Ventas',
-        data: diasDelMes.map(dia => {
-          const ventaDia = ventasDiariasUltimos30Ordenadas.find((v: any) => 
-            moment(v.fecha).date() === dia && 
-            moment(v.fecha).month() === mesSeleccionado && 
-            moment(v.fecha).year() === anoSeleccionado
-          );
-          return ventaDia ? ventaDia.total_ventas : 0;
-        }),
-        backgroundColor: '#4F46E5',
-        borderColor: '#3730A3',
-        borderWidth: 1,
-      },
-    ],
-  };
 
   // Generar opciones de años (últimos 5 años)
   const anosOptions = Array.from({length: 5}, (_, i) => moment().year() - i);
@@ -176,51 +174,6 @@ const NuevosReportes = ({ data, sucursales, setOrderByAndFilter }: NuevosReporte
 
   return (
     <div className="flex flex-col space-y-8 p-4 md:p-6 bg-gray-50">
-      {/* Selectores de fecha y sucursal 
-      <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Filtros de grafica </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mes</label>
-            <select
-              value={mesSeleccionado}
-              onChange={handleMesChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              {moment.months().map((month, index) => (
-                <option key={month} value={index}>{month}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Año</label>
-            <select
-              value={anoSeleccionado}
-              onChange={handleAnoChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              {anosOptions.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
-            <select
-              value={sucursalSeleccionada}
-              onChange={handleSucursalChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="todas">Todas las sucursales</option>
-              {sucursales.map(sucursal => (
-                <option key={sucursal.id} value={sucursal.id}>{sucursal.nombre}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div> */}
-  
-      
       {/* Sección General */}
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Ventas Generales</h2>
@@ -253,26 +206,8 @@ const NuevosReportes = ({ data, sucursales, setOrderByAndFilter }: NuevosReporte
             <p className="text-2xl font-bold text-gray-800">${ventasGenerales.promedioVenta.toFixed(2)}</p>
           </div>
         </div>
-
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Ventas del mes</h3>
-        <div className="bg-white p-4 rounded-lg shadow-inner">
-          <Bar
-            data={datosVentasMes}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: { display: false },
-                title: { display: false },
-              },
-              scales: {
-                y: { beginAtZero: true, grid: { color: '#E5E7EB' } },
-                x: { grid: { display: false } },
-              },
-            }}
-          />
-        </div>
       </div>
-
+  
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Filtros generales</h2>
         <FiltrosCompletos
@@ -280,6 +215,32 @@ const NuevosReportes = ({ data, sucursales, setOrderByAndFilter }: NuevosReporte
           onFiltrar={aplicarFiltros}
         />
       </div>
+      
+      {/* Sección General */}
+      <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Grafica de ventas agrupada por dia</h3>
+        <div className="bg-white p-4 rounded-lg shadow-inner">
+          {
+            datosVentasMes &&
+            <Bar
+              data={datosVentasMes}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: { display: false },
+                  title: { display: false },
+                },
+                scales: {
+                  y: { beginAtZero: true, grid: { color: '#E5E7EB' } },
+                  x: { grid: { display: false } },
+                },
+              }}
+            />
+          }
+        </div>
+      </div>
+
+      
 
       {/* Tabla de Clientes */}
       <div className="bg-white rounded-lg shadow-md p-4 md:p-6">

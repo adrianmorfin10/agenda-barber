@@ -195,7 +195,7 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
       sucursales={sucursales}
       data={reporteAdmin} 
       setOrderByAndFilter={(filter:any, order:any)=>{
-        getReportDataAdmin(filter, order).finally
+        getReportDataAdmin(filter, order).finally(()=>{})
       }} 
     />
 </div>
