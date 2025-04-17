@@ -16,7 +16,9 @@ import {
 } from 'chart.js';
 import { AppContext } from '../components/AppContext';
 import ReporteService from '../services/ReporteService';
+import LocalService from '../services/LocalService';
 const reporteObject = new ReporteService();
+const suscursalObject =  new LocalService();
 ChartJS.register(ArcElement, Tooltip, Legend, Title, ...registerables);
 
 interface ReportesProps {
@@ -33,7 +35,8 @@ interface ReportGeneralData {
 
 const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
   const [state, dispatchState] = React.useContext(AppContext);
-  const [ date, setDate ] = React.useState<Date | null>(null)
+  const [ date, setDate ] = React.useState<Date | null>(null);
+  const [ sucursales, setSucursales ] = React.useState<any[]>([]);
   const [ reportGeneralData, setReportGeneralData ] = React.useState<ReportGeneralData>({
     ingresosTotales: 0,
     serviciosIngresos: 0, 
@@ -45,6 +48,7 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
   
   React.useEffect(()=>{
     getReportDataAdmin().finally()
+    suscursalObject.getLocales().then((data)=>setSucursales(data));
   },[])
   React.useEffect(()=>{
     if(!state.sucursal?.id)
@@ -55,8 +59,8 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
   }, [state.sucursal, date]);
 
 
-  const getReportDataAdmin = async ()=>{
-    const dataAdmin = await reporteObject.reportVentasAdmin();
+  const getReportDataAdmin = async (filter?:any, order?:any)=>{
+    const dataAdmin = await reporteObject.reportVentasAdmin(filter, order);
     setReporteAdmin(dataAdmin);
   }
 
@@ -107,7 +111,7 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
   return (
     <div className="flex flex-col h-full p-5 bg-white">
       <div className="flex items-center mb-4">
-        <h1 className="font-bold text-2xl mr-4 text-black">Estadísticas e Informes</h1>
+        <h1 className="font-bold text-2xl mr-4 text-black">Reporte de Sucursal</h1>
         <DateSelector onDateChange={handleDateChange} />
       </div>
       <hr className="border-t border-gray-300" />
@@ -186,8 +190,14 @@ const Reportess: React.FC<ReportesProps> = ({ onDateChange }) => {
         </div>
         </div>
 
-{/* Insertar el componente NuevosReportes aquí */}
-<NuevosReportes data={reporteAdmin} />
+    {/* Insertar el componente NuevosReportes aquí */}
+    <NuevosReportes 
+      sucursales={sucursales}
+      data={reporteAdmin} 
+      setOrderByAndFilter={(filter:any, order:any)=>{
+        getReportDataAdmin(filter, order).finally(()=>{})
+      }} 
+    />
 </div>
   );
 };

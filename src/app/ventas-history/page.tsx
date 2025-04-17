@@ -233,6 +233,9 @@ const VentasHistory: React.FC = () => {
                 <p className="text-xs text-gray-600">
                   {sale.fecha} - {sale.hora} por {sale.empleado} a {sale.cliente} con descuento de ${sale.descuento} pesos
                 </p>
+                <p className="text-xs text-gray-600">
+                  ID: {sale.id}
+                </p>
               </div>
               <div className="p-2 flex flex-row items-center gap-2.5">
                 <span className="font-bold text-black">{sale.precio}</span>

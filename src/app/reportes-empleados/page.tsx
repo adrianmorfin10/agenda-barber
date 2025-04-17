@@ -1,11 +1,9 @@
-// src/app/reportes-empleados/page.tsx
-
 'use client';
 
 import React, { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title, BarElement, CategoryScale, LinearScale } from 'chart.js';
-import RepNavBar from '../components/RepNavBar'; // Importamos el componente RepNavBar
+import RepNavBar from '../components/RepNavBar';
 import { AppContext } from '../components/AppContext';
 import EmpleadoService from '../services/EmpleadoService';
 import ReporteService from '../services/ReporteService';
@@ -22,11 +20,12 @@ const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', '
 const current_date = moment(new Date()).format("YYYY-MM-DD");
 const ReportesEmpleados: React.FC = () => {
   const [state, dispatchState] = React.useContext(AppContext);
-  const [selectedEmployee, setSelectedEmployee] = useState<number | null >(null);
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth()); // Mes actual por defecto
+  const [selectedEmployee, setSelectedEmployee] = useState<number | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
   const [employees, setEmployees] = useState<any[]>([]);
   const [periodo, setPeriodo] = useState('dia');
-  const [ ventaEmpleadoData, setVentaEmpleadoData ] = React.useState<{ 
+  const [viewType, setViewType] = useState<'citas' | 'ventas'>('citas'); // Nuevo estado para el tipo de vista
+  const [ventaEmpleadoData, setVentaEmpleadoData] = React.useState<{ 
     total_citas: number, 
     total_comision: number, 
     total_ventas: number, 
@@ -38,11 +37,12 @@ const ReportesEmpleados: React.FC = () => {
     total_ventas: 0, 
     membresias_vendidas: 0, 
     productos_vendidos: 0 
-  })
+  });
   const [employeeData, setEmployeeData] = useState({
     totalCitas: 0,
-    citasPorSemana: [0, 0, 0, 0], // Datos de ejemplo para las citas semanales
-    semanas: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'], // Nombre de las semanas
+    citasPorSemana: [0, 0, 0, 0],
+    ventasPorSemana: [0, 0, 0, 0], // Nuevo array para ventas
+    semanas: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
   });
 
   React.useEffect(() => {
@@ -65,13 +65,26 @@ const ReportesEmpleados: React.FC = () => {
 
   const getData = async (local_id: any, month: number | null, employee_id: number | null) => {
     const data = await reporteObject.reporteEmpleado(local_id, month, employee_id);
-    const dataEmpleado = await reporteObject.reporteVentaEmpleado(local_id, periodo, employee_id,  current_date);
+    const dataEmpleado = await reporteObject.reporteVentaEmpleado(local_id, periodo, employee_id, current_date);
     setVentaEmpleadoData(dataEmpleado);
-    const dataList = [0, 0, 0, 0];
+    
+    const citasList = [0, 0, 0, 0];
+    const ventasList = [0, 0, 0, 0];
+    
     data.citas.forEach((item: any, index: number) => {
-      dataList[index] = item.total_citas;
+      citasList[index] = item.total_citas;
     });
-    setEmployeeData({ ...employeeData, totalCitas: data.total_citas, citasPorSemana: dataList });
+    
+    (data.ventas || []).forEach((item: any, index: number) => {
+      ventasList[index] = item.total_ventas;
+    });
+    
+    setEmployeeData({ 
+      ...employeeData, 
+      totalCitas: data.total_citas, 
+      citasPorSemana: citasList,
+      ventasPorSemana: ventasList
+    });
   };
 
   const handleEmployeeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -82,15 +95,13 @@ const ReportesEmpleados: React.FC = () => {
     setSelectedMonth(parseInt(event.target.value));
   };
 
-  
-
   const data = {
     labels: employeeData.semanas.map((semana) => `${semana} de ${meses[selectedMonth]}`),
     datasets: [
       {
-        label: 'Citas Semanales',
-        data: employeeData.citasPorSemana,
-        backgroundColor: 'rgb(0, 0, 0)', // Color completamente negro
+        label: viewType === 'citas' ? 'Citas Semanales' : 'Ventas Semanales',
+        data: viewType === 'citas' ? employeeData.citasPorSemana : employeeData.ventasPorSemana,
+        backgroundColor: 'rgb(0, 0, 0)',
         borderWidth: 1,
       },
     ],
@@ -104,18 +115,18 @@ const ReportesEmpleados: React.FC = () => {
       },
       title: {
         display: true,
-        text: `Citas por Empleado - ${meses[selectedMonth]}`,
+        text: `${viewType === 'citas' ? 'Citas' : 'Ventas'} por Empleado - ${meses[selectedMonth]}`,
       },
     },
     scales: {
       x: {
         ticks: {
-          color: 'rgb(169, 169, 169)', // Escala de grises para las etiquetas de las semanas
+          color: 'rgb(169, 169, 169)',
         },
       },
       y: {
         ticks: {
-          color: 'rgb(169, 169, 169)', // Escala de grises para las etiquetas del eje Y
+          color: 'rgb(169, 169, 169)',
         },
       },
     },
@@ -123,12 +134,12 @@ const ReportesEmpleados: React.FC = () => {
 
   return (
     <div className="p-4 bg-white h-full">
-      <RepNavBar /> {/* Barra de navegación fuera del contenedor */}
+      <RepNavBar />
 
       <div className="p-4">
         <h1 className="text-xl font-bold mb-4 text-black">Reporte de Empleados</h1>
 
-        <div className="flex space-x-4 mb-4">
+        <div className="flex flex-wrap gap-4 mb-4">
           {/* Selector de empleado */}
           <div>
             <label htmlFor="employeeSelector" className="block text-black font-medium mb-2">
@@ -166,6 +177,24 @@ const ReportesEmpleados: React.FC = () => {
               ))}
             </select>
           </div>
+
+          {/* Switch Citas/Ventas */}
+          <div className="flex items-end">
+            <div className="flex items-center mt-2">
+              <span 
+                className={`px-4 py-2 rounded-l-lg cursor-pointer ${viewType === 'citas' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
+                onClick={() => setViewType('citas')}
+              >
+                Citas
+              </span>
+              <span 
+                className={`px-4 py-2 rounded-r-lg cursor-pointer ${viewType === 'ventas' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}
+                onClick={() => setViewType('ventas')}
+              >
+                Ventas
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-wrap lg:flex-nowrap gap-4">
@@ -178,14 +207,19 @@ const ReportesEmpleados: React.FC = () => {
           <div className="flex-1 max-w-[400px]">
             <TablaFiltrosEmpleados
               data={ventaEmpleadoData}
-              onChangePeriodo={(periodo, selectedDate, startDate, endDate)=>{
-
-                if(!state.sucursal?.id || !selectedEmployee) return;
+              onChangePeriodo={(periodo, selectedDate, startDate, endDate) => {
+                if (!state.sucursal?.id || !selectedEmployee) return;
                 
-                reporteObject.reporteVentaEmpleado(state.sucursal?.id, periodo, selectedEmployee, moment(selectedDate).format("YYYY-MM-DD hh:mm"), startDate, endDate).then((reportData)=>{
+                reporteObject.reporteVentaEmpleado(
+                  state.sucursal?.id, 
+                  periodo, 
+                  selectedEmployee, 
+                  moment(selectedDate).format("YYYY-MM-DD hh:mm"), 
+                  startDate, 
+                  endDate
+                ).then((reportData) => {
                   setVentaEmpleadoData(reportData);
-                }).catch(()=>alert('Error al tratar de obtener los datos'));
-                
+                }).catch(() => alert('Error al tratar de obtener los datos'));
               }}
             />
           </div>
