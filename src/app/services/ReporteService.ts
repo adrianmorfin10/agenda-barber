@@ -17,8 +17,8 @@ class ReporteService extends HttpService {
         return response.data;
     }
 
-    async reporteCliente(local_id: any, month:number | null, year:number | null, client_id: number | null) {
-        const response = await axios.post(`${this.baseUrl}/reporte/cliente`, { local_id, year, month, client_id });
+    async reporteCliente(local_id: any, month:number | null, year:number | null, client_id: number | null, tipo: string = 'citas') {
+        const response = await axios.post(`${this.baseUrl}/reporte/cliente`, { local_id, year, month, client_id, tipo });
         return response.data;
     }
 
