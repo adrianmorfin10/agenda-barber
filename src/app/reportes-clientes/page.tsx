@@ -19,10 +19,7 @@ const ReportesClientes: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [clients, setClients] = useState<any[]>([]);
   const [viewType, setViewType] = useState<'citas' | 'ventas'>('citas');
-  const [clientData, setClientData] = useState({
-    citasPorMes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ventasPorMes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  });
+  const [clientData, setClientData] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
   React.useEffect(() => {
     if (!state.sucursal?.id)
@@ -42,29 +39,21 @@ const ReportesClientes: React.FC = () => {
   React.useEffect(() => {
     if (!state.sucursal?.id || !selectedClient)
       return;
-    getData(state.sucursal?.id, selectedYear, selectedClient).finally();
-  }, [state.sucursal, selectedYear, selectedClient]);
+    getData(state.sucursal?.id, selectedYear, selectedClient, viewType).finally();
+  }, [state.sucursal, selectedYear, selectedClient, viewType]);
 
-  const getData = async (local_id: any, year: number | null, client_id: number | null) => {
-    const data = await reporteObject.reporteCliente(local_id, null, year, client_id);
+  const getData = async (local_id: any, year: number | null, client_id: number | null, tipo:string = 'citas') => {
+    const data = await reporteObject.reporteCliente(local_id, null, year, client_id, tipo);
 
-    const citasDataList = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    const ventasDataList = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const monthData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
-    data.citas.forEach((item: any) => {
+    (data?.citas || []).forEach((item: any) => {
       const month = parseInt(item.month);
-      citasDataList[month - 1] = item.total_citas;
+      monthData[month - 1] = item.total_citas;
     });
 
-    (data.ventas || []).forEach((item: any) => {
-      const month = parseInt(item.month);
-      ventasDataList[month - 1] = item.total_ventas;
-    });
 
-    setClientData({ 
-      citasPorMes: citasDataList,
-      ventasPorMes: ventasDataList,
-    });
+    setClientData(monthData);
   }
 
   const handleClientChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -80,7 +69,7 @@ const ReportesClientes: React.FC = () => {
     datasets: [
       {
         label: viewType === 'citas' ? 'Citas Mensuales' : 'Ventas Mensuales',
-        data: viewType === 'citas' ? clientData.citasPorMes : clientData.ventasPorMes,
+        data: clientData,
         backgroundColor: 'rgb(0, 0, 0)',
         borderWidth: 1,
       },
@@ -112,6 +101,7 @@ const ReportesClientes: React.FC = () => {
     },
   };
 
+  console.log("data", data)
   return (
     <div className="p-4 bg-white h-full overflow-scroll">
       <RepNavBar />
