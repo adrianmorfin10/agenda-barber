@@ -41,7 +41,6 @@ const ReportesEmpleados: React.FC = () => {
   const [employeeData, setEmployeeData] = useState({
     totalCitas: 0,
     citasPorSemana: [0, 0, 0, 0],
-    ventasPorSemana: [0, 0, 0, 0], // Nuevo array para ventas
     semanas: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
   });
 
@@ -60,30 +59,24 @@ const ReportesEmpleados: React.FC = () => {
 
   React.useEffect(() => {
     if (!state.sucursal?.id || !selectedEmployee) return;
-    getData(state.sucursal?.id, selectedMonth + 1, selectedEmployee).finally();
-  }, [state.sucursal, selectedMonth, selectedEmployee, periodo]);
+    getData(state.sucursal?.id, selectedMonth + 1, selectedEmployee, viewType).finally();
+  }, [state.sucursal, selectedMonth, selectedEmployee, periodo, viewType]);
 
-  const getData = async (local_id: any, month: number | null, employee_id: number | null) => {
-    const data = await reporteObject.reporteEmpleado(local_id, month, employee_id);
+  const getData = async (local_id: any, month: number | null, employee_id: number | null, tipo:string = 'citas') => {
+    const data = await reporteObject.reporteEmpleado(local_id, month, employee_id, tipo);
     const dataEmpleado = await reporteObject.reporteVentaEmpleado(local_id, periodo, employee_id, current_date);
     setVentaEmpleadoData(dataEmpleado);
     
     const citasList = [0, 0, 0, 0];
-    const ventasList = [0, 0, 0, 0];
     
-    data.citas.forEach((item: any, index: number) => {
+    (data.citas || []).forEach((item: any, index: number) => {
       citasList[index] = item.total_citas;
-    });
-    
-    (data.ventas || []).forEach((item: any, index: number) => {
-      ventasList[index] = item.total_ventas;
     });
     
     setEmployeeData({ 
       ...employeeData, 
       totalCitas: data.total_citas, 
       citasPorSemana: citasList,
-      ventasPorSemana: ventasList
     });
   };
 
@@ -100,7 +93,7 @@ const ReportesEmpleados: React.FC = () => {
     datasets: [
       {
         label: viewType === 'citas' ? 'Citas Semanales' : 'Ventas Semanales',
-        data: viewType === 'citas' ? employeeData.citasPorSemana : employeeData.ventasPorSemana,
+        data: employeeData.citasPorSemana,
         backgroundColor: 'rgb(0, 0, 0)',
         borderWidth: 1,
       },
