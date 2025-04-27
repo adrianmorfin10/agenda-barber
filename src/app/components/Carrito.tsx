@@ -43,11 +43,9 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
   const [isSurveyModalOpen, setIsSurveyModalOpen] = useState(false);
   const [ carritoSavedID, setCarritoSavedId ] = useState(false);
+  
   React.useEffect(() => {
-    if (!state.sucursal?.id)
-      return;
-
-    getClients(state.sucursal ? { local_id: state.sucursal.id } : false).then(data => {
+    getClients(false).then(data => {
       setClientes(data);
     }).catch(error => {
       console.error("Error al obtener los clientes", error);
@@ -146,7 +144,6 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
   };
 
   const handleSurveyModalClose = (rating: number) => {
-
     if(!carritoSavedID || rating == 0){
       setIsSurveyModalOpen(false);
       onCheckOutSuccess();
@@ -157,7 +154,6 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
       setIsSurveyModalOpen(false);
       onCheckOutSuccess();
     })
-    
   };
 
   return (
@@ -252,29 +248,6 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
               </li>
             ))}
           </ul>
-          {
-            /** 
-             * 
-            <div className="flex justify-end mt-4">
-              <div className="flex items-center">
-                <label htmlFor="discount" className="text-sm font-semibold mr-2">
-                  Descuento:
-                </label>
-                <input
-                  id="discount"
-                  type="number"
-                  value={discount}
-                  onChange={(e) => setDiscount(Math.max(0, Number(e.target.value)))}
-                  className="border rounded p-1 w-24 text-right"
-                  placeholder="0"
-                  min="0"
-                />
-                <span className="ml-2">MXN</span>
-              </div>
-            </div>
-            */
-          }
-          
 
           <div className="mt-6 border-t pt-4">
             <h3 className="text-lg font-semibold">Subtotal: ${subtotal.toFixed(2)}</h3>
@@ -293,14 +266,11 @@ const Carrito: React.FC<CarritoProps> = ({ items, onCheckOutSuccess, onLessItem 
         message="La venta se ha realizado correctamente."
       />
 
-      
       <SurveyModal
         isOpen={isSurveyModalOpen}
         onClose={() => setIsSurveyModalOpen(false)}
         onConfirm={handleSurveyModalClose}
       /> 
-
-      
 
       <Modal
         isOpen={isEmployeeModalOpen}
