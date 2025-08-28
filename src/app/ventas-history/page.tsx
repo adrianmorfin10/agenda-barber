@@ -27,6 +27,14 @@ const getType = (venta: any) => {
   return "Cita";
 };
 
+// Función para obtener el nombre completo del cliente
+const getClienteNombreCompleto = (cliente: any) => {
+  if (!cliente || !cliente.usuario) return "Cliente no encontrado";
+  
+  const { nombre, apellido_paterno, apellido_materno } = cliente.usuario;
+  return `${nombre} ${apellido_paterno || ''} ${apellido_materno || ''}`.trim();
+};
+
 const VentasHistory: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState<SectionType | null>("Ventas Realizadas");
   const [filterType, setFilterType] = useState<"dia" | "semana" | "mes" | "year">("dia");
@@ -133,7 +141,7 @@ const VentasHistory: React.FC = () => {
             tipo: getType(item),
             precio: `$${item.total}`,
             descuento: item.descuento || 0,
-            cliente: item.carrito_compra.cliente?.usuario?.nombre || "Cliente no encontrado",
+            cliente: getClienteNombreCompleto(item.carrito_compra.cliente),
             rawPrice: item.total,
             rawDate: ventaDate.toDate()
           };
@@ -314,7 +322,7 @@ const VentasHistory: React.FC = () => {
         {/* Totales */}
         <div className="flex justify-between items-center mt-4">
           <span className="text-sm font-medium">
-            Total de ventas: {totalVentas}
+            Total de transacciones: {totalVentas}
           </span>
           <span className="text-sm font-medium">
             Total: ${totalPrecio.toFixed(2)}
